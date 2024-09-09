@@ -74,10 +74,8 @@ function _mkseed(
     }
   }
   else {
-    if ( quiet != "y" ) {
       console.log(
       _phrase);
-    }
   }
 }
 
