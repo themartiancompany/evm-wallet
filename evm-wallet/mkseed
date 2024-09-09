@@ -103,7 +103,7 @@ _usage() {
       -d '' \
       _usage_text << \
         ENDUSAGETEXT || true
-Run a smart contract function 
+Generates a seed phrase
 
 Usage:
   $(_get "app" "name")
