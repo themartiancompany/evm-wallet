@@ -9,6 +9,7 @@ _path = require(
 
 function _global_variables() {
   wallet_path = "";
+  quiet="";
 }
 
 function _dirname(
@@ -38,7 +39,7 @@ function _file_write(
 function _log(
   _msg) {
   console.log(
-    "INFO:",
+    "[seed-new] INFO:",
     _msg);
 }
 
@@ -57,24 +58,31 @@ function _mkseed(
       process.exit();
     }
     else {
-      console.log(
-        "INFO: writing to",
-        _path);
+      if ( quiet != "y" ) {
+        console.log(
+          "[seed-new] INFO: writing to",
+          _path);
+      }
     }
     _file_write(
       _path,
       _phrase);
-    console.log(
-      "INFO seed saved in",
-      _path);
+    if ( quiet != "y" ) {
+      console.log(
+        "[seed-new] INFO seed saved in",
+        _path);
+    }
   }
   else {
-    console.log(
-    _phrase);
+    if ( quiet != "y" ) {
+      console.log(
+      _phrase);
+    }
   }
 }
 
 function _cmdline_parse() {
+  quiet="y"
   process.argv.forEach(
     function (
       _value,
@@ -82,6 +90,9 @@ function _cmdline_parse() {
       _array) {
       if ( _index == 2 ) {
         wallet_path = _value;
+      }
+      if ( _index == 3 ) {
+        quiet = _value;
       }
   });
   if ( wallet_path == "-h" ) {
@@ -91,6 +102,8 @@ function _cmdline_parse() {
       "  mkseed");
     console.log(
       "    (<path>)");
+    console.log(
+      "    (<verbose>)");
     process.exit();
   }
 }
