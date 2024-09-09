@@ -2,12 +2,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 PREFIX ?= /usr/local
-DOC_DIR=$(DESTDIR)$(PREFIX)/share/doc/evm-wallet
+_PROJECT=evm-wallet
+DOC_DIR=$(DESTDIR)$(PREFIX)/share/doc/$(_PROJECT)
 BIN_DIR=$(DESTDIR)$(PREFIX)/bin
-LIB_DIR=$(DESTDIR)$(PREFIX)/lib
+LIB_DIR=$(DESTDIR)$(PREFIX)/lib/$(_PROJECT)
 
 DOC_FILES=$(wildcard *.rst)
-SCRIPT_FILES=$(wildcard evm-wallet/*)
+SCRIPT_FILES=$(wildcard $(_PROJECT)/*)
 
 all:
 
@@ -20,8 +21,8 @@ install: install-scripts install-doc
 
 install-scripts:
 
-	install -vDm 755 evm-wallet/mkseed "$(BIN_DIR)/mkseed"
-	install -vDm 755 evm-wallet/seed-new "$(LIB_DIR)/seed-new"
+	install -vDm 755 "$(_PROJECT)/mkseed" "$(BIN_DIR)/mkseed"
+	install -vDm 755 "$(_PROJECT)/seed-new" "$(LIB_DIR)/seed-new"
 
 install-doc:
 
