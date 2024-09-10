@@ -1,0 +1,110 @@
+#!/usr/bin/env node
+
+const { ethers } = require(
+  "ethers");
+_ethers = ethers;
+const _fs_utils = require(
+  '../libcrash-js/fs-utils');
+const _libcrash = require(
+  '../libcrash-js/crash-js');
+_app_name_get = _libcrash._app_name_get;
+_msg_info = _libcrash._msg_info;
+_msg_error = _libcrash._msg_error;
+const _wallet_get = require(
+  '../evm-wallet/wallet-get');
+const _network_provider = require(
+  '../evm-wallet/network-provider');
+
+function _global_variables() {
+  method_args = [];
+  wallet_seed = "";
+  target_network = "";
+  api_key = "";
+  quiet = "";
+}
+
+async function _address_get(
+  _wallet_seed,
+  _target_network,
+  _api_key_path) {
+  _wallet_password = "";
+  _wallet_path = [
+    _fs_utils._dirname(
+      _wallet_seed),
+    "wallet.dat"].join("/");
+  _api_key = _fs_utils._file_read(
+    _api_key_path);
+  _provider = _network_provider._provider_get(
+    _target_network,
+    _api_key);
+  _msg = "provider '{_provider}' generated".replace(
+    "{_provider}",
+    _provider);
+  _msg_info(
+    _msg);
+  _wallet_get_opts=[
+    _wallet_path,
+    _wallet_password,
+    _wallet_seed,
+    _provider
+  ];
+  _wallet = _wallet_get._wallet_get.apply(
+    null,
+    _wallet_get_opts);
+  console.log(
+    _wallet.address);
+}
+
+function _config_show() {
+  _msg = "      Wallet seed: {wallet_seed}".replace(
+    "{wallet_seed}",
+    wallet_seed);
+  _msg_info(
+    _msg);
+  _msg = "   Target network: {target_network}".replace(
+    "{target_network}",
+    target_network);
+  _msg_info(
+    _msg);
+  _msg = "          API Key: {api_key}".replace(
+    "{api_key}",
+    api_key);
+  _msg_info(
+    _msg);
+}
+
+function _cmdline_parse() {
+  quiet = "y";
+  process.argv.forEach(
+    function (
+      _value,
+      _index,
+      _array) {
+      if ( _index == 2 ) {
+        wallet_seed = _value;
+      }
+      if ( _index == 3 ) {
+        target_network = _value;
+      }
+      if ( _index == 4 ) {
+        api_key = _value;
+      }
+      if ( _value == "-v" ) {
+        quiet = "n";
+      }
+  });
+  if ( wallet_seed == "" ) {
+    _msg_error(
+      "address-view <seed_path> (<target_network>) (<api_key>)",
+      '1');
+  }
+}
+
+_global_variables();
+app_name = _app_name_get();
+_cmdline_parse();
+_config_show();
+_address_get(
+  wallet_seed,
+  target_network,
+  api_key);
