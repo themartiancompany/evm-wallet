@@ -1,4 +1,8 @@
-#!/unr/bin/env node
+#!/usr/bin/env node
+
+const { ethers } = require(
+  "ethers");
+_ethers = ethers;
 
 function _global_variables() {
   target_network = '';
@@ -53,13 +57,6 @@ function _cmdline_parse() {
       }
   });
 }
-
-
-module.exports = {
-  _provider_get: _provider_get,
-};
-
-// _global_variables();
 
 module.exports = {
   _provider_get: _provider_get,

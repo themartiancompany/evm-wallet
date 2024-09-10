@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
-const { ethers } = require("ethers");
+const { ethers } = require(
+  "ethers");
 _ethers = ethers;
-const _path = require(
-  'path');
 const _network_provider = require('./network-provider');
 const _fs_utils = require('./fs-utils');
 const _wallet_get = require('./wallet-get');
@@ -15,19 +14,6 @@ function _global_variables() {
   wallet_seed = "";
   target_network = "";
   api_key = "";
-}
-
-function _wallet_exists(
-  _path) {
-  if ( _fs_utils._file_exists(
-         _path) == true ) {
-    _msg = "ERROR: wallet '{_path}' already exists".replaceAll(
-      '{_path}',
-      _path);
-    console.error(
-      _msg);
-    process.exit();
-  }
 }
 
 async function _wallet_new(

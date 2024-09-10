@@ -1,17 +1,10 @@
 #!/usr/bin/env node
 
-const { ethers } = require("ethers");
+const { ethers } = require(
+  "ethers");
 _ethers = ethers;
-const _fs_utils = require('./fs-utils');
-
-function _global_variables() {
-  app_opts = [];
-  wallet_path = "";
-  wallet_password = "";
-  wallet_seed = "";
-  target_network = "";
-  api_key = "";
-}
+const _fs_utils = require(
+  './fs-utils');
 
 function _wallet_exists(
   _path) {
@@ -52,60 +45,6 @@ function _wallet_get(
     _wallet);
   return _wallet
 }
-
-function _overrides_set() {
-  if ( target_network == "" ) {
-    target_network = "gnosis";
-  }
-}
-
-function _cmdline_parse() {
-  process.argv.forEach(
-    function (
-      _value,
-      _index,
-      _array) {
-      if ( _index == 2 ) {
-        wallet_path = _value;
-      }
-      if ( _index == 3 ) {
-        wallet_password = _value;
-      }
-      if ( _index == 4 ) {
-        wallet_seed = _value;
-      }
-      if ( _index == 5 ) {
-        target_network = _value;
-      }
-      if ( _index == 6 ) {
-        api_key = _value;
-      }
-      // if ( 5 < _index ) {
-      //   wallet_seed.push(
-      //     _value);
-      // }
-  });
-  if ( wallet_path == "" ) {
-    console.error(
-      "Usage: wallet-new <path> <password> <seed> <network> <api_key>");
-    process.exit();
-  }
-}
-
-// _global_variables();
-// _cmdline_parse();
-// _overrides_set();
-// app_opts=[
-//   wallet_path,
-//   wallet_password,
-//   wallet_seed,
-//   target_network,
-//   api_key
-// ];
-
-// _wallet_new.apply(
-//   null,
-//   app_opts);
 
 module.exports = {
   _wallet_get: _wallet_get
