@@ -108,11 +108,16 @@ _key_get() {
     _cmd="$( \
       _wallet_address_cmd \
         "get")"
-    args+=(
+    _args+=(
       "${_wallet_seed}"
       "${_network_backend}"
       "${_api_key_path}"
     )
+  elif [[ "${_key}" == "seed" ]]; then
+    cat \
+      "${_wallet_seed}"
+    return \
+      0
   fi
 }
 
@@ -162,100 +167,23 @@ _wallet_path_get() {
     _get \
       "wallet" \
       "name")"
-  _path="${HOME}/.config/evm-wallet/${_name}.dat"
-  echo \
-    "${_path}"
-}
-
-_wallet_password_get() {
-  local \
-    _path \
-    _name
-  _name="$( \
-    _get \
-      "wallet" \
-      "name")"
-  _path="${HOME}/.config/evm-wallet/${_name}-password.txt"
-  echo \
-    "${_path}"
-}
-
-
-_wallet_seed_auto_detect() {
-  local \
-    _path \
-    _dir
   _path="$( \
-    _wallet_seed_get)"
-  _dir="$( \
-    dirname \
-      "${_path}")"
-  if [[ ! -e "${_path}" ]]; then
-    mkdir \
-      -p \
-      "${_dir}"
-    chmod \
-      700 \
-      "${_dir}"
-    chmod \
-      700 \
-      "${_dir}"
-    mkseed \
-      "${_path}"
-  fi
+    _get_conf_dir_path)/${_name}.dat"
   echo \
     "${_path}"
 }
 
-_wallet_password_auto_detect() {
+_secret_get() {
   local \
+    _secret="${1}" \
     _path \
-    _dir
+    _name
+  _name="$( \
+    _get \
+      "wallet" \
+      "name")"
   _path="$( \
-    _wallet_password_get)"
-  _dir="$( \
-    dirname \
-      "${_path}")"
-  if [[ ! -e "${_path}" ]]; then
-    mkdir \
-      -p \
-      "${_dir}"
-    chmod \
-      700 \
-      "${_dir}"
-    chmod \
-      700 \
-      "${_dir}"
-    key-gen \
-      -t 'plain' \
-      "${_path}"
-  fi
-  echo \
-    "${_path}"
-}
-
-_wallet_password_get() {
-  local \
-    _path \
-    _name
-  _name="$( \
-    _get \
-      "wallet" \
-      "name")"
-  _path="${HOME}/.config/evm-wallet/${_name}-password.txt"
-  echo \
-    "${_path}"
-}
-
-_wallet_seed_get() {
-  local \
-    _path \
-    _name
-  _name="$( \
-    _get \
-      "wallet" \
-      "name")"
-  _path="${HOME}/.config/evm-wallet/${_name}-seed.txt"
+    _get_conf_dir_path)/${_name}-${_secret}.txt"
   echo \
     "${_path}"
 }
@@ -277,6 +205,56 @@ _api_key_get() {
     "${_conf_dir}"
   echo \
     "${_conf_dir}/${_name}.txt"
+}
+
+_secret_auto_detect() {
+  local \
+    _secret="${1}" \
+    _secret_type="${2}" \
+    _dir \
+    _key_gen_opts=() \
+    _msg=()
+  _path="$( \
+    _secret_get \
+      "${_secret}")"
+  _dir="$( \
+    dirname \
+      "${_path}")"
+  if [[ ! -e "${_path}" ]]; then
+    _key_gen_opts+=(
+      -t
+        "${_secret_type}"
+    )
+    _msg=(
+      "generating ${_secret} '${_path}'"
+    )
+    _msg_info \
+      "${_msg[*]}"
+    mkdir \
+      -p \
+      "${_dir}"
+    chmod \
+      700 \
+      "${_dir}"
+    chmod \
+      700 \
+      "${_dir}"
+    key-gen \
+      "${_key_gen_opts[@]}" \
+      "${_path}"
+    chmod \
+      400 \
+      "${_path}"
+    _msg=(
+      "${_secret} '${_path}' successfully generated"
+    )
+    _msg_info \
+      "${_msg[*]}"
+  fi
+  _set_override \
+    "wallet" \
+    "${_secret}" \
+    "${_path}"
 }
 
 _set_overrides() {
@@ -304,14 +282,12 @@ _set_overrides() {
     "wallet" \
     "path" \
     "$(_wallet_path_get)"
-  _set_override \
-    "wallet" \
+  _secret_auto_detect \
     "seed" \
-    "$(_wallet_seed_auto_detect)"
-  _set_override \
-    "wallet" \
+    "seed"
+  _secret_auto_detect \
     "password" \
-    "$(_wallet_password_get)"
+    "plain"
   _set_override \
     "target" \
     "key" \
@@ -354,6 +330,8 @@ Usage:
       <wallet_name>
       <key>
       <value>
+  keys:
+    address
   networks:
     alchemy
     ankr
@@ -365,6 +343,10 @@ Usage:
     publicPolygon
     quicknode
   options:
+     -w <wallet_path>     Wallet path.
+                          Default: $(_get "wallet" "path")
+     -p <wallet_password> Wallet password.
+                          Default: $(_get "wallet" "password")
      -s <wallet_seed>     Wallet seed path.
                           Default: $(_get "wallet" "seed")
      -n <network>         EVM network name ('mainnet', 'gnosis').
@@ -411,8 +393,9 @@ _show_config() {
   _msg_info "          Wallet password:   $(_get "wallet" "password")"
   _msg_info "              Wallet seed:   $(_get "wallet" "seed")"
   _msg_info "           Target network:   $(_get "target" "network")"
-  _msg_info "                Call type:   $(_get "call" "type")"
   _msg_info "                  API key:   $(_get "api" "key")"
+  _msg_info "               Target key:   $(_get "target" "key")"
+  _msg_info "             Target value:   $(_get "target" "value")"
 }
 
 _globals
@@ -452,32 +435,33 @@ shift \
   $(( \
     OPTIND - 1 \
   ))
-(( 0 < $# )) && \
+if (( 0 < $# )); then
   _set \
     "target" \
     "command" \
-    "${1}" || \
-  true
-(( 1 < $# )) && \
+    "${1}"
+fi
+if (( 1 < $# )); then
   _set \
     "wallet" \
     "name" \
-    "${2}" || \
-    true
-(( 2 < $# )) && \
+    "${2}"
+fi
+if (( 2 < $# )); then
   _set \
     "wallet" \
     "key" \
-    "${3}" || \
-    true
-(( 3 < $# )) && \
+    "${3}"
+fi
+if (( 3 < $# )); then
   _set \
     "wallet" \
     "value" \
-    "${4}" || \
-  true
+    "${4}"
+fi
 shift \
-  4
+  4 || \
+  true
 command_args+=(
   "$@"
 )
