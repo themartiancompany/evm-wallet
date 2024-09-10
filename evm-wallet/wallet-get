@@ -4,18 +4,26 @@ const { ethers } = require(
   "ethers");
 _ethers = ethers;
 const _fs_utils = require(
-  './fs-utils');
+  '../libcrash-js/fs-utils');
+const _libcrash = require(
+  '../libcrash-js/crash-js');
+_msg_info = _libcrash._msg_info;
+_msg_error = _libcrash._msg_error;
+
+function _global_variables() {
+  app_name = "";
+}
 
 function _wallet_exists(
   _path) {
   if ( _fs_utils._file_exists(
          _path) == true ) {
-    _msg = "ERROR: wallet '{_path}' already exists".replaceAll(
+    _msg = "wallet '{_path}' already exists".replaceAll(
       '{_path}',
       _path);
-    console.error(
-      _msg);
-    process.exit();
+    _msg_error(
+      _msg,
+      "1");
   }
 }
 
@@ -24,27 +32,37 @@ function _wallet_get(
   _password,
   _seed,
   _provider) {
-  console.log(
-    "[wallet-get] INFO: wallet path", _path);
-  console.log(
-    "[wallet-get] INFO: wallet password", _password);
-  console.log(
-    "[wallet-get] INFO: wallet seed", _seed);
+  _msg = "wallet path '{_path}'".replace(
+    "{_path}",
+    _path);
+  _msg_info(
+    _msg);
+  _msg = "wallet password '{_password}'".replace(
+    "{_password}",
+    _password);
+  _msg_info(
+    _msg);
+  _msg = "wallet seed '{_seed}'".replace(
+    "{_seed}",
+    _seed);
+  _msg_info(
+    _msg);
   _wallet_exists(
     _path);
   _phrase = _fs_utils._file_read(
     _seed); 
-  console.log(
-    "[wallet-get] INFO seed phrase",
-    _seed, ":",
-      _phrase);
+  _msg = "seed phrase: {_phrase}".replace(
+    "{_phrase}",
+    _phrase);
+  _msg_info(
+    _msg);
   _wallet = _ethers.HDNodeWallet.fromPhrase(
-    _phrase,
-    _provider);
-  console.log(
-    _wallet);
+    _phrase,);
+  _wallet.provider = _provider;
   return _wallet
 }
+
+app_name = "wallet-get"
 
 module.exports = {
   _wallet_get: _wallet_get

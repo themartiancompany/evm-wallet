@@ -3,11 +3,15 @@
 const { ethers } = require(
   "ethers");
 _ethers = ethers;
-const _network_provider = require('./network-provider');
-const _fs_utils = require('./fs-utils');
-const _wallet_get = require('./wallet-get');
+const _network_provider = require(
+  './network-provider');
+const _libcrash = require(
+  '../libcrash-js/crash-js');
+const _wallet_get = require(
+  './wallet-get');
 
 function _global_variables() {
+  app_name = "";
   app_opts = [];
   wallet_path = "";
   wallet_password = "";
@@ -25,12 +29,21 @@ async function _wallet_new(
   _provider = _network_provider._provider_get(
     _network,
     _api_key);
-  console.log(
-    "INFO: path", _path);
-  console.log(
-    "INFO: password", _password);
-  console.log(
-    "INFO: seed", _seed);
+  _msg = "wallet path is '{_path}'".replace(
+    "{_path}",
+    _path);
+  _msg_info(
+    _msg);
+  _msg = "wallet password is '{_password}'".replace(
+    "{_password}",
+    _password);
+  _msg_info(
+    _msg);
+  _msg = "wallet seed is '{_seed}'".replace(
+    "{_seed}",
+    _seed);
+  _msg_info(
+    _msg);
   _wallet = _wallet_get._wallet_get(
     _path,
     _password,
@@ -77,6 +90,7 @@ function _cmdline_parse() {
   }
 }
 
+app_name = "wallet-new"
 _global_variables();
 _cmdline_parse();
 _overrides_set();
