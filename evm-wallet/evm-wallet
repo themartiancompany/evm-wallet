@@ -228,8 +228,10 @@ _secret_auto_detect() {
     _msg=(
       "generating ${_secret} '${_path}'"
     )
-    _msg_info \
-      "${_msg[*]}"
+    if [[ "${quiet}" == "n" ]]; then
+      _msg_info \
+        "${_msg[*]}"
+    fi
     mkdir \
       -p \
       "${_dir}"
@@ -248,8 +250,10 @@ _secret_auto_detect() {
     _msg=(
       "${_secret} '${_path}' successfully generated"
     )
-    _msg_info \
-      "${_msg[*]}"
+    if [[ "${quiet}" == "n" ]]; then
+      _msg_info \
+        "${_msg[*]}"
+    fi
   fi
   _set_override \
     "wallet" \
