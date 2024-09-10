@@ -1,0 +1,112 @@
+#!/usr/bin/env node
+
+const { ethers } = require("ethers");
+_ethers = ethers;
+const _fs_utils = require('./fs-utils');
+
+function _global_variables() {
+  app_opts = [];
+  wallet_path = "";
+  wallet_password = "";
+  wallet_seed = "";
+  target_network = "";
+  api_key = "";
+}
+
+function _wallet_exists(
+  _path) {
+  if ( _fs_utils._file_exists(
+         _path) == true ) {
+    _msg = "ERROR: wallet '{_path}' already exists".replaceAll(
+      '{_path}',
+      _path);
+    console.error(
+      _msg);
+    process.exit();
+  }
+}
+
+function _wallet_get(
+  _path,
+  _password,
+  _seed,
+  _provider) {
+  console.log(
+    "[wallet-get] INFO: wallet path", _path);
+  console.log(
+    "[wallet-get] INFO: wallet password", _password);
+  console.log(
+    "[wallet-get] INFO: wallet seed", _seed);
+  _wallet_exists(
+    _path);
+  _phrase = _fs_utils._file_read(
+    _seed); 
+  console.log(
+    "[wallet-get] INFO seed phrase",
+    _seed, ":",
+      _phrase);
+  _wallet = _ethers.HDNodeWallet.fromPhrase(
+    _phrase,
+    _provider);
+  console.log(
+    _wallet);
+  return _wallet
+}
+
+function _overrides_set() {
+  if ( target_network == "" ) {
+    target_network = "gnosis";
+  }
+}
+
+function _cmdline_parse() {
+  process.argv.forEach(
+    function (
+      _value,
+      _index,
+      _array) {
+      if ( _index == 2 ) {
+        wallet_path = _value;
+      }
+      if ( _index == 3 ) {
+        wallet_password = _value;
+      }
+      if ( _index == 4 ) {
+        wallet_seed = _value;
+      }
+      if ( _index == 5 ) {
+        target_network = _value;
+      }
+      if ( _index == 6 ) {
+        api_key = _value;
+      }
+      // if ( 5 < _index ) {
+      //   wallet_seed.push(
+      //     _value);
+      // }
+  });
+  if ( wallet_path == "" ) {
+    console.error(
+      "Usage: wallet-new <path> <password> <seed> <network> <api_key>");
+    process.exit();
+  }
+}
+
+// _global_variables();
+// _cmdline_parse();
+// _overrides_set();
+// app_opts=[
+//   wallet_path,
+//   wallet_password,
+//   wallet_seed,
+//   target_network,
+//   api_key
+// ];
+
+// _wallet_new.apply(
+//   null,
+//   app_opts);
+
+module.exports = {
+  _wallet_get: _wallet_get
+};

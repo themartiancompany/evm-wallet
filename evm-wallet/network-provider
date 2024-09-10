@@ -1,0 +1,67 @@
+#!/unr/bin/env node
+
+function _global_variables() {
+  target_network = '';
+  api_key = '';
+}
+
+function _provider_get(
+  _network,
+  _api_key) {
+  _provider_opts = {};
+  if ( _network == "gnosis" ) {
+    _rpc = "https://rpc.gnosischain.com" ;
+    _default_network = _rpc;
+  } 
+  else if ( _network == "ethereum" ) {
+    if ( _api_key != "" ) {
+      _default_network = "etherscan";
+      _provider_opts = {
+        'etherscan': _api_key,
+        'exclusive': [
+          "etherscan",
+          "infura"
+        ]
+      };
+    }
+    else {
+      _rpc="https://rpc.ankr.com/eth"
+      _default_network = _rpc;
+    }
+  }
+  else {
+    _default_network = _network;
+  }
+  _provider = _ethers.getDefaultProvider(
+    _default_network,
+    _provider_opts);
+  return _provider;
+}
+
+function _cmdline_parse() {
+  target_network = "gnosis";
+  process.argv.forEach(
+    function (
+      _value,
+      _index,
+      _array) {
+      if ( _index == 2 ) {
+        target_network = _value;
+      }
+      if ( _index == 3 ) {
+        api_key = _value;
+      }
+  });
+}
+
+
+module.exports = {
+  _provider_get: _provider_get,
+};
+
+// _global_variables();
+
+module.exports = {
+  _provider_get: _provider_get,
+};
+

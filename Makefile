@@ -23,6 +23,10 @@ install-scripts:
 
 	install -vDm 755 "$(_PROJECT)/mkseed" "$(BIN_DIR)/mkseed"
 	install -vDm 755 "$(_PROJECT)/seed-new" "$(LIB_DIR)/seed-new"
+	install -vDm 755 "$(_PROJECT)/fs-utils" "$(LIB_DIR)/fs-utils"
+	install -vDm 755 "$(_PROJECT)/network-provider" "$(LIB_DIR)/network-provider"
+	install -vDm 755 "$(_PROJECT)/wallet-get" "$(LIB_DIR)/wallet-get"
+	install -vDm 755 "$(_PROJECT)/wallet-new" "$(LIB_DIR)/wallet-new"
 
 install-doc:
 
