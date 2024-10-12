@@ -59,7 +59,9 @@ function _wallet_get(
   _wallet = _ethers.HDNodeWallet.fromPhrase(
     _phrase,);
   _wallet.provider = _provider;
-  return _wallet
+  _signer = _wallet.connect(
+    _provider);
+  return _signer;
 }
 
 app_name = "wallet-get"

@@ -118,6 +118,11 @@ _key_get() {
       "${_wallet_seed}"
     return \
       0
+  elif [[ "${_key}" == "name" ]]; then
+    echo \
+      "${wallet_name}"
+    return \
+      0
   fi
 }
 
@@ -148,6 +153,10 @@ _evm_wallet() {
   if [[ "${_target_command}" == "get" ]]; then
     "_key_${_target_command}" \
       "${_target_key}"
+    if [[ "${_target_key}" == "name" ]]; then
+      return \
+        0
+    fi
   fi
   if [[ "${quiet}" != "y" ]]; then
     _args+=(
@@ -295,7 +304,7 @@ _set_overrides() {
   _set_override \
     "target" \
     "key" \
-    "address"
+    "name"
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
   elif [[ -z "${quiet}" ]]; then
@@ -453,13 +462,13 @@ if (( 1 < $# )); then
 fi
 if (( 2 < $# )); then
   _set \
-    "wallet" \
+    "target" \
     "key" \
     "${3}"
 fi
 if (( 3 < $# )); then
   _set \
-    "wallet" \
+    "target" \
     "value" \
     "${4}"
 fi
