@@ -1,8 +1,14 @@
 #!/usr/bin/env node
 
+
+
 const { ethers } = require(
   "ethers");
 _ethers = ethers;
+_getDefaultProvider = _ethers.getDefaultProvider
+const _libcrash = require(
+  '../libcrash-js/crash-js');
+_app_name_get = _libcrash._app_name_get;
 
 function _global_variables() {
   target_network = '';
@@ -36,9 +42,14 @@ function _provider_get(
   else {
     _default_network = _network;
   }
-  _provider = _ethers.getDefaultProvider(
+  _provider = _getDefaultProvider(
     _default_network,
     _provider_opts);
+  _msg = "provider {_provider} generated".replace(
+    "{_provider}",
+    _provider);
+  _msg_info(
+    _msg);
   return _provider;
 }
 
