@@ -14,6 +14,7 @@ source \
 
 # shellcheck disable=SC2034
 _global_variables() {
+  call_date=''
   target_command=""
   wallet_path=""
   wallet_password=""
@@ -272,6 +273,10 @@ _secret_auto_detect() {
 
 _set_overrides() {
   _set_override \
+    "call" \
+    "date" \
+    "$(_get_date_human)"
+  _set_override \
     "wallet" \
     "name" \
     "default"
@@ -392,16 +397,8 @@ _display_flags() {
 
 # Shows configuration options.
 _show_config() {
-  local \
-    _call_date
-  TZ=UTC \
-  printf \
-    -v \
-      _call_date \
-    '%(%FT%R%z)T' \
-    "${SOURCE_DATE_EPOCH}"
   _msg_info "${app_name} configuration"
-  _msg_info "                Call date:   $(_get "_call" "date")"
+  _msg_info "                Call date:   $(_get "call" "date")"
   _msg_info "              Wallet path:   $(_get "wallet" "path")"
   _msg_info "          Wallet password:   $(_get "wallet" "password")"
   _msg_info "              Wallet seed:   $(_get "wallet" "seed")"
