@@ -397,11 +397,21 @@ _display_flags() {
 
 # Shows configuration options.
 _show_config() {
+  local \
+    _seed \
+    _seed_show
+  _seed="$( \
+    _get \
+      "wallet" \
+      "seed")"
+  if [[ "${_seed}" != "" ]]; then
+    _seed_show="*******"
+  fi
   _msg_info "${app_name} configuration"
   _msg_info "                Call date:   $(_get "call" "date")"
   _msg_info "              Wallet path:   $(_get "wallet" "path")"
   _msg_info "          Wallet password:   $(_get "wallet" "password")"
-  _msg_info "              Wallet seed:   $(_get "wallet" "seed")"
+  _msg_info "              Wallet seed:   ${_seed_show}"
   _msg_info "           Target network:   $(_get "target" "network")"
   _msg_info "                  API key:   $(_get "api" "key")"
   _msg_info "               Target key:   $(_get "target" "key")"
