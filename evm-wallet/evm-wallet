@@ -333,6 +333,7 @@ _usage() {
       -d '' \
       _usage_text << \
         ENDUSAGETEXT || true
+
 EVM network wallet
 
 Usage:

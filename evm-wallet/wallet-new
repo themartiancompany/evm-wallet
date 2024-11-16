@@ -1,82 +1,153 @@
 #!/usr/bin/env node
 
-const { ethers } = require(
-  "ethers");
-_ethers = ethers;
-const _network_provider = require(
-  './network-provider');
-const _libcrash = require(
-  '../libcrash-js/crash-js');
-const _wallet_get = require(
-  './wallet-get');
+const
+  { ethers } =
+    require(
+      "ethers");
+_ethers =
+  ethers;
+const
+  _network_provider =
+    require(
+      './network-provider');
+const
+  _libcrash =
+    require(
+      '../libcrash-js/crash-js');
+_msg_info = 
+  _libcrash._msg_info;
+_msg_info_obj = 
+  _libcrash._msg_info_obj;
+_msg_error = 
+  _libcrash._msg_error;
+const
+  _wallet_get =
+    require(
+      './wallet-get');
 
-function _global_variables() {
-  app_name = "";
-  app_opts = [];
-  wallet_path = "";
-  wallet_password = "";
-  wallet_seed = "";
-  target_network = "";
-  api_key = "";
+
+function
+  _global_variables() {
+  app_name =
+    "wallet-new";
+  app_opts =
+    [];
+  wallet_path =
+    "";
+  wallet_password =
+    "";
+  wallet_seed =
+    "";
+  target_network =
+    "";
+  api_key =
+    "";
+  quiet =
+    "";
 }
 
-async function _wallet_new(
-  _path,
-  _password,
-  _seed,
-  _network,
-  _api_key) {
-  _provider = _network_provider._provider_get(
-    _network,
-    _api_key);
-  _msg = "wallet path is '{_path}'".replace(
-    "{_path}",
-    _path);
-  _msg_info(
-    _msg);
-  _msg = "wallet password is '{_password}'".replace(
-    "{_password}",
-    _password);
-  _msg_info(
-    _msg);
-  _msg = "wallet seed is '{_seed}'".replace(
-    "{_seed}",
-    _seed);
-  _msg_info(
-    _msg);
-  _wallet = _wallet_get._wallet_get(
+
+async function
+  _wallet_new(
     _path,
     _password,
     _seed,
-    _provider);
+    _network,
+    _api_key) {
+  let
+    _password_show,
+    _provider;
+  _provider =
+    _network_provider._provider_get(
+      _network,
+      _api_key);
+  _msg_info_obj(
+    "wallet path",
+    _path);
+  _password_show =
+    "";
+  if ( _password != "" ) {
+    _password_show =
+      "****";
+  }
+  _msg_info_obj(
+    "wallet password",
+    _password_show);
+  _msg_info_obj(
+    "seed path",
+    _seed);
+  _wallet =
+    _wallet_get._wallet_get(
+      _path,
+      _password,
+      _seed,
+      _provider);
 }
 
-function _overrides_set() {
+
+function
+  _overrides_set() {
   if ( target_network == "" ) {
-    target_network = "gnosis";
+    target_network =
+      "gnosis";
   }
 }
 
-function _cmdline_parse() {
+
+function
+  _usage() {
+  let
+    _line,
+    _text;
+  _text = [
+    "Usage:",
+    "  wallet-new",
+    "    <path>",
+    "    <password>",
+    "    <seed>",
+    "    <network>",
+    "    <api_key>",
+    "    <quiet>"];
+  for ( _line in _text ) {
+    console.log(
+      _line);
+  }
+  process.exit();
+}
+
+
+function
+  _cmdline_parse() {
+  quiet =
+    "y";
   process.argv.forEach(
     function (
       _value,
       _index,
       _array) {
       if ( _index == 2 ) {
-        wallet_path = _value;
+        wallet_path =
+          _value;
       }
       if ( _index == 3 ) {
-        wallet_password = _value;
+        wallet_password =
+          _value;
       }
       if ( _index == 4 ) {
-        wallet_seed = _value;
+        wallet_seed =
+          _value;
       }
       if ( _index == 5 ) {
-        target_network = _value;
+        target_network =
+          _value;
       }
       if ( _index == 6 ) {
-        api_key = _value;
+        api_key =
+          _value;
+      }
+      if ( _index == 6 ) {
+        quiet =
+          _value;
       }
       // if ( 5 < _index ) {
       //   wallet_seed.push(
@@ -90,7 +161,6 @@ function _cmdline_parse() {
   }
 }
 
-app_name = "wallet-new"
 _global_variables();
 _cmdline_parse();
 _overrides_set();
@@ -99,7 +169,8 @@ app_opts=[
   wallet_password,
   wallet_seed,
   target_network,
-  api_key
+  api_key,
+  quiet
 ];
 
 // _wallet_new.apply(

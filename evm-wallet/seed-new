@@ -149,7 +149,7 @@ function
     "Usage:",
     "  mkseed",
     "    (<path>)",
-    "    (<verbose>)"]
+    "    (<verbose>)"];
   for ( _line in _text ) {
     console.log(
       _line);
