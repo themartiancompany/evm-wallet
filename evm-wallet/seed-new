@@ -46,9 +46,6 @@ function
     "";
   quiet =
     "";
-  console.log(
-    app_name
-  );
 }
 
 function
