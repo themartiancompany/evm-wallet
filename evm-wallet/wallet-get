@@ -6,7 +6,7 @@ const
       "ethers");
 _ethers = 
   ethers;
-_hd_wallet =
+_hdnode_wallet =
   _ethers.HDNodeWallet
 const 
   _libcrash =
@@ -146,7 +146,7 @@ function _wallet_get(
     'seed phrase',
     _phrase_show);
   _wallet =
-    _node_wallet.fromPhrase(
+    _hdnode_wallet.fromPhrase(
       _phrase);
   _wallet.provider =
     _provider;
