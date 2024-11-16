@@ -149,15 +149,9 @@ function
         quiet =
           _value;
       }
-      // if ( 5 < _index ) {
-      //   wallet_seed.push(
-      //     _value);
-      // }
   });
   if ( wallet_path == "" ) {
-    console.error(
-      "Usage: wallet-new <path> <password> <seed> <network> <api_key>");
-    process.exit();
+    _usage();
   }
 }
 
@@ -173,9 +167,12 @@ app_opts=[
   quiet
 ];
 
-// _wallet_new.apply(
-//   null,
-//   app_opts);
+
+if ( require.main == module ) {
+  _wallet_new.apply(
+    null,
+    app_opts);
+}
 
 module.exports = {
   _wallet_new: _wallet_new
