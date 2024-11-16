@@ -47,6 +47,24 @@ function
 }
 
 
+function
+  _seed_missing_error(
+    _seed) {
+  let
+    _msg,
+    _template;
+  _template =
+    "the seed '{_seed}' does not exist."
+  _msg =
+    _template.replaceAll(
+      "{_seed}",
+      _seed);
+  _msg_error(
+    _msg,
+    1)
+}
+
+
 async function
   _wallet_new(
     _path,

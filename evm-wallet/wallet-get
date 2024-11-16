@@ -32,7 +32,7 @@ _file_read =
 
 function _global_variables() {
   app_name =
-    _app_name_get();
+    "wallet-get";
 }
 
 
@@ -59,6 +59,42 @@ function _wallet_exists(
 }
 
 
+function
+  _msg_info_seed_empty(
+    _seed) {
+  let
+    _msg,
+    _template;
+  _template =
+    "the seed '{_seed}' is empty."
+  _msg =
+    _template.replaceAll(
+      "{_seed}",
+      _seed);
+  _msg_error(
+    _msg,
+    1)
+}
+
+
+function
+  _seed_missing_error(
+    _seed) {
+  let
+    _msg,
+    _template;
+  _template =
+    "the seed '{_seed}' does not exist."
+  _msg =
+    _template.replaceAll(
+      "{_seed}",
+      _seed);
+  _msg_error(
+    _msg,
+    1)
+}
+
+
 function _wallet_get(
   _path,
   _password,
@@ -67,7 +103,10 @@ function _wallet_get(
   let
     _password_show,
     _phrase,
-    _phrase_show;
+    _phrase_show,
+    _seed_exists;
+  _password_show =
+    "";
   if ( _password != "" ) {
     _password_show="****" 
   }
@@ -77,14 +116,29 @@ function _wallet_get(
   _msg_info_obj(
     'wallet password',
     _password_show);
-  _msg_info_obj(
-    'wallet seed',
-    _seed);
   _wallet_exists(
     _path);
   _phrase =
-    _file_read(
-      _seed); 
+    "";
+  if ( _seed != "" ) {
+    _seed_exists =
+      _file_exists(
+        _seed);
+    if ( _seed_exists == false ) {
+      _seed_missing_error(
+        _seed);
+    }
+    _msg_info_obj(
+      'wallet seed',
+      _seed);
+    _phrase =
+      _file_read(
+        _seed); 
+  }
+  else if ( _seed == "" ) {
+    _msg_info_seed_empty(
+      _seed);
+  }
   if ( _phrase != "" ) {
     _phrase_show="****" 
   }
