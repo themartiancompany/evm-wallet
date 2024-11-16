@@ -40,6 +40,8 @@ _file_write =
 
 function
   _global_variables() {
+  app_name =
+    _app_name_get();
   wallet_path =
     "";
   quiet =
@@ -114,7 +116,7 @@ function
     _dir_exists =
       _file_exists(
         _dir);
-    if ( _dir_exists != true ) {
+    if ( _dir_exists ) {
       _dir_missing_error(
         _dir);
     }
