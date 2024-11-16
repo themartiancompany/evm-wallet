@@ -41,11 +41,14 @@ _file_write =
 function
   _global_variables() {
   app_name =
-    _app_name_get();
+    "seed-new";
   wallet_path =
     "";
   quiet =
     "";
+  console.log(
+    app_name
+  );
 }
 
 function
@@ -76,7 +79,7 @@ function
   _msg =
     _template.replaceAll(
       "{_path}",
-      _msg);
+      _path);
   _msg_info(
     _msg);
 }
@@ -92,7 +95,7 @@ function
   _msg =
     _template.replaceAll(
       "{_path}",
-      _msg);
+      _path);
   _msg_info(
     _msg);
 }
@@ -116,7 +119,7 @@ function
     _dir_exists =
       _file_exists(
         _dir);
-    if ( _dir_exists ) {
+    if ( ! _dir_exists ) {
       _dir_missing_error(
         _dir);
     }
