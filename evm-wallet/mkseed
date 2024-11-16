@@ -190,7 +190,8 @@ if (( 0 < $# )); then
   _set \
     "out" \
     "file" \
-    "${1}"
+    "$(realpath \
+         "${1}")"
 fi
 _set_overrides
 _config_user_init \

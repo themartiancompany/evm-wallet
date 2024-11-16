@@ -1,86 +1,164 @@
 #!/usr/bin/env node
 
-const { ethers } = require(
-  "ethers");
-const _fs = require(
-  'fs');
-_path = require(
-  'path');
+const
+  { ethers } =
+    require(
+      "ethers");
+_ethers = 
+  ethers;
+_Wallet =
+  _ethers.Wallet;
+const
+  _fs =
+    require(
+      'fs');
+_path =
+  require(
+    'path');
+const 
+  _libcrash =
+    require(
+      '../libcrash-js/crash-js');
+_app_name_get = 
+  _libcrash._app_name_get;
+_msg_info = 
+  _libcrash._msg_info;
+_msg_info_obj = 
+  _libcrash._msg_info_obj;
+_msg_error = 
+  _libcrash._msg_error;
+const 
+  _fs_utils =
+    require(
+      '../libcrash-js/fs-utils');
+_dirname =
+  _fs_utils._dirname
+_file_exists =
+  _fs_utils._file_exists
+_file_write =
+  _fs_utils._file_write
 
-function _global_variables() {
-  wallet_path = "";
-  quiet="";
+function
+  _global_variables() {
+  wallet_path =
+    "";
+  quiet =
+    "";
 }
 
-function _dirname(
-  _file_path) {
-  _dir = _path.dirname(_file_path);
-  return _dir 
+function
+  _dir_missing_error(
+    _dir) {
+  let
+    _msg,
+    _template;
+  _template =
+    "the directory '{_dir}' does not exist."
+  _msg =
+    _template.replaceAll(
+      "{_dir}",
+      _dir);
+  _msg_error(
+    _msg,
+    1)
 }
 
-function _file_exists(
-  _path) {
-  _return = false
-  if (_fs.existsSync(
-        _path)) {
-  _return = true;
-  }
-  return _return;
-}
-
-function _file_write(
-  _path,
-  _content) {
-  _fs.writeFileSync(
-    _path,
-    _content);
-}
-
-function _log(
-  _msg) {
-  console.log(
-    "[seed-new] INFO:",
+function
+  _msg_info_seed_write(
+    _path) {
+  let
+    _msg,
+    _template;
+  _template =
+    "writing seed to '{_path}'."
+  _msg =
+    _template.replaceAll(
+      "{_path}",
+      _msg);
+  _msg_info(
     _msg);
 }
 
-function _mkseed(
-  _path) {
-  _wallet = ethers.Wallet.createRandom();
-  _phrase = _wallet.mnemonic.phrase;
+function
+  _msg_info_seed_written(
+    _path) {
+  let
+    _msg,
+    _template;
+  _template =
+    "seed written to '{_path}'."
+  _msg =
+    _template.replaceAll(
+      "{_path}",
+      _msg);
+  _msg_info(
+    _msg);
+}
+
+function
+  _mkseed(
+    _path) {
+  let
+    _dir,
+    _dir_exists,
+    _phrase,
+    _wallet;
+  _wallet =
+    _Wallet.createRandom();
+  _phrase =
+    _wallet.mnemonic.phrase;
   if ( _path != "" ) {
-    _dir = _dirname(
-      _path);
-    if ( _file_exists(_dir) != true ) {
-      console.error(
-        "ERROR: the directory",
-        _dir,
-        "does not exist");
-      process.exit();
+    _dir =
+      _dirname(
+        _path);
+    _dir_exists =
+      _file_exists(
+        _dir);
+    if ( _dir_exists != true ) {
+      _dir_missing_error(
+        _dir);
     }
     else {
       if ( quiet != "y" ) {
-        console.log(
-          "[seed-new] INFO: writing to",
-          _path);
+	_msg_info_seed_write(
+	  _path);
       }
     }
     _file_write(
       _path,
       _phrase);
     if ( quiet != "y" ) {
-      console.log(
-        "[seed-new] INFO seed saved in",
+      _msg_info_seed_written(
         _path);
     }
   }
   else {
-      console.log(
+    console.log(
       _phrase);
   }
 }
 
-function _cmdline_parse() {
-  quiet="y"
+function
+  _usage() {
+  let
+    _line,
+    _text;
+  _text = [
+    "Usage:",
+    "  mkseed",
+    "    (<path>)",
+    "    (<verbose>)"]
+  for ( _line in _text ) {
+    console.log(
+      _line);
+  }
+  process.exit();
+}
+
+function
+  _cmdline_parse() {
+  quiet =
+    "y";
   process.argv.forEach(
     function (
       _value,
@@ -94,15 +172,7 @@ function _cmdline_parse() {
       }
   });
   if ( wallet_path == "-h" ) {
-    console.log(
-      "Usage:");
-    console.log(
-      "  mkseed");
-    console.log(
-      "    (<path>)");
-    console.log(
-      "    (<verbose>)");
-    process.exit();
+    _usage();
   }
 }
 

@@ -39,8 +39,8 @@ function _global_variables() {
 function _wallet_exists(
   _path) {
   let
-    _exists
-    _template
+    _exists,
+    _template,
     _msg; 
   _exists =
     _file_exists(
@@ -65,8 +65,8 @@ function _wallet_get(
   _seed,
   _provider) {
   let
-    _password_show
-    _phrase
+    _password_show,
+    _phrase,
     _phrase_show;
   if ( _password != "" ) {
     _password_show="****" 
