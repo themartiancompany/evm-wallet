@@ -12,8 +12,6 @@ const
   _libcrash =
     require(
       '../libcrash-js/crash-js');
-_app_name_get = 
-  _libcrash._app_name_get;
 _msg_info = 
   _libcrash._msg_info;
 _msg_info_obj = 
@@ -47,7 +45,7 @@ function _wallet_exists(
       _path);
   if ( _exists == true ) {
     _template =
-      "wallet '{_path}' already exists"
+      "wallet '{_path}' already exists";
     _msg =
       _template.replaceAll(
         '{_path}',
@@ -66,7 +64,7 @@ function
     _msg,
     _template;
   _template =
-    "the seed '{_seed}' is empty."
+    "the seed '{_seed}' is empty.";
   _msg =
     _template.replaceAll(
       "{_seed}",
@@ -84,7 +82,7 @@ function
     _msg,
     _template;
   _template =
-    "the seed '{_seed}' does not exist."
+    "the seed '{_seed}' does not exist.";
   _msg =
     _template.replaceAll(
       "{_seed}",

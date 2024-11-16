@@ -174,24 +174,24 @@ function
 }
 
 _global_variables();
-_cmdline_parse();
-_overrides_set();
-app_opts=[
-  wallet_path,
-  wallet_password,
-  wallet_seed,
-  target_network,
-  api_key,
-  quiet
-];
-
 
 if ( require.main == module ) {
+  _cmdline_parse();
+  _overrides_set();
+  app_opts=[
+    wallet_path,
+    wallet_password,
+    wallet_seed,
+    target_network,
+    api_key,
+    quiet
+  ];
   _wallet_new.apply(
     null,
     app_opts);
 }
 
 module.exports = {
-  _wallet_new: _wallet_new
+  _wallet_new:
+    _wallet_new
 };
