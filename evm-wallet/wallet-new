@@ -131,7 +131,7 @@ function
     "    <api_key>",
     "    <quiet>"];
   for ( _line in _text ) {
-    console.log(
+    _msg_info(
       _line);
   }
   process.exit();

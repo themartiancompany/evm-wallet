@@ -46,7 +46,7 @@ function
   _global_variables() {
   app_name =
     "seed-new";
-  wallet_path =
+  seed_path =
     "";
   quiet =
     "";
@@ -145,6 +145,23 @@ function
 }
 
 function
+  _config_show() {
+  let
+    _line,
+    _text;
+  _text = [
+    "        Seed path: {seed_path}".replaceAll(
+      "{seed_path}",
+      seed_path),
+  ]
+  for ( _line in _text ) {
+    _msg_info(
+      _line);
+  }
+}
+
+
+function
   _usage() {
   let
     _line,
@@ -155,7 +172,7 @@ function
     "    (<path>)",
     "    (<verbose>)"];
   for ( _line in _text ) {
-    console.log(
+    _msg_info(
       _line);
   }
   process.exit();
@@ -171,7 +188,7 @@ function
       _index,
       _array) {
       if ( _index == 2 ) {
-        wallet_path = _value;
+        seed_path = _value;
       }
       if ( _index == 3 ) {
         quiet = _value;
@@ -185,7 +202,7 @@ function
 _global_variables();
 _cmdline_parse();
 _mkseed(
-  wallet_path);
+  seed_path);
 
 // console.log('wallet.address:', wallet.address)
 // console.log('wallet.mnemonic.phrase:', wallet.mnemonic.phrase)
