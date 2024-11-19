@@ -14,8 +14,9 @@ _ethers =
 _get_default_provider =
   _ethers.getDefaultProvider;
 const
-  _libcrash = require(
-    '../libcrash-js/crash-js');
+  _libcrash =
+    require(
+      '../libcrash-js/crash-js');
 _app_name_get =
   _libcrash._app_name_get;
 
@@ -43,9 +44,8 @@ function
     _template.replaceAll(
       "{_provider}",
       _provider);
-  _msg_error(
-    _msg,
-    1)
+  _msg_info(
+    _msg);
 }
 
 

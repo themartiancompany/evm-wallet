@@ -73,9 +73,8 @@ function
     _template.replaceAll(
       "{_provider}",
       _provider);
-  _msg_error(
-    _msg,
-    1)
+  _msg_info(
+    _msg);
 }
 
 

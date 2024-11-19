@@ -62,7 +62,7 @@ function _wallet_exists(
 
 
 function
-  _msg_info_seed_empty(
+  _msg_error_seed_empty(
     _seed) {
   let
     _msg,
@@ -138,7 +138,7 @@ function _wallet_get(
         _seed); 
   }
   else if ( _seed == "" ) {
-    _msg_info_seed_empty(
+    _msg_error_seed_empty(
       _seed);
   }
   if ( _phrase != "" ) {
