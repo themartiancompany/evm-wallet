@@ -200,9 +200,21 @@ function
 }
 
 _global_variables();
-_cmdline_parse();
-_mkseed(
-  seed_path);
+
+if ( require.main == module ) {
+  _cmdline_parse();
+  app_opts = [
+    seed_path
+  ];
+  _mkseed.apply(
+    null,
+    app_opts);
+}
+
+module.exports = {
+  _mkseed:
+    _mkseed
+};
 
 // console.log('wallet.address:', wallet.address)
 // console.log('wallet.mnemonic.phrase:', wallet.mnemonic.phrase)
