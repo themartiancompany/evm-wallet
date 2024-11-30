@@ -45,7 +45,7 @@ _msg_info_provider_generated =
 function
   _global_variables() {
   app_name =
-    "address-get";
+    "balance-get";
   method_args =
     [];
   wallet_seed =
@@ -60,12 +60,12 @@ function
 
 
 async function
-  _address_get(
+  _balance_get(
     _wallet_seed,
     _target_network,
     _api_key_path) {
   let
-    _address,
+    _balance,
     _wallet_dir,
     _wallet_password,
     _wallet_path_list;
@@ -100,10 +100,11 @@ async function
     _wallet_get.apply(
       null,
       _wallet_get_opts);
-  _address =
-    _wallet.address;
+  _balance =
+    _provider.getBalance(
+      _wallet);
   console.log(
-    _address);
+    _balance);
 }
 
 function
@@ -135,7 +136,7 @@ function
     _text;
   _text = [
     "Usage:",
-    "  address-get",
+    "  balance-get",
     "    <seed_path>",
     "    (<target_network>)",
     "    (<api_key>)"
@@ -189,12 +190,12 @@ if ( require.main == module ) {
     target_network,
     api_key
   ];
-  _address_get.apply(
+  _balance_get.apply(
     null,
     app_opts);
 }
 
 module.exports = {
-  _address_get:
-    _address_get
+  _balance_get:
+    _balance_get
 };

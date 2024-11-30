@@ -24,6 +24,7 @@ install-scripts:
 	install -vDm 755 "$(_PROJECT)/$(_PROJECT)" "$(BIN_DIR)/$(_PROJECT)"
 	install -vDm 755 "$(_PROJECT)/mkseed" "$(BIN_DIR)/mkseed"
 	install -vDm 755 "$(_PROJECT)/address-get" "$(LIB_DIR)/address-get"
+	install -vDm 755 "$(_PROJECT)/balance-get" "$(LIB_DIR)/balance-get"
 	install -vDm 755 "$(_PROJECT)/network-provider" "$(LIB_DIR)/network-provider"
 	install -vDm 755 "$(_PROJECT)/seed-new" "$(LIB_DIR)/seed-new"
 	install -vDm 755 "$(_PROJECT)/wallet-get" "$(LIB_DIR)/wallet-get"
