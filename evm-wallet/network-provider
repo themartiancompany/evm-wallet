@@ -10,7 +10,6 @@ const
       "ethers");
 _ethers =
   ethers;
-// _getDefaultProvider =
 _get_default_provider =
   _ethers.getDefaultProvider;
 const
@@ -171,5 +170,7 @@ if ( require.main == module ) {
 module.exports = {
   _provider_get:
     _provider_get,
+  _msg_info_provider_generated:
+    _msg_info_provider_generated,
 };
 

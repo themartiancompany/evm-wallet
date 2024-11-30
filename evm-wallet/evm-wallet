@@ -46,14 +46,15 @@ _get_conf_dir_path() {
     "${_dir}"
 }
 
-_wallet_address_cmd() {
+_wallet_key_cmd() {
   local \
-    _command="${1}" \
+    _key="${1}" \
+    _command="${2}" \
     _lib
   _lib="$( \
     _get_lib)/evm-wallet"
   echo \
-    "${_lib}/address-${_command}"
+    "${_lib}/${_key}-${_command}"
 }
 
 _node_run() {
@@ -105,9 +106,11 @@ _api_key_read() {
 _key_get() {
   local \
     _key="${1}"
-  if [[ "${_key}" == "address" ]]; then
+  if [[ "${_key}" == "address" ]] || \
+     [[ "${_key}" == "balance" ]]; then
     _cmd="$( \
-      _wallet_address_cmd \
+      "_wallet_key_cmd" \
+        "${_key}" \
         "get")"
     _args+=(
       "${_wallet_seed}"
@@ -308,8 +311,6 @@ _set_overrides() {
     "wallet" \
     "path" \
     "$(_wallet_path_get)"
-  _msg_info \
-    "about to generate seed"
   _secret_auto_detect \
     "seed" \
     "seed"
@@ -351,6 +352,7 @@ Usage:
       <value>
   keys:
     address
+    balance
   networks:
     alchemy
     ankr
