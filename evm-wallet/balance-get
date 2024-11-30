@@ -65,6 +65,7 @@ async function
     _target_network,
     _api_key_path) {
   let
+    _address,
     _balance,
     _wallet_dir,
     _wallet_password,
@@ -100,11 +101,14 @@ async function
     _wallet_get.apply(
       null,
       _wallet_get_opts);
-  _balance =
+  _address =
+    _wallet.address;
+  _balance = await
     _provider.getBalance(
-      _wallet);
+      _address);
   console.log(
     _balance);
+  return _balance;
 }
 
 function

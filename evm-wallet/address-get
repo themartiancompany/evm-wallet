@@ -104,6 +104,7 @@ async function
     _wallet.address;
   console.log(
     _address);
+  return _address;
 }
 
 function
