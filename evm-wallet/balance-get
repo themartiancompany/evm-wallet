@@ -10,6 +10,8 @@ const
       "ethers");
 _ethers =
   ethers;
+_wei_to_ether =
+  _ethers.formatEther;
 const
   _libcrash =
     require(
@@ -54,6 +56,10 @@ function
     "";
   api_key =
     "";
+  target_address =
+    "";
+  display_unit =
+    "";
   quiet =
     "";
 }
@@ -63,10 +69,13 @@ async function
   _balance_get(
     _wallet_seed,
     _target_network,
-    _api_key_path) {
+    _api_key_path,
+    _target_address,
+    _display_unit) {
   let
-    _address,
     _balance,
+    _balance_eth,
+    _balance_wei,
     _wallet_dir,
     _wallet_password,
     _wallet_path_list;
@@ -91,24 +100,48 @@ async function
       _api_key);
   _msg_info_provider_generated(
     _provider);
-  _wallet_get_opts = [
-    _wallet_path,
-    _wallet_password,
-    _wallet_seed,
-    _provider
-  ];
-  _wallet =
-    _wallet_get.apply(
-      null,
-      _wallet_get_opts);
-  _address =
-    _wallet.address;
-  _balance = await
+  if ( target_address == "" ) {
+    _wallet_get_opts = [
+      _wallet_path,
+      _wallet_password,
+      _wallet_seed,
+      _provider
+    ];
+    _wallet =
+      _wallet_get.apply(
+        null,
+        _wallet_get_opts);
+    _target_address =
+      _wallet.address;
+  }
+  _balance_wei = await
     _provider.getBalance(
-      _address);
+      _target_address);
+  if ( _display_unit == "" ) {
+    _display_unit =
+      "ether";
+  }
+  if ( _display_unit == "wei" ) {
+    _balance =
+      _balance_wei;
+  }
+  else if ( _display_unit == "ether" ) {
+    _balance_ether =
+      _wei_to_ether(
+        _balance_wei);
+    _balance =
+      _balance_ether;
+  }
   console.log(
     _balance);
   return _balance;
+}
+
+function
+  _overrides_set() {
+  if ( display_unit == "" ) {
+    display_unit = "ether";
+  }
 }
 
 function
@@ -125,9 +158,15 @@ function
       target_network),
     "          API Key: {api_key}".replace(
       "{api_key}",
-      api_key)
+      api_key),
+    "   Target address: {target_address}".replace(
+      "{target_address}",
+      target_address),
+    "     Display unit: {display_unit}".replace(
+      "{display_unit}",
+      display_unit)
   ]
-  for ( _line in _text ) {
+  for ( _line of _text ) {
     _msg_info(
       _line);
   }
@@ -141,11 +180,26 @@ function
   _text = [
     "Usage:",
     "  balance-get",
+    "    <quiet>",
     "    <seed_path>",
     "    (<target_network>)",
-    "    (<api_key>)"
+    "    (<api_key>)",
+    "    (<target_address>)",
+    "    (<display_unit>)",
+    "",
+    "Args:",
+    "  <seed_path>         Path on disk of the file",
+    "                      containing the seed phrase.",
+    "  <target_network>    Name of the network to connect to.",
+    "  <api_key>           Path on disk of the API key for",
+    "                      the network service provider.",
+    "  <target_address>    Address of which to return",
+    "                      the balance of.",
+    "                      Default: the wallet address.",
+    "  <display_unit>      Can be 'wei' or 'ether'.",
+    "                      Default: 'ether'",
   ];
-  for ( _line in _text ) {
+  for ( _line of _text ) {
     console.log(
       _line);
   }
@@ -163,23 +217,32 @@ function _cmdline_parse() {
       _index,
       _array) {
       if ( _index == 2 ) {
-        wallet_seed =
+        quiet =
 	  _value;
       }
       if ( _index == 3 ) {
-        target_network =
+        wallet_seed =
 	  _value;
       }
       if ( _index == 4 ) {
+        target_network =
+	  _value;
+      }
+      if ( _index == 5 ) {
         api_key =
 	  _value;
       }
-      if ( _value == 5 ) {
-        quiet =
-	  "n";
+      if ( _index == 6 ) {
+        target_address =
+	  _value;
+      }
+      if ( _index == 7 ) {
+        display_unit =
+	  _value;
       }
   });
-  if ( wallet_seed == "" ) {
+  if ( wallet_seed == "" &&
+       target_address == "") {
     _usage();
   }
 }
@@ -192,7 +255,9 @@ if ( require.main == module ) {
   app_opts = [
     wallet_seed,
     target_network,
-    api_key
+    api_key,
+    target_address,
+    display_unit
   ];
   _balance_get.apply(
     null,

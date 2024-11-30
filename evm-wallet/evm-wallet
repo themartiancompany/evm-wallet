@@ -113,6 +113,7 @@ _key_get() {
         "${_key}" \
         "get")"
     _args+=(
+      "${quiet}"
       "${_wallet_seed}"
       "${_network_backend}"
       "${_api_key_path}"
@@ -162,11 +163,11 @@ _evm_wallet() {
         0
     fi
   fi
-  if [[ "${quiet}" != "y" ]]; then
-    _args+=(
-      -v
-    )
-  fi
+  # if [[ "${quiet}" != "y" ]]; then
+  #   _args+=(
+  #     -v
+  #   )
+  # fi
   _node_run \
     "${_cmd}" \
     "${_args[@]}"
@@ -417,6 +418,7 @@ _show_config() {
   _msg_info "              Wallet seed:   ${_seed_show}"
   _msg_info "           Target network:   $(_get "target" "network")"
   _msg_info "                  API key:   $(_get "api" "key")"
+  _msg_info "           Target command:   $(_get "target" "command")"
   _msg_info "               Target key:   $(_get "target" "key")"
   _msg_info "             Target value:   $(_get "target" "value")"
 }
