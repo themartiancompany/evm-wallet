@@ -235,18 +235,18 @@ _secret_auto_detect() {
       -t
         "${_secret_type}"
     )
+    if [[ "${quiet}" == "y" ]]; then
+      _key_gen_opts+=(
+        -v
+      )
+    fi
     _msg=(
       "generating ${_secret} '${_path}'"
     )
-    if [[ "${quiet}" == "n" ]]; then
-      _msg_info \
-        "${_msg[*]}"
-    fi
+    _msg_info \
+      "${_msg[*]}"
     mkdir \
       -p \
-      "${_dir}"
-    chmod \
-      700 \
       "${_dir}"
     chmod \
       700 \
@@ -260,10 +260,8 @@ _secret_auto_detect() {
     _msg=(
       "${_secret} '${_path}' successfully generated"
     )
-    if [[ "${quiet}" == "n" ]]; then
-      _msg_info \
-        "${_msg[*]}"
-    fi
+    _msg_info \
+      "${_msg[*]}"
   fi
   _set_override \
     "wallet" \
@@ -310,6 +308,8 @@ _set_overrides() {
     "wallet" \
     "path" \
     "$(_wallet_path_get)"
+  _msg_info \
+    "about to generate seed"
   _secret_auto_detect \
     "seed" \
     "seed"
