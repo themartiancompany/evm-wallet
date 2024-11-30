@@ -235,7 +235,7 @@ _secret_auto_detect() {
       -t
         "${_secret_type}"
     )
-    if [[ "${quiet}" == "y" ]]; then
+    if [[ "${quiet}" == "n" ]]; then
       _key_gen_opts+=(
         -v
       )
