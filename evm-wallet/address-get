@@ -52,7 +52,7 @@ function
     "";
   target_network =
     "";
-  api_key =
+  api_key_path =
     "";
   quiet =
     "";
@@ -66,6 +66,7 @@ async function
     _api_key_path) {
   let
     _address,
+    _api_key,
     _wallet_dir,
     _wallet_password,
     _wallet_path_list;
@@ -82,8 +83,12 @@ async function
     _path_join(
       _wallet_path_list);
   _api_key =
-    _file_read(
-      _api_key_path);
+    "";
+  if ( _api_key_path != "" ) {
+    _api_key =
+      _file_read(
+        _api_key_path);
+  }
   _provider =
     _provider_get(
       _target_network,
@@ -119,9 +124,9 @@ function
     "   Target network: {target_network}".replaceAll(
       "{target_network}",
       target_network),
-    "          API Key: {api_key}".replace(
+    "          API Key: {api_key_path}".replace(
       "{api_key}",
-      api_key)
+      api_key_path)
   ]
   for ( _line of _text ) {
     _msg_info(
@@ -140,10 +145,10 @@ function
     "    <quiet>",
     "    <seed_path>",
     "    (<target_network>)",
-    "    (<api_key>)"
+    "    (<api_key_path>)"
   ];
-  for ( _line in _text ) {
-    console.log(
+  for ( _line of _text ) {
+    _msg_info(
       _line);
   }
   process.exit();
@@ -172,7 +177,7 @@ function _cmdline_parse() {
 	  _value;
       }
       if ( _index == 5 ) {
-        api_key =
+        api_key_path =
 	  _value;
       }
   });
@@ -189,7 +194,7 @@ if ( require.main == module ) {
   app_opts = [
     wallet_seed,
     target_network,
-    api_key
+    api_key_path
   ];
   _address_get.apply(
     null,

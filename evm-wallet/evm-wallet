@@ -94,13 +94,13 @@ _network_setup() {
 _api_key_read() {
   local \
     _path="${1}"
-  if [ ! -e "${_path}" ]; then
-    _msg_error \
-      "service api key file '${_path}' not found" \
-      1
+  if [ -e "${_path}" ]; then
+    cat \
+      "${_path}"
+  elif [ ! -e "${_path}" ]; then
+    _msg_warning \
+      "service api key file '${_path}' not found"
   fi
-  cat \
-    "${_path}"
 }
 
 _key_get() {
@@ -151,9 +151,12 @@ _evm_wallet() {
   _command_args+=(
     "$@"
   )
-  _api_key="$( \
-    _api_key_read \
-      "${_api_key_path}")"
+  _api_key=""
+  if [[ "${_api_key_path}" != "" ]]; then
+    _api_key="$( \
+      _api_key_read \
+        "${_api_key_path}")"
+  fi
   _network_setup
   if [[ "${_target_command}" == "get" ]]; then
     "_key_${_target_command}" \
@@ -202,12 +205,13 @@ _secret_get() {
     "${_path}"
 }
 
-_api_key_get() {
+_api_key_auto_detect() {
   local \
     _name="${1}" \
     _network="${2}" \
     _conf_dir \
-    _service
+    _service \
+    _key
   if [[ "${_network}" == "ethereum" ]]; then
     _service="etherscan"
   elif [[ "${_network}" == "gnosis" ]]; then
@@ -217,8 +221,16 @@ _api_key_get() {
   mkdir \
     -p \
     "${_conf_dir}"
-  echo \
-    "${_conf_dir}/${_name}.txt"
+  _key="${_conf_dir}/${_name}.txt"
+  if [[ ! -e "${_key}" ]]; then
+    _msg_warning \
+      "key '${_key}' doesn't exists!"
+    _key=""
+  fi
+  _set_override \
+    "api" \
+    "key" \
+    "${_key}"
 }
 
 _secret_auto_detect() {
@@ -300,14 +312,11 @@ _set_overrides() {
     "target" \
     "command" \
     "get"
-  _set_override \
-    "api" \
-    "key" \
-    "$(_api_key_get \
-         "default" \
-         "$(_get \
-              "target" \
-              "network")")"
+  _api_key_auto_detect \
+    "default" \
+    "$(_get \
+         "target" \
+         "network")"
   _set_override \
     "wallet" \
     "path" \
