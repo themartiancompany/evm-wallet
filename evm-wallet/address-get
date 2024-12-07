@@ -155,7 +155,6 @@ function
 }
 
 
-
 function _cmdline_parse() {
   quiet =
     "y";
