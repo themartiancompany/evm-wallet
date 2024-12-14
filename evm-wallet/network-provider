@@ -54,6 +54,7 @@ function
     _api_key) {
   let
     _default_network,
+    _provider,
     _provider_opts,
     _rpc;
   _provider_opts =

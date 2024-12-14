@@ -81,6 +81,57 @@ _node_run() {
 }
 
 _network_setup() {
+  local \
+    _chain="${1}" \
+    _chain_name \
+    _chain_id \
+    _rpc \
+    _msg=() \
+    _input_types=() \
+    _input_type
+  _input_types=(
+    "id"
+    "name"
+  )
+  _msg=(
+    "looking for info on EVM blockchain"
+    "'${_chain}'"
+  )
+  _msg_info \
+    "${_msg[*]}"
+  for _input_type in "${_input_types[@]}"; do
+    _chain_id="$( \
+      evm-chains-info \
+        -i \
+          "${_input_type}" \
+        -o \
+          "id" \
+        "${_chain}")"
+    if [[ "${_chain_id}" != "" ]]; then
+      _chain_name="$( \
+        evm-chains-info \
+          -i \
+            "${_input_type}" \
+          -o \
+            "name" \
+          "${_chain}")"
+      _msg=(
+        "Found blockchain '${_chain_name}'"
+        "with id '${_chain_id}'"
+      )
+      _msg_info \
+        "${_msg[*]}"
+      break
+    fi
+  done
+  if [[ "${_chain_id}" != "" ]]; then
+    _msg=(
+      "Selecting RPC address with"
+      "criterion 'kirsh'"
+    )
+    _msg_info \
+
+_network_setup() {
   if [[ "${_network}" == "gnosis" ]]; then
     _rpc="https://rpc.gnosischain.com"
     _network_backend="${_network}"
@@ -88,18 +139,6 @@ _network_setup() {
     _network_backend="etherscan"
   else
     _network_backend="${_network}"
-  fi
-}
-
-_api_key_read() {
-  local \
-    _path="${1}"
-  if [ -e "${_path}" ]; then
-    cat \
-      "${_path}"
-  elif [ ! -e "${_path}" ]; then
-    _msg_warning \
-      "service api key file '${_path}' not found"
   fi
 }
 
@@ -157,7 +196,8 @@ _evm_wallet() {
       _api_key_read \
         "${_api_key_path}")"
   fi
-  _network_setup
+  _network_setup \
+    "${_network}"
   if [[ "${_target_command}" == "get" ]]; then
     "_key_${_target_command}" \
       "${_target_key}"
@@ -352,6 +392,7 @@ Usage:
     [options]
     <command>
       (<command_args>)
+
   commands:
     get
       <wallet_name>
@@ -360,19 +401,15 @@ Usage:
       <wallet_name>
       <key>
       <value>
+
   keys:
     address
     balance
+
   networks:
-    alchemy
-    ankr
-    cloudflare
-    chainstack
-    etherscan
-    gnosis
-    infura
-    publicPolygon
-    quicknode
+    all those supported by
+    evm-chains-info
+
   options:
      -w <wallet_path>     Wallet path.
                           Default: $(_get "wallet" "path")
@@ -424,7 +461,7 @@ _show_config() {
   _msg_info "                Call date:   $(_get "call" "date")"
   _msg_info "              Wallet path:   $(_get "wallet" "path")"
   _msg_info "          Wallet password:   $(_get "wallet" "password")"
-  _msg_info "              Wallet seed:   ${_seed_show}"
+  _msg_info "              Wallet seed:   $(_get "wallet" "seed")"
   _msg_info "           Target network:   $(_get "target" "network")"
   _msg_info "                  API key:   $(_get "api" "key")"
   _msg_info "           Target command:   $(_get "target" "command")"
