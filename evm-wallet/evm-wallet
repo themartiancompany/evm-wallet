@@ -106,7 +106,8 @@ _network_setup() {
           "${_input_type}" \
         -o \
           "id" \
-        "${_chain}")"
+        "${_chain}" || \
+        true)"
     if [[ "${_chain_id}" != "" ]]; then
       _chain_name="$( \
         evm-chains-info \
@@ -130,16 +131,34 @@ _network_setup() {
       "criterion 'kirsh'"
     )
     _msg_info \
-
-_network_setup() {
-  if [[ "${_network}" == "gnosis" ]]; then
-    _rpc="https://rpc.gnosischain.com"
-    _network_backend="${_network}"
-  elif [[ "${_network}" == "ethereum" ]]; then
-    _network_backend="etherscan"
-  else
-    _network_backend="${_network}"
+      "${_msg[*]}"
+    _rpc="$( \
+      evm-chains-info \
+        -i \
+          "${_input_type}" \
+        -o \
+          "rpc" \
+        -s \
+          "kirsh" \
+        "${_chain}")"
+  elif [[ "${_chain_id}" == "" ]]; then
+    _msg=(
+      "Found no known blockchain for input"
+      "'${_chain}', interpreting given input"
+      "as an rpc address for the selected"
+      "network."
+    )
+    _msg_info \
+      "${_msg[*]}"
+    _rpc="${_chain}"
   fi
+  _msg=(
+    "Selected RPC address"
+    "'${_rpc}'"
+  )
+  _msg_info \
+    "${_msg[*]}"
+  _network_backend="${_rpc}"
 }
 
 _key_get() {
@@ -190,12 +209,6 @@ _evm_wallet() {
   _command_args+=(
     "$@"
   )
-  _api_key=""
-  if [[ "${_api_key_path}" != "" ]]; then
-    _api_key="$( \
-      _api_key_read \
-        "${_api_key_path}")"
-  fi
   _network_setup \
     "${_network}"
   if [[ "${_target_command}" == "get" ]]; then
@@ -252,9 +265,11 @@ _api_key_auto_detect() {
     _conf_dir \
     _service \
     _key
-  if [[ "${_network}" == "ethereum" ]]; then
+  if [[ "${_network}" == "Ethereum Mainnet" ]] || \
+     [[ "${_network}" == "1" ]]; then
     _service="etherscan"
-  elif [[ "${_network}" == "gnosis" ]]; then
+  elif [[ "${_network}" == "Gnosis" ]] || \
+       [[ "${_network}" == "100" ]]; then
     _service="gnosisscan"
   fi
   _conf_dir="${HOME}/.config/${_service}"
@@ -347,7 +362,7 @@ _set_overrides() {
   _set_override \
     "target" \
     "network" \
-    "gnosis"
+    "Gnosis"
   _set_override \
     "target" \
     "command" \
