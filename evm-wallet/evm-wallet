@@ -408,7 +408,8 @@ Usage:
 
   networks:
     all those supported by
-    evm-chains-info
+    'evm-chains-info' as
+    well as directly RPC address
 
   options:
      -w <wallet_path>     Wallet path.
@@ -417,8 +418,9 @@ Usage:
                           Default: $(_get "wallet" "password")
      -s <wallet_seed>     Wallet seed path.
                           Default: $(_get "wallet" "seed")
-     -n <network>         EVM network name ('mainnet', 'gnosis').
-                          Default: $(_get "target" "network")
+     -n <network>         EVM network name. Accepted values
+                          are all those supported by
+                          evm-chains-info and RPC addresses.
      -k <api_key>         Etherscan-like service key.
                           Default: $(_get "api" "key")
      -h                   This message.
