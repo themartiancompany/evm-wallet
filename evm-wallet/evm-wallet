@@ -80,6 +80,7 @@ _node_run() {
     true
 }
 
+
 _network_setup() {
   local \
     _chain="${1}" \
@@ -87,7 +88,7 @@ _network_setup() {
     _chain_id \
     _rpc \
     _msg=() \
-    _input_types=() \
+    _number \
     _input_type
   _input_types=(
     "id"
@@ -99,34 +100,31 @@ _network_setup() {
   )
   _msg_info \
     "${_msg[*]}"
-  for _input_type in "${_input_types[@]}"; do
-    _chain_id="$( \
+  _number='^[0-9]+$'
+  if [[ "${_chain}" =~ "${_number}" ]] ; then
+    _input_type="id"
+  elif [[ ! "${_chain}" =~ "${_number}" ]] ; then
+    _input_type="name"
+  fi
+  _chain_id="$( \
+    evm-chains-info \
+      -i \
+        "${_input_type}" \
+      -o \
+        "id" \
+      "${_chain}")"
+  if [[ "${_chain_id}" != "" ]]; then
+    _chain_name="$( \
       evm-chains-info \
         -i \
           "${_input_type}" \
         -o \
-          "id" \
-        "${_chain}" || \
+          "name" \
+        "${_chain}" 2>/dev/null || \
         true)"
-    if [[ "${_chain_id}" != "" ]]; then
-      _chain_name="$( \
-        evm-chains-info \
-          -i \
-            "${_input_type}" \
-          -o \
-            "name" \
-          "${_chain}")"
-      _msg=(
-        "Found blockchain '${_chain_name}'"
-        "with id '${_chain_id}'"
-      )
-      _msg_info \
-        "${_msg[*]}"
-      break
-    fi
-  done
-  if [[ "${_chain_id}" != "" ]]; then
     _msg=(
+      "Found blockchain '${_chain_name}'"
+      "with id '${_chain_id}'"
       "Selecting RPC address with"
       "criterion 'kirsh'"
     )
