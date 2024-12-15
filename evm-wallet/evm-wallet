@@ -87,37 +87,21 @@ _network_setup() {
     _chain_name \
     _chain_id \
     _rpc \
-    _msg=() \
-    _number \
-    _input_type
-  _input_types=(
-    "id"
-    "name"
-  )
+    _msg=()
   _msg=(
     "looking for info on EVM blockchain"
     "'${_chain}'"
   )
   _msg_info \
     "${_msg[*]}"
-  _number='^[0-9]+$'
-  if [[ "${_chain}" =~ "${_number}" ]] ; then
-    _input_type="id"
-  elif [[ ! "${_chain}" =~ "${_number}" ]] ; then
-    _input_type="name"
-  fi
   _chain_id="$( \
     evm-chains-info \
-      -i \
-        "${_input_type}" \
       -o \
         "id" \
       "${_chain}")"
   if [[ "${_chain_id}" != "" ]]; then
     _chain_name="$( \
       evm-chains-info \
-        -i \
-          "${_input_type}" \
         -o \
           "name" \
         "${_chain}" 2>/dev/null || \
@@ -132,8 +116,6 @@ _network_setup() {
       "${_msg[*]}"
     _rpc="$( \
       evm-chains-info \
-        -i \
-          "${_input_type}" \
         -o \
           "rpc" \
         -s \
