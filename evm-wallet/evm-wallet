@@ -33,6 +33,10 @@ _requirements() {
   _check_cmd \
     'node' \
     'nodejs'
+  _check_cmd \
+    "evm-chains-info"
+  _check_cmd \
+    "evm-chains-explorers"
 }
 
 _get_conf_dir_path() {
