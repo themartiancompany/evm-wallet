@@ -240,27 +240,36 @@ _secret_get() {
 
 _api_key_auto_detect() {
   local \
-    _name="${1}" \
-    _network="${2}" \
-    _conf_dir \
-    _service \
-    _key
-  if [[ "${_network}" == "Ethereum Mainnet" ]] || \
-     [[ "${_network}" == "1" ]]; then
-    _service="etherscan"
-  elif [[ "${_network}" == "Gnosis" ]] || \
-       [[ "${_network}" == "100" ]]; then
-    _service="gnosisscan"
-  fi
-  _conf_dir="${HOME}/.config/${_service}"
-  mkdir \
-    -p \
-    "${_conf_dir}"
-  _key="${_conf_dir}/${_name}.txt"
-  if [[ ! -e "${_key}" ]]; then
-    _msg_warning \
-      "key '${_key}' doesn't exists!"
-    _key=""
+    _chain="${1}" \
+    _chain_name \
+    _key \
+    _msg=()
+  _key="$( \
+    evm-chains-explorers \
+      -c \
+        "${_chain}" \
+      -s \
+        'kirsh' \
+      get \
+        keys)"
+  _msg_info "${_key}"
+  _chain_name="$( \
+    evm-chains-info \
+      -o \
+        "name" \
+      "${_chain}")"
+  if [[ "${_key}" == "" ]]; then
+    _msg=(
+      "Found no provider services"
+      "keys for chain '${_chain_name}'."
+      "Check available service"
+      "providers with \"evm-chains-info"
+      "-o explorers '${_chain}'\""
+      "and add the relative api key in"
+      "'<user_home>/.config/evm-chains-explorers/<service>/default.txt'"
+    )
+    _msg_info \
+      "${_msg[*]}"
   fi
   _set_override \
     "api" \
@@ -348,7 +357,6 @@ _set_overrides() {
     "command" \
     "get"
   _api_key_auto_detect \
-    "default" \
     "$(_get \
          "target" \
          "network")"
