@@ -50,6 +50,15 @@ _get_conf_dir_path() {
     "${_dir}"
 }
 
+_balance_send_cmd() {
+  local \
+    _lib
+  _lib="$( \
+    _get_lib)/evm-wallet"
+  echo \
+    "${_lib}/balance-send"
+}
+
 _wallet_key_cmd() {
   local \
     _key="${1}" \
@@ -173,6 +182,22 @@ _key_get() {
   fi
 }
 
+_balance_send() {
+  local \
+    _target_address="${1}" \
+    _target_amount="${2}"
+  _cmd="$( \
+    _balance_send_cmd)"
+  _args+=(
+    "${quiet}"
+    "${_wallet_seed}"
+    "${_target_address}"
+    "${_target_amount}"
+    "${_network_backend}"
+    "${_api_key_path}"
+  )
+}
+
 _evm_wallet() {
   local \
     _target_command="${1}" \
@@ -184,9 +209,9 @@ _evm_wallet() {
     _target_key="${7}" \
     _target_value="${8}" \
     _command_args=() \
+    _msg=() \
     _cmd \
     _args=() \
-    _api_key \
     _network_backend
   shift \
     8
@@ -202,6 +227,17 @@ _evm_wallet() {
       return \
         0
     fi
+  elif [[ "${_target_command}" == "send" ]]; then
+    _balance_send \
+      "${_target_key}" \
+      "${_target_value}"
+  else
+    _msg=(
+      "unknown command '${_target_command}'."
+    )
+    _msg_error \
+      "${_msg[*]}" \
+      1
   fi
   # if [[ "${quiet}" != "y" ]]; then
   #   _args+=(
@@ -408,6 +444,9 @@ Usage:
       <wallet_name>
       <key>
       <value>
+    send
+      <address>
+      <amount>
 
   keys:
     address
