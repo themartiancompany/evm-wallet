@@ -12,6 +12,8 @@ _ethers =
   ethers;
 _wei_to_ether =
   _ethers.formatEther;
+_parse_units =
+  _ethers.parseUnits;
 const
   _libcrash =
     require(
@@ -95,6 +97,13 @@ function
 }
 
 
+function
+  _ethers_to_wei(
+    _amount) {
+  return _parse_units(
+    _amount,
+    "ether");
+}
 
 
 async function
@@ -106,6 +115,7 @@ async function
     _api_key_path,
     _measure_unit) {
   let
+    _amount,
     _balance,
     _send_opts,
     _sender_address,
@@ -166,11 +176,22 @@ async function
       _balance,
       _target_amount);
   }
+  if ( _measure_unit == "wei" ) {
+    _amount =
+      target_amount;
+  }
+  else if ( _measure_unit == "ether" ) {
+    _amount =
+      _ethers_to_wei(
+        _target_amount);
+  }
+  console.log(
+    "sending", _amount, _measure_unit);
   _send_opts = {
     'to':
       _target_address,
-    'amount':
-      _target_amount
+    'value':
+      _amount
   };
   _tx =
     await _wallet.sendTransaction(
