@@ -91,9 +91,11 @@ async function
   _wallet_path =
     _path_join(
       _wallet_path_list);
-  _api_key =
-    _file_read(
-      _api_key_path);
+  if ( _api_key_path != "" ) {
+    _api_key =
+      _file_read(
+        _api_key_path);
+  }
   _provider =
     _provider_get(
       _target_network,
