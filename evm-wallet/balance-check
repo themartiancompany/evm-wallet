@@ -114,7 +114,9 @@ async function
     _measure_unit) {
   let
     _amount,
+    _api_key,
     _balance,
+    _provider_get_opts,
     _sender_address,
     _tx,
     _wallet_dir,
@@ -132,13 +134,19 @@ async function
   _wallet_path =
     _path_join(
       _wallet_path_list);
-  _api_key =
-    _file_read(
-      _api_key_path);
-  _provider =
-    _provider_get(
-      _target_network,
+  _provider_get_opts = [
+    _target_network
+  ];
+  if ( _api_key_path != "" ) {
+    _api_key =
+      _file_read(
+        _api_key_path);
+    _provider_get_opts.push(
       _api_key);
+  _provider =
+    _provider_get.apply(
+      null,
+      _provider_get_opts);
   _msg_info_provider_generated(
     _provider);
   _wallet_get_opts = [
