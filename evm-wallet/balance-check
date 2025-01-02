@@ -143,6 +143,7 @@ async function
         _api_key_path);
     _provider_get_opts.push(
       _api_key);
+  }
   _provider =
     _provider_get.apply(
       null,
