@@ -11,6 +11,8 @@ _bin="$( \
 _lib="${_bin}/../lib"
 source \
   "${_lib}/libcrash-bash/crash-bash"
+source \
+  "${_lib}/libevm/libevm"
 
 # shellcheck disable=SC2034
 _global_variables() {
@@ -21,6 +23,8 @@ _global_variables() {
   wallet_seed=""
   target_network=""
   api_key=""
+  rpc_selection=""
+  explorer_selection=""
   wallet_name=""
   target_key=""
   target_value=""
@@ -30,6 +34,10 @@ _global_variables() {
 }
 
 _requirements() {
+  _check_cmd \
+    'libevm-requirements' \
+    'libevm'
+  libevm-requirements
   _check_cmd \
     'node' \
     'nodejs'
@@ -97,6 +105,7 @@ _node_run() {
 _network_setup() {
   local \
     _chain="${1}" \
+    _selection="${2}" \
     _chain_name \
     _chain_id \
     _rpc \
@@ -123,7 +132,7 @@ _network_setup() {
       "Found blockchain '${_chain_name}'"
       "with id '${_chain_id}'"
       "Selecting RPC address with"
-      "criterion 'kirsh'"
+      "criterion '${_selection}'"
     )
     _msg_info \
       "${_msg[*]}"
@@ -132,7 +141,7 @@ _network_setup() {
         -o \
           "rpc" \
         -s \
-          "kirsh" \
+          "${_selection}" \
         "${_chain}")"
   elif [[ "${_chain_id}" == "" ]]; then
     _msg=(
@@ -205,21 +214,23 @@ _evm_wallet() {
     _wallet_password="${3}" \
     _wallet_seed="${4}" \
     _network="${5}" \
-    _api_key_path="${6}" \
-    _target_key="${7}" \
-    _target_value="${8}" \
+    _rpc_selection="${6}" \
+    _api_key_path="${7}" \
+    _target_key="${8}" \
+    _target_value="${9}" \
     _command_args=() \
     _msg=() \
     _cmd \
     _args=() \
     _network_backend
   shift \
-    8
+    9
   _command_args+=(
     "$@"
   )
   _network_setup \
-    "${_network}"
+    "${_network}" \
+    "${rpc_selection}"
   if [[ "${_target_command}" == "get" ]]; then
     "_key_${_target_command}" \
       "${_target_key}"
@@ -249,126 +260,6 @@ _evm_wallet() {
     "${_args[@]}"
 }
 
-_wallet_path_get() {
-  local \
-    _path \
-    _name
-  _name="$( \
-    _get \
-      "wallet" \
-      "name")"
-  _path="$( \
-    _get_conf_dir_path)/${_name}.dat"
-  echo \
-    "${_path}"
-}
-
-_secret_get() {
-  local \
-    _secret="${1}" \
-    _path \
-    _name
-  _name="$( \
-    _get \
-      "wallet" \
-      "name")"
-  _path="$( \
-    _get_conf_dir_path)/${_name}-${_secret}.txt"
-  echo \
-    "${_path}"
-}
-
-_api_key_auto_detect() {
-  local \
-    _chain="${1}" \
-    _chain_name \
-    _key \
-    _msg=()
-  _key="$( \
-    evm-chains-explorers \
-      -c \
-        "${_chain}" \
-      -s \
-        'kirsh' \
-      get \
-        keys)"
-  _msg_info "${_key}"
-  _chain_name="$( \
-    evm-chains-info \
-      -o \
-        "name" \
-      "${_chain}")"
-  if [[ "${_key}" == "" ]]; then
-    _msg=(
-      "Found no provider services"
-      "keys for chain '${_chain_name}'."
-      "Check available service"
-      "providers with \"evm-chains-info"
-      "-o explorers '${_chain}'\""
-      "and add the relative api key in"
-      "'<user_home>/.config/evm-chains-explorers/<service>/default.txt'"
-    )
-    _msg_info \
-      "${_msg[*]}"
-  fi
-  _set_override \
-    "api" \
-    "key" \
-    "${_key}"
-}
-
-_secret_auto_detect() {
-  local \
-    _secret="${1}" \
-    _secret_type="${2}" \
-    _dir \
-    _key_gen_opts=() \
-    _msg=()
-  _path="$( \
-    _secret_get \
-      "${_secret}")"
-  _dir="$( \
-    dirname \
-      "${_path}")"
-  if [[ ! -e "${_path}" ]]; then
-    _key_gen_opts+=(
-      -t
-        "${_secret_type}"
-    )
-    if [[ "${quiet}" == "n" ]]; then
-      _key_gen_opts+=(
-        -v
-      )
-    fi
-    _msg=(
-      "generating ${_secret} '${_path}'"
-    )
-    _msg_info \
-      "${_msg[*]}"
-    mkdir \
-      -p \
-      "${_dir}"
-    chmod \
-      700 \
-      "${_dir}"
-    key-gen \
-      "${_key_gen_opts[@]}" \
-      "${_path}"
-    chmod \
-      400 \
-      "${_path}"
-    _msg=(
-      "${_secret} '${_path}' successfully generated"
-    )
-    _msg_info \
-      "${_msg[*]}"
-  fi
-  _set_override \
-    "wallet" \
-    "${_secret}" \
-    "${_path}"
-}
-
 _set_overrides() {
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
@@ -396,20 +287,33 @@ _set_overrides() {
     "target" \
     "command" \
     "get"
+  _set_override \
+    "rpc" \
+    "selection" \
+    "kirsh"
+  _set_override \
+    "explorer" \
+    "selection" \
+    "kirsh"
   _api_key_auto_detect \
-    "$(_get \
-         "target" \
-         "network")"
+    "${target_network}" \
+    "${explorer_selection}"
   _set_override \
     "wallet" \
     "path" \
-    "$(_wallet_path_get)"
+    "$(_wallet_path_get \
+         "evm-wallet" \
+         "${wallet_name}")"
   _secret_auto_detect \
     "seed" \
-    "seed"
+    "seed" \
+    "evm-wallet" \
+    "${wallet_name}"
   _secret_auto_detect \
     "password" \
-    "plain"
+    "plain" \
+    "evm-wallet" \
+    "${wallet_name}"
   _set_override \
     "target" \
     "key" \
@@ -458,20 +362,24 @@ Usage:
     well as directly RPC address
 
   options:
-     -w <wallet_path>     Wallet path.
-                          Default: ${wallet_path}
-     -p <wallet_password> Wallet password.
-                          Default: ${wallet_password}
-     -s <wallet_seed>     Wallet seed path.
-                          Default: ${wallet_seed}
-     -n <network>         EVM network name. Accepted values
-                          are all those supported by
-                          evm-chains-info and RPC addresses.
-     -k <api_key>         Etherscan-like service key.
-                          Default: ${api_key}
-     -h                   This message.
-     -c                   Enable color output
-     -v                   Enable verbose output
+     -w <wallet_path>         Wallet path.
+                              Default: ${wallet_path}
+     -p <wallet_password>     Wallet password.
+                              Default: ${wallet_password}
+     -s <wallet_seed>         Wallet seed path.
+                              Default: ${wallet_seed}
+     -n <network>             EVM network name. Accepted values
+                              are all those supported by
+                              evm-chains-info and RPC addresses.
+     -k <api_key>             Etherscan-like service key.
+                              Default: ${api_key}
+     -R <rpc_selection>       RPC selection method.
+                              Default: ${rpc_selection}
+     -S <explorer_selection>  Network explorer selection method.
+                              Default: ${explorer_selection}
+     -h                       This message.
+     -c                       Enable color output
+     -v                       Enable verbose output
 ENDUSAGETEXT
   _printf \
     '%s\n' \
@@ -506,28 +414,28 @@ _show_config() {
     _seed_show="*******"
   fi
   _msg_info "${app_name} configuration"
-  _msg_info "                Call date:   ${call_date}"
-  _msg_info "              Wallet path:   ${wallet_path}"
-  _msg_info "          Wallet password:   ${wallet_password}"
-  _msg_info "              Wallet seed:   ${wallet_seed}"
-  _msg_info "           Target network:   ${target_network}"
-  _msg_info "                  API key:   ${api_key}"
-  _msg_info "           Target command:   ${target_command}"
-  _msg_info "               Target key:   ${target_key}"
-  _msg_info "             Target value:   ${target_value}"
+  _msg_info "                  Call date:   ${call_date}"
+  _msg_info "                Wallet path:   ${wallet_path}"
+  _msg_info "            Wallet password:   ${wallet_password}"
+  _msg_info "                Wallet seed:   ${wallet_seed}"
+  _msg_info "             Target network:   ${target_network}"
+  _msg_info "       RPC selection method:   ${rpc_selection}"
+  _msg_info "  Explorer selection method:   ${explorer_selection}"
+  _msg_info "                    API key:   ${api_key}"
+  _msg_info "             Target command:   ${target_command}"
+  _msg_info "                 Target key:   ${target_key}"
+  _msg_info "               Target value:   ${target_value}"
 }
 
 _globals
 _global_variables
 _requirements
 _config_user_init \
-  "$(_get \
-       "app" \
-       "name")"
+  "${app_name}"
 # shellcheck disable=SC2034
 while \
   getopts \
-    'w:p:s:n:k:cvh?' \
+    'w:p:s:n:S:E:k:cvh?' \
     arg; do
   case \
     "${arg}" in
@@ -535,6 +443,8 @@ while \
     p) override_wallet_password="${OPTARG}" ;;
     s) override_wallet_seed="${OPTARG}" ;;
     n) override_target_network="${OPTARG}" ;;
+    S) override_rpc_selection="${OPTARG}" ;;
+    E) override_explorer_selection="${OPTARG}" ;;
     k) override_api_key="${OPTARG}" ;;
     c) override_color="y" ;;
     v) override_quiet="n" ;;
@@ -585,11 +495,6 @@ command_args+=(
   "$@"
 )
 _set_overrides
-_config_user_init \
-  "$( \
-    _get \
-      "app" \
-      "name")"
 _show_config
 app_opts=(
   "${target_command}"
@@ -597,6 +502,7 @@ app_opts=(
   "${wallet_password}"
   "${wallet_seed}"
   "${target_network}"
+  "${rpc_selection}"
   "${api_key}"
   "${target_key}"
   "${target_value}"
