@@ -181,7 +181,7 @@ _key_get() {
   elif [[ "${_key}" == "seed" ]]; then
     cat \
       "${_wallet_seed}"
-    return \
+    exit \
       0
   elif [[ "${_key}" == "name" ]]; then
     echo \
