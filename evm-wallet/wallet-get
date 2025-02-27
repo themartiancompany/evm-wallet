@@ -68,7 +68,7 @@ function _wallet_exists(
       _path);
   if ( _exists == true ) {
     _template =
-      "wallet '{_path}' already exists";
+      "Wallet '{_path}' already exists.";
     _msg =
       _template.replaceAll(
         '{_path}',
@@ -132,10 +132,10 @@ function _wallet_get(
     _password_show="****" 
   }
   _msg_info_obj(
-    'wallet path',
+    'Wallet path',
     _path);
   _msg_info_obj(
-    'wallet password',
+    'Wallet password',
     _password_show);
   _wallet_exists(
     _path);
@@ -150,7 +150,7 @@ function _wallet_get(
         _seed);
     }
     _msg_info_obj(
-      'wallet seed',
+      'Wallet seed',
       _seed);
     _phrase =
       _file_read(
@@ -164,7 +164,7 @@ function _wallet_get(
     _phrase_show="****" 
   }
   _msg_info_obj(
-    'seed phrase',
+    'Seed phrase',
     _phrase_show);
   _wallet =
     _hdnode_wallet.fromPhrase(
