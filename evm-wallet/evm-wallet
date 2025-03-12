@@ -443,11 +443,7 @@ _config_user_init \
 # shellcheck disable=SC2034
 while \
   getopts \
-<<<<<<< HEAD
     'w:p:s:n:S:E:k:r:cvh?' \
-=======
-    'w:p:s:n:aS:E:k:cvh?' \
->>>>>>> 00f7c1f3bed05d4fa22bf7b3e6926f92828f3ba3
     arg; do
   case \
     "${arg}" in
