@@ -60,7 +60,6 @@ _requirements() {
     'libevm'
   libevm-requirements
   _check_cmd \
-    'node-run' \
     'node-run'
   _check_cmd \
     "evm-chains-info"
@@ -229,7 +228,8 @@ _evm_wallet() {
     "$@"
   )
   _node_run_opts+=(
-    "${_retries_max}"
+    -r
+      "${_retries_max}"
   )
   _network_setup \
     "${_network}" \
