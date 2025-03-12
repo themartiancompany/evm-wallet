@@ -59,8 +59,8 @@ _requirements() {
     'libevm'
   libevm-requirements
   _check_cmd \
-    'node' \
-    'nodejs'
+    'node-run' \
+    'node-run'
   _check_cmd \
     "evm-chains-info"
   _check_cmd \
