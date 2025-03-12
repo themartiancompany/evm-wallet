@@ -48,6 +48,7 @@ _global_variables() {
   target_key=""
   target_value=""
   command_args=()
+  retries_max=""
   color=""
   quiet=""
 }
@@ -96,30 +97,6 @@ _wallet_key_cmd() {
   echo \
     "${_lib}/${_key}-${_command}"
 }
-
-_node_run() {
-  local \
-    _cmd="${1}" \
-    _args=() \
-    _node_path \
-    _lib
-  shift \
-    1
-  _args=(
-    "$@"
-  )
-  _lib="$( \
-    _get_lib)"
-  _node_path="${_lib}/node_modules" 
-  export \
-    NODE_PATH="${_node_path}"
-  NODE_PATH="${_node_path}" \
-  node \
-    "${_cmd}" \
-      "${_args[@]}" || \
-    true
-}
-
 
 _network_setup() {
   local \
@@ -235,17 +212,22 @@ _evm_wallet() {
     _network="${5}" \
     _rpc_selection="${6}" \
     _api_key_path="${7}" \
-    _target_key="${8}" \
-    _target_value="${9}" \
+    _retries_max="${8}" \
+    _target_key="${9}" \
+    _target_value="${10}" \
     _command_args=() \
     _msg=() \
     _cmd \
     _args=() \
-    _network_backend
+    _network_backend \
+    _node_run_opts=()
   shift \
-    9
+    10
   _command_args+=(
     "$@"
+  )
+  _node_run_opts+=(
+    "${_retries_max}"
   )
   _network_setup \
     "${_network}" \
@@ -269,12 +251,8 @@ _evm_wallet() {
       "${_msg[*]}" \
       1
   fi
-  # if [[ "${quiet}" != "y" ]]; then
-  #   _args+=(
-  #     -v
-  #   )
-  # fi
-  _node_run \
+  node-run \
+    "${_node_run_opts[@]}" \
     "${_cmd}" \
     "${_args[@]}"
 }
@@ -298,6 +276,10 @@ _set_overrides() {
     "wallet" \
     "name" \
     "default"
+  _set_override \
+    "retries" \
+    "max" \
+    300
   _set_override \
     "target" \
     "network" \
@@ -396,6 +378,10 @@ Usage:
                               Default: ${rpc_selection}
      -S <explorer_selection>  Network explorer selection method.
                               Default: ${explorer_selection}
+     -r <retries_max>         Maximum number of retries before
+                              failing.
+                              Default: ${retries_max}
+
      -h                       This message.
      -c                       Enable color output
      -v                       Enable verbose output
@@ -441,6 +427,7 @@ _show_config() {
   _msg_info "       RPC selection method:   ${rpc_selection}"
   _msg_info "  Explorer selection method:   ${explorer_selection}"
   _msg_info "                    API key:   ${api_key}"
+  _msg_info "            Maximum retries:   ${retries_max}"
   _msg_info "             Target command:   ${target_command}"
   _msg_info "                 Target key:   ${target_key}"
   _msg_info "               Target value:   ${target_value}"
@@ -454,7 +441,7 @@ _config_user_init \
 # shellcheck disable=SC2034
 while \
   getopts \
-    'w:p:s:n:S:E:k:cvh?' \
+    'w:p:s:n:S:E:k:r:cvh?' \
     arg; do
   case \
     "${arg}" in
@@ -465,6 +452,7 @@ while \
     S) override_rpc_selection="${OPTARG}" ;;
     E) override_explorer_selection="${OPTARG}" ;;
     k) override_api_key="${OPTARG}" ;;
+    r) override_retries_max="${OPTARG}" ;;
     c) override_color="y" ;;
     v) override_quiet="n" ;;
     h|?) _set_overrides && \
@@ -523,6 +511,7 @@ app_opts=(
   "${target_network}"
   "${rpc_selection}"
   "${api_key}"
+  "${retries_max}"
   "${target_key}"
   "${target_value}"
 )

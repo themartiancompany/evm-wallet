@@ -55,7 +55,7 @@ function
     _msg,
     _template;
   _template =
-    "provider '{_provider}' generated";
+    "Provider '{_provider}' generated.";
   _msg =
     _template.replaceAll(
       "{_provider}",
