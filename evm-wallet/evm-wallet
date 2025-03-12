@@ -41,6 +41,7 @@ _global_variables() {
   wallet_password=""
   wallet_seed=""
   target_network=""
+  networks_all=""
   api_key=""
   rpc_selection=""
   explorer_selection=""
@@ -360,7 +361,7 @@ Usage:
   networks:
     all those supported by
     'evm-chains-info' as
-    well as directly RPC address
+    well as direct RPC addresses
 
   options:
      -w <wallet_path>         Wallet path.
@@ -424,6 +425,7 @@ _show_config() {
   _msg_info "            Wallet password:   ${wallet_password}"
   _msg_info "                Wallet seed:   ${wallet_seed}"
   _msg_info "             Target network:   ${target_network}"
+  _msg_info "               All networks:   ${networks_all}"
   _msg_info "       RPC selection method:   ${rpc_selection}"
   _msg_info "  Explorer selection method:   ${explorer_selection}"
   _msg_info "                    API key:   ${api_key}"
@@ -441,7 +443,11 @@ _config_user_init \
 # shellcheck disable=SC2034
 while \
   getopts \
+<<<<<<< HEAD
     'w:p:s:n:S:E:k:r:cvh?' \
+=======
+    'w:p:s:n:aS:E:k:cvh?' \
+>>>>>>> 00f7c1f3bed05d4fa22bf7b3e6926f92828f3ba3
     arg; do
   case \
     "${arg}" in
@@ -449,6 +455,7 @@ while \
     p) override_wallet_password="${OPTARG}" ;;
     s) override_wallet_seed="${OPTARG}" ;;
     n) override_target_network="${OPTARG}" ;;
+    a) override_networks_all="${OPTARG}" ;;
     S) override_rpc_selection="${OPTARG}" ;;
     E) override_explorer_selection="${OPTARG}" ;;
     k) override_api_key="${OPTARG}" ;;
@@ -509,6 +516,7 @@ app_opts=(
   "${wallet_password}"
   "${wallet_seed}"
   "${target_network}"
+  "${networks_all}"
   "${rpc_selection}"
   "${api_key}"
   "${retries_max}"
