@@ -326,9 +326,9 @@ function _cmdline_parse() {
   }
 }
 
-_global_variables();
-
-if ( require.main == module ) {
+if ( _cmdline_check(
+       "balance-send") == true ) {
+  _global_variables();
   _cmdline_parse();
   _config_show();
   app_opts = [

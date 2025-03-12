@@ -33,6 +33,8 @@ const
   _libcrash =
     require(
       '../libcrash-js/crash-js');
+_cmdline_check =
+  _libcrash._cmdline_check;
 _msg_info = 
   _libcrash._msg_info;
 _msg_info_obj = 
@@ -66,7 +68,7 @@ function _wallet_exists(
       _path);
   if ( _exists == true ) {
     _template =
-      "wallet '{_path}' already exists";
+      "Wallet '{_path}' already exists.";
     _msg =
       _template.replaceAll(
         '{_path}',
@@ -130,10 +132,10 @@ function _wallet_get(
     _password_show="****" 
   }
   _msg_info_obj(
-    'wallet path',
+    'Wallet path',
     _path);
   _msg_info_obj(
-    'wallet password',
+    'Wallet password',
     _password_show);
   _wallet_exists(
     _path);
@@ -148,7 +150,7 @@ function _wallet_get(
         _seed);
     }
     _msg_info_obj(
-      'wallet seed',
+      'Wallet seed',
       _seed);
     _phrase =
       _file_read(
@@ -162,7 +164,7 @@ function _wallet_get(
     _phrase_show="****" 
   }
   _msg_info_obj(
-    'seed phrase',
+    'Seed phrase',
     _phrase_show);
   _wallet =
     _hdnode_wallet.fromPhrase(
@@ -175,9 +177,10 @@ function _wallet_get(
   return _signer;
 }
 
-
-_global_variables();
-
+if ( _cmdline_check(
+       "wallet-get") ) {
+  _global_variables();
+}
 
 module.exports = {
   _wallet_get:
