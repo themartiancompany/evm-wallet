@@ -231,7 +231,7 @@ _evm_wallet() {
   )
   _network_setup \
     "${_network}" \
-    "${rpc_selection}"
+    "${_rpc_selection}"
   if [[ "${_target_command}" == "get" ]]; then
     "_key_${_target_command}" \
       "${_target_key}"
