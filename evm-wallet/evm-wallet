@@ -211,11 +211,12 @@ _evm_wallet() {
     _wallet_password="${3}" \
     _wallet_seed="${4}" \
     _network="${5}" \
-    _rpc_selection="${6}" \
-    _api_key_path="${7}" \
-    _retries_max="${8}" \
-    _target_key="${9}" \
-    _target_value="${10}" \
+    _networks_all="${6}" \
+    _rpc_selection="${7}" \
+    _api_key_path="${8}" \
+    _retries_max="${9}" \
+    _target_key="${10}" \
+    _target_value="${11}" \
     _command_args=() \
     _msg=() \
     _cmd \
@@ -223,7 +224,7 @@ _evm_wallet() {
     _network_backend \
     _node_run_opts=()
   shift \
-    10
+    11
   _command_args+=(
     "$@"
   )
@@ -281,6 +282,10 @@ _set_overrides() {
     "retries" \
     "max" \
     300
+  _set_override \
+    "networks" \
+    "all" \
+    "n"
   _set_override \
     "target" \
     "network" \
@@ -443,7 +448,7 @@ _config_user_init \
 # shellcheck disable=SC2034
 while \
   getopts \
-    'w:p:s:n:S:E:k:r:cvh?' \
+    'w:p:s:n:a:S:E:k:r:cvh?' \
     arg; do
   case \
     "${arg}" in
