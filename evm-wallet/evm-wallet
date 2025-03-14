@@ -362,6 +362,7 @@ Usage:
   keys:
     address
     balance
+    seed
 
   networks:
     all those supported by

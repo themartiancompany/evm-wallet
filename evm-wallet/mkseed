@@ -130,7 +130,7 @@ _usage() {
 Generates a seed phrase
 
 Usage:
-  $(_get "app" "name")
+  ${app_name}
     (<out_file>)
 
   options:
@@ -220,10 +220,7 @@ _config_user_init \
       "name")"
 _show_config
 app_opts=(
-  "$( \
-    _get \
-      "out" \
-      "file")"
+  "${out_file}"
 )
 
 _mkseed \
