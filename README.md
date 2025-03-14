@@ -13,11 +13,18 @@ and
 [EVM Chains Explorers](
   https://github.com/themartiancompany/evm-chains-explorers)
 in order to automatically retrieve informations about
-blockchain networks and
+blockchain networks, on
 [key-gen](
   https://github.com/themartiancompany/key-gen),
 for which it is at the same time a seed-phrase provider,
-to generate secrets.
+to generate secrets,
+and on the
+[Crash Bash](
+  https://github.com/themartiancompany/crash-bash)
+and
+[Crash JavaScript](
+  https://github.com/themartiancompany/crash-js)
+run-time libraries.
 
 It is a dependency for the
 [EVM Contracts Tools](
