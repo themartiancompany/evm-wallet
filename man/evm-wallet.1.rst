@@ -21,13 +21,13 @@
    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-==========
+===========
 evm-wallet
-==========
+===========
 
----------------------------------------------------------
+-----------------------------------------------------------
 Ethereum Virtual Machine (EVM) compatible networks' wallet
----------------------------------------------------------
+-----------------------------------------------------------
 :Version: evm-wallet |version|
 :Manual section: 1
 
