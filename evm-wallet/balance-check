@@ -139,6 +139,9 @@ async function
     _wallet_dir,
     _wallet_password,
     _wallet_path_list;
+  _target_amount =
+    Number(
+      _target_amount);
   _wallet_password =
     "";
   _wallet_dir =
@@ -194,6 +197,9 @@ async function
     await _balance_get.apply(
       null,
       _balance_get_opts);
+  _balance =
+    Number(
+      _balance);
   if ( _balance <= _target_amount ) {
     return false;
   }
