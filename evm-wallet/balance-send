@@ -122,6 +122,9 @@ async function
     _wallet_dir,
     _wallet_password,
     _wallet_path_list;
+  _target_amount =
+    Number(
+      _target_amount);
   _wallet_password =
     "";
   _wallet_dir =
