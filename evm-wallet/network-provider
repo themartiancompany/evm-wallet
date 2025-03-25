@@ -184,9 +184,9 @@ function
     "Usage:",
     "  network-provider",
     "    <target_network>",
-    "    <api_key>"
-    "    (<chain_id>)"
-    "    (<chain_name>)"
+    "    <api_key>",
+    "    (<chain_id>)",
+    "    (<chain_name>)",
     "",
     "Args:",
     "  <target_network>                 Network on which the transaction",
