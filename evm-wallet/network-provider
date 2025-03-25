@@ -29,22 +29,27 @@ _ethers =
   ethers;
 _get_default_provider =
   _ethers.getDefaultProvider;
+_network_class =
+  _ethers.Network;
 const
   _libcrash =
     require(
       '../libcrash-js/crash-js');
-_app_name_get =
-  _libcrash._app_name_get;
-
+_cmdline_check =
+  _libcrash._cmdline_check;
 
 function
   _global_variables() {
   app_name =
     "network-provider";
   target_network =
-    '';
+    "";
   api_key =
-    '';
+    "";
+  chain_id =
+    "";
+  chain_name =
+    "";
 }
 
 
@@ -64,30 +69,39 @@ function
     _msg);
 }
 
-
 function
   _provider_get(
-    _network,
-    _api_key) {
+    _target_network,
+    _api_key,
+    _chain_id,
+    _chain_name) {
   let
     _default_network,
+    _get_default_provider_opts,
+    _network,
+    _network_new_opts,
     _provider,
     _provider_opts,
     _rpc;
+  _get_default_provider_opts =
+    [];
+  _network_new_opts = [
+    null
+  ];
   _provider_opts =
     {};
-  if ( _network == "gnosis" ) {
+  if ( _target_network == "gnosis" ) {
     _rpc =
       "https://rpc.gnosischain.com";
     _default_network = _rpc;
   } 
-  else if ( _network == "ethereum" ) {
+  else if ( _target_network == "ethereum" ) {
     if ( _api_key != "" ) {
       _default_network =
         "etherscan";
       _provider_opts = {
         'etherscan':
-	  _api_key,
+          _api_key,
         'exclusive': [
           "etherscan",
           "infura"
@@ -103,11 +117,33 @@ function
   }
   else {
     _default_network =
-      _network;
+      _target_network;
   }
-  _provider = _get_default_provider(
-    _default_network,
+  _get_default_provider_opts.push(
+    _default_network);
+  if ( _chain_name != "" ||
+       _chain_name != undefined ) {
+    _network_opts.push(
+      _chain_name);
+  }
+  if ( _chain_id != "" || 
+       _chain_id != undefined ) {
+    _network_opts.push(
+      _chain_id);
+  }
+  if ( 0 < _network_opts.length ) {
+    _network =
+      new (Function.prototype.bind.apply(
+        _network_class,
+	_network_new_opts));
+    _get_default_provider_opts.push(
+     _network); 
+  }
+  _get_default_provider_opts.push(
     _provider_opts);
+  _provider = _get_default_provider.apply(
+    null,
+    _get_default_provider_opts);
   _msg_info_provider_generated(
     _provider);
   return _provider;
@@ -124,16 +160,23 @@ function
       target_network),
     "          API Key: {api_key}".replace(
       "{api_key}",
-      api_key)
+      api_key),
+    "        Chain ID: {chain_id}".replace(
+      "{chain_id}",
+      chain_id),
+    "      Chain Name: {chain_name}".replace(
+      "{chain_name}",
+      chain_name)
   ]
-  for ( _line in _text ) {
+  for ( _line of _text ) {
     _msg_info(
       _line);
   }
 }
 
 function
-  _usage() {
+  _usage(
+    _exit_code) {
   let
     _line,
     _text;
@@ -142,12 +185,26 @@ function
     "  network-provider",
     "    <target_network>",
     "    <api_key>"
+    "    (<chain_id>)"
+    "    (<chain_name>)"
+    "",
+    "Args:",
+    "  <target_network>                 Network on which the transaction",
+    "                                   resides.",
+    "  <api_key_path>                   Path of the API key for the",
+    "                                   contract ABI provider service.",
+    "  <chain_id>                       Chain ID for the network.",
+    "  <chain_name>                     Name for the network.",
+    "",
+    "  Options:",
+    "    -h                             This help."
   ];
-  for ( _line in _text ) {
+  for ( _line of _text ) {
     _msg_info(
       _line);
   }
-  process.exit();
+  process.exit(
+    _exit_code);
 }
 
 
@@ -155,8 +212,6 @@ function
   _cmdline_parse() {
   quiet =
     "y";
-  target_network =
-    "gnosis";
   process.argv.forEach(
     function (
       _value,
@@ -164,21 +219,57 @@ function
       _array) {
       if ( _index == 2 ) {
         target_network =
-	  _value;
+          _value;
       }
       if ( _index == 3 ) {
         api_key =
-	  _value;
+          _value;
       }
-  });
+      if ( _index == 4 ) {
+        chain_id =
+          _value;
+      }
+      if ( _index == 5 ) {
+        chain_name =
+          _value;
+      }
+      if ( _value == "-h" ||
+           _value == "--help" ) {
+        quiet =
+          "n";
+        _usage(
+          0);
+      }
+    }
+  );
+  if ( target_network == "" ) {
+    quiet =
+      "n";
+    _usage(
+      1);
+  }
 }
 
-if ( require.main == module ) {
+function
+  _overrides_set() {
+  if ( target_network == "" ) {
+    // But really.
+    target_network =
+      "gnosis";
+  }
+}
+
+if ( _cmdline_check(
+       "network-provider") ) {
+  _global_variables();
   _cmdline_parse();
+  _overrides_set();
   _config_show();
   app_opts = [
     target_network,
-    api_key
+    api_key,
+    chain_id,
+    chain_name
   ];
   _provider_get.apply(
     null,

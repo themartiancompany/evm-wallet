@@ -70,10 +70,7 @@ _requirements() {
 _get_conf_dir_path() {
   local \
     _dir
-  _dir="${HOME}/.config/$( \
-    _get \
-      "app" \
-      "name")"
+  _dir="${HOME}/.config/${app_name}"
   echo \
     "${_dir}"
 }
