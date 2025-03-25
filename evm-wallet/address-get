@@ -142,7 +142,7 @@ function
       "{target_network}",
       target_network),
     "          API Key: {api_key_path}".replace(
-      "{api_key}",
+      "{api_key_path}",
       api_key_path)
   ]
   for ( _line of _text ) {

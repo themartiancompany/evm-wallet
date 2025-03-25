@@ -122,23 +122,23 @@ function
   _get_default_provider_opts.push(
     _default_network);
   if ( _chain_name != "" &&
-       _chain_name != undefined ) {
+       _chain_name != undefined &&
+       _chain_name != null ) {
     _network_new_opts.push(
       _chain_name);
   }
   if ( _chain_id != "" &&
        _chain_id != undefined &&
+       _chain_id != null && 
        ( ! isNaN(
-           _chain_id) ) ) {
+             _chain_id) ) ) {
     _chain_id =
       Number(
         _chain_id);
-    _msg_info(
-      _chain_id);
     _network_new_opts.push(
       _chain_id);
   }
-  if ( 0 < _network_new_opts.length ) {
+  if ( 1 < _network_new_opts.length ) {
     _network =
       new (Function.prototype.bind.apply(
         _network_class,
