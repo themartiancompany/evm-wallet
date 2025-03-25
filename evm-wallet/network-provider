@@ -123,12 +123,12 @@ function
     _default_network);
   if ( _chain_name != "" ||
        _chain_name != undefined ) {
-    _network_opts.push(
+    _network_new_opts.push(
       _chain_name);
   }
   if ( _chain_id != "" || 
        _chain_id != undefined ) {
-    _network_opts.push(
+    _network_new_opts.push(
       _chain_id);
   }
   if ( 0 < _network_opts.length ) {
