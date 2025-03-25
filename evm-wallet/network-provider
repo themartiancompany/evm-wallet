@@ -121,16 +121,20 @@ function
   }
   _get_default_provider_opts.push(
     _default_network);
-  if ( _chain_name != "" ||
+  if ( _chain_name != "" &&
        _chain_name != undefined ) {
     _network_new_opts.push(
       _chain_name);
   }
-  if ( _chain_id != "" || 
-       _chain_id != undefined ) {
+  if ( _chain_id != "" &&
+       _chain_id != undefined &&
+       ( ! isNaN(
+           _chain_id) ) ) {
     _chain_id =
       Number(
         _chain_id);
+    _msg_info(
+      _chain_id);
     _network_new_opts.push(
       _chain_id);
   }
