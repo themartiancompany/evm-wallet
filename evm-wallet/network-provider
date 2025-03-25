@@ -128,6 +128,9 @@ function
   }
   if ( _chain_id != "" || 
        _chain_id != undefined ) {
+    _chain_id =
+      Number(
+        _chain_id);
     _network_new_opts.push(
       _chain_id);
   }
