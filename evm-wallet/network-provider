@@ -131,7 +131,7 @@ function
     _network_new_opts.push(
       _chain_id);
   }
-  if ( 0 < _network_opts.length ) {
+  if ( 0 < _network_new_opts.length ) {
     _network =
       new (Function.prototype.bind.apply(
         _network_class,
