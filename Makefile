@@ -29,32 +29,83 @@ MAN_DIR?=$(DESTDIR)$(PREFIX)/share/man
 DOC_FILES=\
   $(wildcard *.rst) \
   $(wildcard *.md)
-SCRIPT_FILES=$(wildcard $(_PROJECT)/*)
+
+BASH_FILES=\
+  $(_PROJECT) \
+  mkseed
+
+NODE_FILES=\
+  address-get \
+  balance-check \
+  balance-get \
+  balance-send \
+  network-provider \
+  seed-new \
+  wallet-get \
+  wallet-new
+
+_INSTALL_FILE=install -vDm644
+_INSTALL_EXE=install -vDm755
+_INSTALL_DIR=install vdm755
+
+_CHECK_TARGETS=\
+  shellcheck
+_CHECK_TARGETS_ALL=\
+  check \
+  $(_CHECK_TARGETS)
+_INSTALL_SCRIPTS_TARGETS=\
+  install-bash-scripts \
+  install-node-scripts
+INSTALL_DOC_TARGETS=\
+  install-doc \
+  install-man
+_INSTALL_TARGETS=\
+  install-scripts \
+  $(_INSTALL_DOC_TARGETS)
+_INSTALL_TARGETS_ALL=\
+  install \
+  $(_INSTALL_TARGETS) \
+  $(_INSTALL_SCRIPTS_TARGETS)
+
+_PHONY_TARGETS=\
+  $(_CHECK_TARGETS_ALL) \
+  $(_INSTALL_TARGETS_ALL)
 
 all:
 
 check: shellcheck
 
 shellcheck:
-	shellcheck -s bash $(SCRIPT_FILES)
 
-install: install-scripts install-doc install-man
+	shellcheck -s bash $(BASH_FILES)
 
-install-scripts:
+install: $(_INSTALL_TARGETS)
 
-	install -vDm 755 "$(_PROJECT)/$(_PROJECT)" "$(BIN_DIR)/$(_PROJECT)"
-	install -vDm 755 "$(_PROJECT)/mkseed" "$(BIN_DIR)/mkseed"
-	install -vDm 755 "$(_PROJECT)/address-get" "$(LIB_DIR)/address-get"
-	install -vDm 755 "$(_PROJECT)/balance-get" "$(LIB_DIR)/balance-get"
-	install -vDm 755 "$(_PROJECT)/balance-send" "$(LIB_DIR)/balance-send"
-	install -vDm 755 "$(_PROJECT)/network-provider" "$(LIB_DIR)/network-provider"
-	install -vDm 755 "$(_PROJECT)/seed-new" "$(LIB_DIR)/seed-new"
-	install -vDm 755 "$(_PROJECT)/wallet-get" "$(LIB_DIR)/wallet-get"
-	install -vDm 755 "$(_PROJECT)/wallet-new" "$(LIB_DIR)/wallet-new"
+install-scripts: $(_INSTALL_SCRIPTS_TARGETS)
+
+install-bash-scripts:
+
+	for _file in $(_BASH_FILES); do \
+	  $(_INSTALL_EXE) \
+	    "$(_PROJECT)/$${_file}" \
+	    "$(BIN_DIR)/$${_file}"; \
+	done
+
+install-node-scripts:
+
+	for _file in $(_NODE_FILES); do \
+	  $(_INSTALL_EXE) \
+	    "$(_PROJECT)/$${_file}" \
+	    "$(LIB_DIR)/$(_PROJECT)/$${_file}"; \
+	done
 
 install-doc:
 
-	install -vDm 644 $(DOC_FILES) -t $(DOC_DIR)
+	$(_INSTALL_FILE) \
+	  $(DOC_FILES) \
+	  -t \
+	  "$(DOC_DIR)/"
+
 
 install-man:
 
@@ -69,4 +120,4 @@ install-man:
 	  "$(MAN_DIR)/man1/mkseed.1"
 
 
-.PHONY: check install install-doc install-man install-scripts shellcheck
+.PHONY: $(_PHONY_TARGETS)
