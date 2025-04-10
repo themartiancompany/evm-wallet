@@ -1,0 +1,489 @@
+#!/usr/bin/env node
+
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+//    ----------------------------------------------------------------------
+//    Copyright © 2024, 2025  Pellegrino Prevete
+//
+//    All rights reserved
+//    ----------------------------------------------------------------------
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU Affero General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU Affero General Public License for more details.
+//
+//    You should have received a copy of the GNU Affero General Public License
+//    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+const
+  _libcrash =
+  require(
+    '../libcrash-js/crash-js');
+_cmdline_check =
+  _libcrash._cmdline_check;
+_file_read =
+  _libcrash._file_read;
+_file_write =
+  _libcrash._file_write;
+_json_display =
+  _libcrash._json_display;
+_msg_info =
+  _libcrash._msg_info;
+_msg_error =
+  _libcrash._msg_error;
+const
+  { ethers } =
+    require(
+      "ethers");
+_ethers =
+  ethers;
+_wei_to_ether =
+  _ethers.formatEther;
+_parse_units =
+  _ethers.parseUnits;
+const
+  _evm_contract_call_dynamic_module =
+    require(
+      '../evm-contracts-tools/evm-contract-call-dynamic');
+_contract_run =
+  _evm_contract_call_dynamic_module._contract_run;
+
+function
+  _global_variables() {
+  app_name =
+    "token-send";
+  retries_max =
+    "";
+  call_timeout =
+    "";
+  wallet_seed_path =
+    "";
+  api_key_path =
+    "";
+  target_network =
+    "";
+  token_address =
+    "";
+  token_abi_path =
+    "";
+  token_bytecode_path =
+    "";
+  token_compiler_output_path =
+    "";
+  measure_unit =
+    "";
+  target_recipient =
+    "";
+  target_amount =
+    "";
+  receipt_file_path =
+    "";
+  quiet =
+    "";
+}
+
+async function
+  _token_send_call(
+    _contract_run_opts) {
+  let
+    _tx;
+  try {
+    _tx = await
+      _contract_run.apply(
+        null,
+        _contract_run_opts);
+  } catch(
+      _error) {
+    _error_display(
+      _error);
+    _msg_error(
+      "Error sending the amount.",
+      0);
+    throw _error;
+  }
+  return _tx;
+}
+
+function
+  _ether_to_wei(
+    _amount) {
+  return _parse_units(
+    _amount,
+    "ether");
+}
+
+async function
+  _token_send(
+    _retries_max,
+    _call_timeout,
+    _wallet_seed_path,
+    _api_key_path,
+    _target_network,
+    _token_address,
+    _token_abi_path,
+    _token_bytecode_path,
+    _token_compiler_output_path,
+    _measure_unit,
+    _receipt_file_path,
+    _target_recipient,
+    _amount
+  ) {
+  let
+    _receipt,
+    _receipt_json,
+    _token_send_call_base_opts,
+    _token_send_call_opts,
+    _transfer_args,
+    _wallet_password;
+  if ( _amount == "" ) {
+    _msg_error(
+      "Amount must be a number greater than zero.",
+      1);
+  }
+  if ( _receipt_file_path == undefined ) {
+    _receipt_file_path =
+      "";
+  }
+  if ( _call_timeout == "" ) {
+    _call_timeout =
+      300000;
+  }
+  _call_timeout =
+    Number(
+      _call_timeout);
+  _amount =
+    Number(
+      _amount);
+  _wallet_password =
+    "";
+  _token_send_call_base_opts = [
+    _retries_max,
+    _call_timeout,
+    _wallet_seed_path,
+    _wallet_password,
+    _api_key_path,
+    0,
+    "ether",
+    _target_network,
+    _token_address,
+    _token_abi_path,
+    _token_bytecode_path,
+    _token_compiler_output_path,
+    "transfer"e
+  ];
+ re if ( _measure_unit == "ether" ) {
+    _amount =
+      _ether_to_wei(
+        _amount);
+  }
+  _transfer_args = [
+    _target_recipient,
+    _amount
+  ];
+  _token_send_call_opts =
+    _token_send_call_base_opts.concat(
+      [_transfer_args]);
+  try {
+    _receipt = await
+      _token_send_call(
+        _token_send_call_opts);
+  } catch (
+      _error) {
+    _error_display(
+      _error);
+    _msg_error(
+      "Error sending the intended token amount.",
+      0);
+    throw _error;
+  }
+  if ( _receipt_file_path != "" ) {
+    _receipt_json =
+      _json_display(
+        _receipt);
+    _file_write(
+      _receipt_file_path,
+      _receipt_json);
+  }
+  return _receipt;
+}
+
+function
+  _config_show() {
+  let
+    _line,
+    _text;
+  _text = 
+    [];
+  _text.push(
+    "          Maximum retries: {retries_max}".replace(
+      "{retries_max}",
+      retries_max));
+  _text.push(
+    "            Call timeout: {call_timeout}".replace(
+      "{call_timeout}",
+      call_timeout));
+  _text.push(
+    "              Wallet seed: {wallet_seed_path}".replace(
+      "{wallet_seed_path}",
+      wallet_seed_path));
+  _text.push(
+    "                  API Key: {api_key_path}".replace(
+      "{api_key_path}",
+      api_key_path));
+  _text.push(
+    "           Target network: {target_network}".replace(
+      "{target_network}",
+      target_network));
+  _text.push(
+    "            Token address: {token_address}".replace(
+      "{token_address}",
+      token_address));
+  _text.push(
+    "                Token ABI: {token_abi_path}".replace(
+      "{token_abi_path}",
+      token_abi_path));
+  _text.push(
+    "           Token bytecode: {token_bytecode_path}".replace(
+      "{token_bytecode_path}",
+      token_bytecode_path));
+  _text.push(
+    "    Token compiler output: {token_compiler_output_path}".replace(
+      "{token_compiler_output_path}",
+      token_compiler_output_path));
+  _text.push(
+    "             Measure unit: {measure_unit}".replace(
+      "{measure_unit}",
+      measure_unit));
+  _text.push(
+    "        Receipt file path: {receipt_file_path}".replace(
+      "{receipt_file_path}",
+      receipt_file_path));
+  _text.push(
+    "         Target recipient: {target_recipient}".replace(
+      "{target_recipient}",
+      target_recipient));
+  _text.push(
+    "            Target amount: {target_amount}".replace(
+      "{target_amount}",
+      target_amount));
+  for ( _line in _text ) {
+    _msg_info(
+      _text[
+        _line]);
+  }
+}
+
+function
+  _usage(
+    _exit_code) {
+  let
+    _line,
+    _text;
+  _text = [
+    "Usage:",
+    "  publish",
+    "    <quiet>",
+    "    <retries_max>",
+    "    <call_timeout>",
+    "    <wallet_seed_path>",
+    "    <api_key_path>",
+    "    <target_network>",
+    "    <token_address>",
+    "    <token_abi_path>",
+    "    <token_bytecode_path>",
+    "    <token_compiler_output_path>",
+    "    <measure_unit>",
+    "    <receipt_file_path>",
+    "    <target_recipient>",
+    "    <target_amount>",
+    "",
+    "Args:",
+    "  <quiet>                          Can be 'y' or 'n'",
+    "                                   Default: y",
+    "  <retries_max>                    Maximum number of retries before",
+    "                                   failing (not implemented).",
+    "  <call_timeout>                   How many milliseconds to wait for a return",
+    "                                   before declaring the call failed.",
+    "  <wallet_seed_path>               Path of the file containing",
+    "                                   the seed phrase.",
+    "  <api_key_path>                   Path of the API key for the",
+    "                                   contract ABI provider service.",
+    "  <target_network>                 Network on which the contract",
+    "                                   resides.",
+    "  <token_address>                  Address of the token contract.",
+    "  <token_abi_path>                 Token ABI path.",
+    "  <token_bytecode_path>            Path for the token bytecode.",
+    "  <token_compiler_output_path>     Path for the token compiler",
+    "                                   output path (the hardhat artifact).",
+    "  <measure_unit>                   Measure unit for the transaction",
+    "                                   value. It can be 'wei' or 'ether'",
+    "                                   Default: ether",
+    "  <receipt_file_path>              If specified, will save the transaction",
+    "                                   receipt at the path.",
+    "  <target_amount>                  How much <measure_unit> of the specified",
+    "                                   token to send.",
+  ];
+  for ( _line of _text ) {
+    _msg_info(
+      _line);
+  }
+  process.exit(
+    _exit_code);
+}
+
+function 
+  _cmdline_parse() {
+  quiet = 
+    "y";
+  process.argv.forEach(
+    function (
+      _value,
+      _index,
+      _array) {
+      if ( _index == 2 ) {
+        quiet =
+          _value;
+      }
+      if ( _index == 3 ) {
+        retries_max =
+          _value;
+      }
+      if ( _index == 4 ) {
+        call_timeout =
+          _value;
+      }
+      if ( _index == 5 ) {
+        wallet_seed_path =
+          _value;
+      }
+      if ( _index == 6 ) {
+        api_key_path =
+          _value;
+      }
+      if ( _index == 7 ) {
+        target_network =
+          _value;
+      }
+      if ( _index == 8 ) {
+        token_address =
+          _value;
+      }
+      if ( _index == 9 ) {
+        token_abi_path =
+          _value;
+      }
+      if ( _index == 10 ) {
+        token_bytecode_path =
+          _value;
+      }
+      if ( _index == 11 ) {
+        token_compiler_output_path =
+          _value;
+      }
+      if ( _index == 12 ) {
+        measure_unit =
+          _value;
+      }
+      if ( _index == 13 ) {
+        receipt_file_path =
+          _value;
+      }
+      if ( _index == 14 ) {
+        target_recipient =
+          _value;
+      }
+      if ( _index == 15 ) {
+        target_amount =
+          _value;
+      }
+      if ( _value == "-h" ||
+           _value == "--help" ) {
+        quiet =
+          "n";
+        _usage(
+          0);
+      }
+  });
+  if ( target_recipient == "" ||
+       target_amount  == "" ||
+       target_amount == "0" ) {
+    quiet =
+      "n";
+    _usage(
+      1);
+  }
+}
+
+async function
+  _token_send_cmdline(
+    _app_opts) {
+  let
+    _receipt;
+  try {
+    _receipt =
+      await _token_send.apply(
+        null,
+        _app_opts);
+    if (  _receipt == undefined ) {
+      throw { "error": {
+                "message": "Error sending the amount."} };
+    }
+    console.log(
+      _receipt);
+  } catch (
+      _error) {
+    _error_display(
+      _error);
+    _msg_error(
+      "Transfer error.",
+      1);
+  }
+}
+
+function
+  _overrides_set() {
+  if ( call_timeout == "" ) {
+    call_timeout =
+      300000;
+  }
+  if ( measure_unit == "" ) {
+    measure_unit =
+      "ether";
+  }
+}
+
+if ( _cmdline_check(
+       "token-send") == true ) {
+  _global_variables();
+  _cmdline_parse();
+  _overrides_set();
+  _config_show();
+  app_opts = [
+    retries_max,
+    call_timeout,
+    wallet_seed_path,
+    api_key_path,
+    target_network,
+    token_address,
+    token_abi_path,
+    token_bytecode_path,
+    token_compiler_output_path,
+    measure_unit,
+    receipt_file_path,
+    target_recipient,
+    target_amount,
+  ];
+  _token_send_cmdline(
+    app_opts);
+}
+
+module.exports = {
+  _token_send:
+    _token_send
+};
