@@ -30,11 +30,11 @@ DOC_FILES=\
   $(wildcard *.rst) \
   $(wildcard *.md)
 
-BASH_FILES=\
+_BASH_FILES=\
   $(_PROJECT) \
   mkseed
 
-NODE_FILES=\
+_NODE_FILES=\
   address-get \
   balance-check \
   balance-get \
@@ -77,7 +77,7 @@ check: shellcheck
 
 shellcheck:
 
-	shellcheck -s bash $(BASH_FILES)
+	shellcheck -s bash $(_BASH_FILES)
 
 install: $(_INSTALL_TARGETS)
 
