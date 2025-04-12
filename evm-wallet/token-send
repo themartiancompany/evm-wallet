@@ -175,9 +175,9 @@ async function
     _token_abi_path,
     _token_bytecode_path,
     _token_compiler_output_path,
-    "transfer"e
+    "transfer"
   ];
- re if ( _measure_unit == "ether" ) {
+ if ( _measure_unit == "ether" ) {
     _amount =
       _ether_to_wei(
         _amount);
