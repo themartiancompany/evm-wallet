@@ -243,7 +243,8 @@ _evm_wallet() {
     _cmd \
     _args=() \
     _network_backend \
-    _node_run_opts=()
+    _node_run_opts=() \
+    _approve_call_opts=()
   shift \
     13
   _command_args+=(
@@ -271,6 +272,12 @@ _evm_wallet() {
       "${currency_token}" \
       "${_target_address}" \
       "${_target_amount}"
+  elif [[ "${_target_command}" == "approve" ]]; then
+    # TODO: write approve function
+    # _approve_call_opts_setup
+    # evm-contract-call \
+    #   "${_approve_call_opts[@]}" \
+    #   "${}"
   else
     _msg=(
       "Unknown command '${_target_command}'."
