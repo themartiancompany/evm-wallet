@@ -26,12 +26,18 @@ _bin="$( \
     "$( \
       command \
         -v \
-	  "env")")"
-_lib="${_bin}/../lib"
-source \
-  "${_lib}/libcrash-bash/crash-bash"
-source \
-  "${_lib}/libevm/libevm"
+        "env")")"
+_lib="$( \
+  realpath \
+    "${_bin}/../lib")"
+_crash_bash="${_lib}/libcrash-bash/crash-bash"
+_libevm="${_lib}/libevm/libevm"
+_sourced \
+  "${_crash_bash}" 2>/dev/null || \
+  source \
+    "${_crash_bash}"
+_sourced \
+  "${_libevm}"
 
 # shellcheck disable=SC2034
 _global_variables() {
@@ -93,67 +99,6 @@ _wallet_key_cmd() {
     _get_lib)/evm-wallet"
   echo \
     "${_lib}/${_key}-${_command}"
-}
-
-_network_setup() {
-  local \
-    _chain="${1}" \
-    _selection="${2}" \
-    _chain_name \
-    _chain_id \
-    _rpc \
-    _msg=()
-  _msg=(
-    "looking for info on EVM blockchain"
-    "'${_chain}'"
-  )
-  _msg_info \
-    "${_msg[*]}"
-  _chain_id="$( \
-    evm-chains-info \
-      -o \
-        "id" \
-      "${_chain}")"
-  if [[ "${_chain_id}" != "" ]]; then
-    _chain_name="$( \
-      evm-chains-info \
-        -o \
-          "name" \
-        "${_chain}" 2>/dev/null || \
-        true)"
-    _msg=(
-      "Found blockchain '${_chain_name}'"
-      "with id '${_chain_id}'"
-      "Selecting RPC address with"
-      "criterion '${_selection}'"
-    )
-    _msg_info \
-      "${_msg[*]}"
-    _rpc="$( \
-      evm-chains-info \
-        -o \
-          "rpc" \
-        -s \
-          "${_selection}" \
-        "${_chain}")"
-  elif [[ "${_chain_id}" == "" ]]; then
-    _msg=(
-      "Found no known blockchain for input"
-      "'${_chain}', interpreting given input"
-      "as an rpc address for the selected"
-      "network."
-    )
-    _msg_info \
-      "${_msg[*]}"
-    _rpc="${_chain}"
-  fi
-  _msg=(
-    "Selected RPC address"
-    "'${_rpc}'"
-  )
-  _msg_info \
-    "${_msg[*]}"
-  _network_backend="${_rpc}"
 }
 
 _key_get() {
@@ -228,7 +173,7 @@ _evm_wallet() {
     -r
       "${_retries_max}"
   )
-  _network_setup \
+  _rpc_backend_get \
     "${_network}" \
     "${_rpc_selection}"
   if [[ "${_target_command}" == "get" ]]; then
