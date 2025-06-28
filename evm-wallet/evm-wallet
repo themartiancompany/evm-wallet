@@ -150,7 +150,7 @@ _key_get() {
     _args+=(
       "${quiet}"
       "${_wallet_seed}"
-      "${_rpc}"
+      "${_rpc_backend}"
       "${_api_key_path}"
     )
   elif [[ "${_key}" == "balance" ]]; then
@@ -178,7 +178,7 @@ _key_get() {
     _args+=(
       "${quiet}"
       "${_wallet_seed}"
-      "${_network_backend}"
+      "${_rpc_backend}"
       "${_api_key_path}"
       "${wallet_address}"
       "${measure_unit}"
@@ -220,7 +220,8 @@ _evm_wallet() {
     _args=() \
     _network_backend \
     _node_run_opts=() \
-    _approve_call_opts=()
+    _approve_call_opts=() \
+    _rpc_backend
   shift \
     15
   _command_args+=(
