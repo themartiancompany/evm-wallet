@@ -359,7 +359,7 @@ _set_overrides() {
     "${explorer_selection}"
   _wallet_overrides_set \
     "evm-wallet" \
-    "default" \
+    "${wallet_name}" \
     "y"
 }
 
