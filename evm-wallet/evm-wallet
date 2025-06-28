@@ -41,21 +41,17 @@ _sourced \
 
 # shellcheck disable=SC2034
 _global_variables() {
-  call_date=''
+  call_date=""
   target_command=""
-  wallet_path=""
-  wallet_password=""
-  wallet_seed=""
-  target_network=""
-  networks_all=""
-  api_key=""
-  rpc_selection=""
-  explorer_selection=""
-  wallet_name=""
   target_key=""
   target_value=""
-  command_args=()
+  currency_type=""
+  currency_address=""
+  networks_all=""
+  rpc_selection=""
+  explorer_selection=""
   retries_max=""
+  command_args=()
   color=""
   quiet=""
 }
@@ -81,13 +77,49 @@ _get_conf_dir_path() {
     "${_dir}"
 }
 
-_balance_send_cmd() {
+_balance_send() {
   local \
-    _lib
+    _currency_type="${1}" \
+    _currency_token="${2}" \
+    _target_address="${3}" \
+    _target_amount="${4}" \
+    _lib \
+    _msg=()
   _lib="$( \
     _get_lib)/evm-wallet"
-  echo \
-    "${_lib}/balance-send"
+  _cmd=""
+  if [[ "${_currency_type}" == "gas" ]]; then
+    _cmd="${_lib}/balance-send"
+    _args+=(
+      "${quiet}"
+      "${_wallet_seed}"
+      "${_target_address}"
+      "${_target_amount}"
+      "${_network_backend}"
+      "${_api_key_path}"
+    )
+  elif [[ "${_currency_type}" == "erc20" ]]; then
+    _cmd="${_lib}/token-send"
+    _args+=(
+      "${quiet}"
+      "${retries_max}"
+      "${call_timeout}"
+      "${wallet_seed}"
+      "${api_key_path}"
+      "${token_bytecode_path}"
+      "${token_compiler_output_path}"
+      "${measure_unit}"
+      "${receipt_file_path}"
+      "${target_address}"
+      "${target_amount}"
+    )
+  fi
+  _msg=(
+    "Running send program"
+    "'${_balance_send_cmd}'"
+    "with options '${_balance_send_opts[*]}'."
+  _msg_info \
+    "${_msg[*]}"
 }
 
 _wallet_key_cmd() {
@@ -129,22 +161,6 @@ _key_get() {
   fi
 }
 
-_balance_send() {
-  local \
-    _target_address="${1}" \
-    _target_amount="${2}"
-  _cmd="$( \
-    _balance_send_cmd)"
-  _args+=(
-    "${quiet}"
-    "${_wallet_seed}"
-    "${_target_address}"
-    "${_target_amount}"
-    "${_network_backend}"
-    "${_api_key_path}"
-  )
-}
-
 _evm_wallet() {
   local \
     _target_command="${1}" \
@@ -156,16 +172,19 @@ _evm_wallet() {
     _rpc_selection="${7}" \
     _api_key_path="${8}" \
     _retries_max="${9}" \
-    _target_key="${10}" \
-    _target_value="${11}" \
+    _currency_type="${10}" \
+    _currency_address="${11}" \
+    _target_key="${12}" \
+    _target_value="${13}" \
     _command_args=() \
     _msg=() \
     _cmd \
     _args=() \
     _network_backend \
-    _node_run_opts=()
+    _node_run_opts=() \
+    _approve_call_opts=()
   shift \
-    11
+    13
   _command_args+=(
     "$@"
   )
@@ -184,12 +203,22 @@ _evm_wallet() {
         0
     fi
   elif [[ "${_target_command}" == "send" ]]; then
+    _target_address="${_target_key}"
+    _target_amount="${_target_value}"
     _balance_send \
-      "${_target_key}" \
-      "${_target_value}"
+      "${_currency_type}" \
+      "${currency_token}" \
+      "${_target_address}" \
+      "${_target_amount}"
+  elif [[ "${_target_command}" == "approve" ]]; then
+    # TODO: write approve function
+    # _approve_call_opts_setup
+    # evm-contract-call \
+    #   "${_approve_call_opts[@]}" \
+    #   "${}"
   else
     _msg=(
-      "unknown command '${_target_command}'."
+      "Unknown command '${_target_command}'."
     )
     _msg_error \
       "${_msg[*]}" \
@@ -199,6 +228,21 @@ _evm_wallet() {
     "${_node_run_opts[@]}" \
     "${_cmd}" \
     "${_args[@]}"
+}
+
+_currency_type_auto_detect() {
+  local \
+    _currency_type
+  _currency_type=""
+  if [[ "${currency_address}" == "" ]]; then
+    currency_type="gas"
+  elif [[ "${currency_address}" == "" ]]; then
+    currency_type="erc20"
+  fi
+  _set_override \
+    "currency" \
+    "type" \
+    "${_currency_type}"
 }
 
 _set_overrides() {
@@ -217,25 +261,26 @@ _set_overrides() {
     "date" \
     "$(_get_date_human)"
   _set_override \
-    "wallet" \
-    "name" \
-    "default"
+    "target" \
+    "command" \
+    "get"
+  _set_override \
+    "target" \
+    "key" \
+    "name"
   _set_override \
     "retries" \
     "max" \
-    300
+    "300"
   _set_override \
     "networks" \
     "all" \
     "n"
   _set_override \
-    "target" \
-    "network" \
-    "Gnosis"
-  _set_override \
-    "target" \
-    "command" \
-    "get"
+    "currency" \
+    "address" \
+    ""
+  _currency_type_auto_detect
   _set_override \
     "rpc" \
     "selection" \
@@ -244,29 +289,17 @@ _set_overrides() {
     "explorer" \
     "selection" \
     "kirsh"
+  _set_override \
+    "target" \
+    "network" \
+    "100"
   _api_key_auto_detect \
     "${target_network}" \
     "${explorer_selection}"
-  _set_override \
-    "wallet" \
-    "path" \
-    "$(_wallet_path_get \
-         "evm-wallet" \
-         "${wallet_name}")"
-  _secret_auto_detect \
-    "seed" \
-    "seed" \
+  _wallet_overrides_set \
     "evm-wallet" \
-    "${wallet_name}"
-  _secret_auto_detect \
-    "password" \
-    "plain" \
-    "evm-wallet" \
-    "${wallet_name}"
-  _set_override \
-    "target" \
-    "key" \
-    "name"
+    "default" \
+    "y"
 }
 
 # Show help usage, with an exit status.
@@ -284,7 +317,7 @@ _usage() {
 EVM network wallet
 
 Usage:
-  $(_get "app" "name")
+  ${app_name}
     [options]
     <command>
       (<command_args>)
@@ -312,6 +345,22 @@ Usage:
     well as direct RPC addresses
 
   options:
+     -R <rpc_selection>       RPC selection method.
+                              Default: ${rpc_selection}
+     -S <explorer_selection>  Network explorer selection method.
+                              Default: ${explorer_selection}
+     -r <retries_max>         Maximum number of retries before
+                              failing.
+                              Default: ${retries_max}
+
+  send options:
+     -t <currency_type>       Currency type.
+                              It can be 'gas', 'erc20'.
+     -C <currency>            Address of the ERC20
+                              token on the network,
+                              if type is 'erc20'.
+
+  credentials options:
      -w <wallet_path>         Wallet path.
                               Default: ${wallet_path}
      -p <wallet_password>     Wallet password.
@@ -323,14 +372,13 @@ Usage:
                               evm-chains-info and RPC addresses.
      -k <api_key>             Etherscan-like service key.
                               Default: ${api_key}
-     -R <rpc_selection>       RPC selection method.
-                              Default: ${rpc_selection}
-     -S <explorer_selection>  Network explorer selection method.
-                              Default: ${explorer_selection}
-     -r <retries_max>         Maximum number of retries before
-                              failing.
-                              Default: ${retries_max}
 
+  libEVM options:
+     -n <network>             EVM network name. Accepted values
+                              are all those supported by
+                              evm-chains-info and RPC addresses.
+
+  application options:
      -h                       This message.
      -c                       Enable color output
      -v                       Enable verbose output
@@ -357,94 +405,98 @@ _display_flags() {
 
 # Shows configuration options.
 _show_config() {
-  local \
-    _seed \
-    _seed_show
-  _seed="$( \
-    _get \
-      "wallet" \
-      "seed")"
-  if [[ "${_seed}" != "" ]]; then
-    _seed_show="*******"
-  fi
   _msg_info "${app_name} configuration"
   _msg_info "                  Call date:   ${call_date}"
-  _msg_info "                Wallet path:   ${wallet_path}"
-  _msg_info "            Wallet password:   ${wallet_password}"
-  _msg_info "                Wallet seed:   ${wallet_seed}"
-  _msg_info "             Target network:   ${target_network}"
-  _msg_info "               All networks:   ${networks_all}"
-  _msg_info "       RPC selection method:   ${rpc_selection}"
-  _msg_info "  Explorer selection method:   ${explorer_selection}"
-  _msg_info "                    API key:   ${api_key}"
-  _msg_info "            Maximum retries:   ${retries_max}"
   _msg_info "             Target command:   ${target_command}"
   _msg_info "                 Target key:   ${target_key}"
   _msg_info "               Target value:   ${target_value}"
+  _msg_info "               All networks:   ${networks_all}"
+  _msg_info "       RPC selection method:   ${rpc_selection}"
+  _msg_info "  Explorer selection method:   ${explorer_selection}"
+  _msg_info "             Send options:"
+  _msg_info "              Currency type:   ${currency_type}"
+  _msg_info "           Currency address:   ${currency_address}"
+  _msg_info "      Credentials options:"
+  _msg_info "                Wallet path:   ${wallet_path}"
+  _msg_info "            Wallet password:   ${wallet_password}"
+  _msg_info "                Wallet seed:   ${wallet_seed}"
+  _msg_info "                    API key:   ${api_key}"
+  _msg_info "           LibEVM options:"
+  _msg_info "             Target network:   ${target_network}"
+  _msg_info "            Maximum retries:   ${retries_max}"
 }
 
 _globals
 _global_variables
 _requirements
+_libevm_global_variables
 _config_user_init \
   "${app_name}"
 # shellcheck disable=SC2034
+getopts_opts="$( \
+  printf \
+    "%s" \
+    "S:E:a:r:" \
+    "t:C:" \
+    "$(_libevm_app_getopts_params_get)" \
+    "n:" \
+    "$(_wallet_getopts_params_get)" \
+    "W:cvh")"
 while \
   getopts \
-    'w:p:s:n:a:S:E:k:r:cvh?' \
+    "${getopts_opts}" \
     arg; do
+  _wallet_getopts_case
+  _libevm_app_getopts_case
   case \
     "${arg}" in
-    w) override_wallet_path="${OPTARG}" ;;
-    p) override_wallet_password="${OPTARG}" ;;
-    s) override_wallet_seed="${OPTARG}" ;;
-    n) override_target_network="${OPTARG}" ;;
-    a) override_networks_all="${OPTARG}" ;;
-    S) override_rpc_selection="${OPTARG}" ;;
-    E) override_explorer_selection="${OPTARG}" ;;
-    k) override_api_key="${OPTARG}" ;;
-    r) override_retries_max="${OPTARG}" ;;
-    c) override_color="y" ;;
-    v) override_quiet="n" ;;
-    h|?) _set_overrides && \
+    S) \
+      override_rpc_selection="${OPTARG}" ;;
+    E) \
+      override_explorer_selection="${OPTARG}" ;;
+    a) \
+      override_networks_all="${OPTARG}" ;;
+    r) \
+      override_retries_max="${OPTARG}" ;;
+    t) \
+      override_currency_type="${OPTARG}" ;;
+    C) \
+      override_currency_address="${OPTARG}" ;;
+    n) \
+      override_target_network="${OPTARG}" ;;
+    c) \
+      override_color="y" ;;
+    v) \
+      override_quiet="n" ;;
+    h) \
+      _set_overrides && \
          _usage \
            0 ;;
-    *)
-    _msg_error \
-      "Invalid argument '${arg}'" \
-      0
-    _usage \
-      1
-    ;;
+    *) \
+      if [[ " ${getopts_opts} " != *"${arg}"* ]]; then
+        _msg_error \
+          "Invalid argument '${arg}'." \
+          0
+        _usage \
+          1
+      fi ;;
   esac
 done
 shift \
   $(( \
     OPTIND - 1 \
   ))
-if (( 0 < $# )); then
-  _set \
-    "target" \
-    "command" \
-    "${1}"
+if (( 0 < "$#" )); then
+  target_command="${1}"
 fi
-if (( 1 < $# )); then
-  _set \
-    "wallet" \
-    "name" \
-    "${2}"
+if (( 1 < "$#" )); then
+  wallet_name="${2}"
 fi
-if (( 2 < $# )); then
-  _set \
-    "target" \
-    "key" \
-    "${3}"
+if (( 2 < "$#" )); then
+  target_key="${3}"
 fi
 if (( 3 < $# )); then
-  _set \
-    "target" \
-    "value" \
-    "${4}"
+  target_value="${4}"
 fi
 shift \
   4 || \
@@ -464,6 +516,8 @@ app_opts=(
   "${rpc_selection}"
   "${api_key}"
   "${retries_max}"
+  "${currency_type}"
+  "${currency_address}"
   "${target_key}"
   "${target_value}"
 )

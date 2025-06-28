@@ -55,7 +55,8 @@ _CHECK_TARGETS_ALL=\
   $(_CHECK_TARGETS)
 _INSTALL_SCRIPTS_TARGETS=\
   install-bash-scripts \
-  install-node-scripts
+  install-node-scripts \
+  install-configs
 INSTALL_DOC_TARGETS=\
   install-doc \
   install-man
@@ -96,8 +97,16 @@ install-node-scripts:
 	for _file in $(_NODE_FILES); do \
 	  $(_INSTALL_EXE) \
 	    "$(_PROJECT)/$${_file}" \
-	    "$(LIB_DIR)/$(_PROJECT)/$${_file}"; \
+	    "$(LIB_DIR)/$${_file}"; \
 	done
+
+install-configs:
+
+	$(_INSTALL_DIR) \
+	  "$(LIB_DIR)/configs"
+	$(_INSTALL_FILE) \
+	  "configs/IERC20."* \
+	  "$(LIB_DIR)/configs"
 
 install-doc:
 
