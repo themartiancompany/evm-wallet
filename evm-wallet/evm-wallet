@@ -119,7 +119,7 @@ _balance_send() {
   _msg=(
     "Running send program"
     "'${_cmd}'"
-    "with options '${_cmd_opts[*]}'."
+    "with arguments '${_args[*]}'."
   )
   _msg_info \
     "${_msg[*]}"
