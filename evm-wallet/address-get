@@ -71,6 +71,10 @@ function
     "";
   api_key_path =
     "";
+  chain_id =
+    "";
+  chain_name =
+    "";
   quiet =
     "";
 }
@@ -80,10 +84,13 @@ async function
   _address_get(
     _wallet_seed,
     _target_network,
-    _api_key_path) {
+    _api_key_path,
+    _chain_id,
+    _chain_name) {
   let
     _address,
     _api_key,
+    _provider_get_opts,
     _wallet_dir,
     _wallet_password,
     _wallet_path_list;
@@ -106,10 +113,16 @@ async function
       _file_read(
         _api_key_path);
   }
+  _provider_get_opts = [
+    _target_network,
+    _api_key,
+    _chain_id,
+    _chain_name
+  ];
   _provider =
-    _provider_get(
-      _target_network,
-      _api_key);
+    _provider_get.apply(
+      null,
+      _provider_get_opts);
   _msg_info_provider_generated(
     _provider);
   _wallet_get_opts = [
@@ -203,8 +216,11 @@ function _cmdline_parse() {
 }
 
 function _overrides_set() {
-  if ( target_network == "" ) {
-    target_network = "https://127.0.0.1";
+  // if ( target_network == "" ) {
+  //   target_network = "https://127.0.0.1";
+  // }
+  if ( chain_id == "" ) {
+    chain_id = "100";
   }
 }
 
@@ -217,7 +233,9 @@ if ( _cmdline_check(
   app_opts = [
     wallet_seed,
     target_network,
-    api_key_path
+    api_key_path,
+    chain_id,
+    chain_name
   ];
   _address_get.apply(
     null,
