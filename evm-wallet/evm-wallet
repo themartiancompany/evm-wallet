@@ -26,7 +26,7 @@ _bin="$( \
     "$( \
       command \
         -v \
-	  "env")")"
+        "env")")"
 _lib="$( \
   realpath \
     "${_bin}/../lib")"
@@ -46,7 +46,6 @@ _global_variables() {
   target_command=""
   target_key=""
   target_value=""
-  target_network=""
   currency_type=""
   currency_address=""
   networks_all=""
