@@ -97,7 +97,7 @@ _balance_send() {
       "${_wallet_seed}"
       "${_target_address}"
       "${_target_amount}"
-      "${_network_backend}"
+      "${_rpc_backend}"
       "${_api_key_path}"
     )
   elif [[ "${_currency_type}" == "erc20" ]]; then
