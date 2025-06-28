@@ -98,7 +98,6 @@ async function
     _balance,
     _balance_eth,
     _balance_wei,
-    _balance_number,
     _provider_get_opts,
     _wallet_dir,
     _wallet_password,
@@ -164,14 +163,9 @@ async function
       _balance_ether;
   }
   if ( _output_file != "" ) {
-    _balance_number =
-      Number(
-        _balance);
-    if ( _balance_number > 0 ) {
       _file_write(
         _output_file,
-        _balance_number);
-    }
+        _balance.toString());
   }
   return _balance;
 }
