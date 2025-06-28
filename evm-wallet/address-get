@@ -202,10 +202,17 @@ function _cmdline_parse() {
   }
 }
 
-_global_variables();
+function _overrides_set() {
+  if ( target_network == "" ) {
+    target_network = "https://127.0.0.1";
+  }
+}
 
-if ( require.main == module ) {
+if ( _cmdline_check(
+       "address-get") ) {
+  _global_variables();
   _cmdline_parse();
+  _overrides_set();
   _config_show();
   app_opts = [
     wallet_seed,
