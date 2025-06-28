@@ -163,9 +163,14 @@ async function
       _balance_ether;
   }
   if ( _output_file != "" ) {
-    _file_write(
-      _output_file,
-      _balance);
+    _balance =
+      Number(
+        _balance);
+    if ( _balance > 0 ) {
+      _file_write(
+        _output_file,
+        _balance);
+    }
   }
   return _balance;
 }
