@@ -42,6 +42,7 @@ _sourced \
 # shellcheck disable=SC2034
 _global_variables() {
   call_date=""
+  cache_dir=""
   target_command=""
   target_key=""
   target_value=""
@@ -201,8 +202,6 @@ _key_get() {
   local \
     _key="${1}" \
     _output_file \
-    _cache_dir
-  _cache_dir="${HOME}/.config/${app_name}"
   if [[ "${_key}" == "address" ]]; then
     _cmd="$( \
       "_wallet_key_cmd" \
@@ -255,15 +254,16 @@ _evm_wallet() {
     _wallet_password="${3}" \
     _wallet_seed="${4}" \
     _target_network="${5}" \
-    _networks_all="${6}" \
-    _rpc_selection="${7}" \
-    _api_key_path="${8}" \
-    _retries_max="${9}" \
-    _measure_unit="${10}" \
-    _currency_type="${11}" \
-    _currency_address="${12}" \
-    _target_key="${13}" \
-    _target_value="${14}" \
+    _cache_dir="${6}" \
+    _networks_all="${7}" \
+    _rpc_selection="${8}" \
+    _api_key_path="${9}" \
+    _retries_max="${10}" \
+    _measure_unit="${11}" \
+    _currency_type="${12}" \
+    _currency_address="${13}" \
+    _target_key="${14}" \
+    _target_value="${15}" \
     _command_args=() \
     _msg=() \
     _cmd \
@@ -272,7 +272,7 @@ _evm_wallet() {
     _node_run_opts=() \
     _approve_call_opts=()
   shift \
-    14
+    15
   _command_args+=(
     "$@"
   )
@@ -338,6 +338,21 @@ _currency_type_auto_detect() {
     "${_currency_type}"
 }
 
+_cache_dir_auto_detect() {
+  local \
+    _dir
+  _dir="${HOME}/.cache/${app_name}"
+  if [[ ! -v "override_cache_dir" ]]; then
+    mkdir \
+      -p \
+      "${_dir}"
+  fi
+  _set_override \
+    "cache" \
+    "dir" \
+    "${_dir}"
+}
+
 _set_overrides() {
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
@@ -353,6 +368,7 @@ _set_overrides() {
     "call" \
     "date" \
     "$(_get_date_human)"
+  _cache_dir_auto_detect
   _set_override \
     "target" \
     "command" \
@@ -525,6 +541,8 @@ _show_config() {
   _msg_info "           LibEVM options:"
   _msg_info "             Target network:   ${target_network}"
   _msg_info "            Maximum retries:   ${retries_max}"
+  _msg_info "      Application options:"
+  _msg_info "            Cache directory:   ${cache_dir}"
 }
 
 _globals
@@ -567,6 +585,8 @@ while \
       override_currency_address="${OPTARG}" ;;
     n) \
       override_target_network="${OPTARG}" ;;
+    W) \
+      override_cache_dir="${OPTARG}" ;;
     c) \
       override_color="y" ;;
     v) \
@@ -615,6 +635,7 @@ app_opts=(
   "${wallet_password}"
   "${wallet_seed}"
   "${target_network}"
+  "${cache_dir}"
   "${networks_all}"
   "${rpc_selection}"
   "${api_key}"
