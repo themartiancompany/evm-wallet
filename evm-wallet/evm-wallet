@@ -259,10 +259,11 @@ _evm_wallet() {
     _rpc_selection="${7}" \
     _api_key_path="${8}" \
     _retries_max="${9}" \
-    _currency_type="${10}" \
-    _currency_address="${11}" \
-    _target_key="${12}" \
-    _target_value="${13}" \
+    _measure_unit="${10}" \
+    _currency_type="${11}" \
+    _currency_address="${12}" \
+    _target_key="${13}" \
+    _target_value="${14}" \
     _command_args=() \
     _msg=() \
     _cmd \
@@ -271,7 +272,7 @@ _evm_wallet() {
     _node_run_opts=() \
     _approve_call_opts=()
   shift \
-    13
+    14
   _command_args+=(
     "$@"
   )
@@ -618,6 +619,7 @@ app_opts=(
   "${rpc_selection}"
   "${api_key}"
   "${retries_max}"
+  "${measure_unit}"
   "${currency_type}"
   "${currency_address}"
   "${target_key}"
