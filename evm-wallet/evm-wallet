@@ -231,6 +231,7 @@ _key_get() {
       "${_network_backend}"
       "${_api_key_path}"
       "${wallet_address}"
+      "${measure_unit}"
       "${_output_file}"
     )
   elif [[ "${_key}" == "seed" ]]; then
