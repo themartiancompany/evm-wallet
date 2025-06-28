@@ -118,8 +118,8 @@ _balance_send() {
   fi
   _msg=(
     "Running send program"
-    "'${_balance_send_cmd}'"
-    "with options '${_balance_send_opts[*]}'."
+    "'${_cmd}'"
+    "with options '${_cmd_opts[*]}'."
   )
   _msg_info \
     "${_msg[*]}"
