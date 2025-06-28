@@ -197,9 +197,15 @@ _network_setup() {
 
 _key_get() {
   local \
-    _key="${1}"
+    _key="${1}" \
+    _output_file \
+    _cache_dir
+  _cache_dir="${HOME}/.config/${app_name}"
   if [[ "${_key}" == "address" ]] || \
      [[ "${_key}" == "balance" ]]; then
+    if [[ "${_key}" == "balance" ]]; then
+      _output_file="${_cache_dir}/${wallet_name}/${_target_network}"
+    fi
     _cmd="$( \
       "_wallet_key_cmd" \
         "${_key}" \
@@ -209,6 +215,7 @@ _key_get() {
       "${_wallet_seed}"
       "${_network_backend}"
       "${_api_key_path}"
+      "${_output_file}"
     )
   elif [[ "${_key}" == "seed" ]]; then
     cat \
@@ -229,7 +236,7 @@ _evm_wallet() {
     _wallet_path="${2}" \
     _wallet_password="${3}" \
     _wallet_seed="${4}" \
-    _network="${5}" \
+    _target_network="${5}" \
     _networks_all="${6}" \
     _rpc_selection="${7}" \
     _api_key_path="${8}" \
@@ -255,7 +262,7 @@ _evm_wallet() {
       "${_retries_max}"
   )
   _network_setup \
-    "${_network}" \
+    "${_target_network}" \
     "${_rpc_selection}"
   if [[ "${_target_command}" == "get" ]]; then
     "_key_${_target_command}" \
