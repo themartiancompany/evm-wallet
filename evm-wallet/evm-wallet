@@ -42,6 +42,7 @@ _sourced \
 # shellcheck disable=SC2034
 _global_variables() {
   call_date=""
+  cache_dir=""
   target_command=""
   target_key=""
   target_value=""
@@ -51,6 +52,7 @@ _global_variables() {
   rpc_selection=""
   explorer_selection=""
   retries_max=""
+  measure_unit=""
   command_args=()
   color=""
   quiet=""
@@ -118,6 +120,7 @@ _balance_send() {
     "Running send program"
     "'${_balance_send_cmd}'"
     "with options '${_balance_send_opts[*]}'."
+  )
   _msg_info \
     "${_msg[*]}"
 }
@@ -135,9 +138,10 @@ _wallet_key_cmd() {
 
 _key_get() {
   local \
-    _key="${1}"
-  if [[ "${_key}" == "address" ]] || \
-     [[ "${_key}" == "balance" ]]; then
+    _key="${1}" \
+    _output_file \
+    _output_dir
+  if [[ "${_key}" == "address" ]]; then
     _cmd="$( \
       "_wallet_key_cmd" \
         "${_key}" \
@@ -145,8 +149,39 @@ _key_get() {
     _args+=(
       "${quiet}"
       "${_wallet_seed}"
-      "${_network_backend}"
+      "${_rpc_backend}"
       "${_api_key_path}"
+    )
+  elif [[ "${_key}" == "balance" ]]; then
+    _output_file="${_cache_dir}/${wallet_name}/${_target_network}"
+    _output_dir="$( \
+      dirname \
+        "${_output_file}")"
+    if [[ ! -d "${_cache_dir}" ]]; then
+      _msg=(
+        "Cache"
+        "directory '${_cache_dir}'"
+        "does not exist."
+      )
+      _msg_error \
+        "${_msg[*]}" \
+        1
+    fi
+    mkdir \
+      -p \
+      "${_output_dir}"
+    _cmd="$( \
+      "_wallet_key_cmd" \
+        "${_key}" \
+        "get")"
+    _args+=(
+      "${quiet}"
+      "${_wallet_seed}"
+      "${_rpc_backend}"
+      "${_api_key_path}"
+      "${wallet_address}"
+      "${measure_unit}"
+      "${_output_file}"
     )
   elif [[ "${_key}" == "seed" ]]; then
     cat \
@@ -167,24 +202,27 @@ _evm_wallet() {
     _wallet_path="${2}" \
     _wallet_password="${3}" \
     _wallet_seed="${4}" \
-    _network="${5}" \
-    _networks_all="${6}" \
-    _rpc_selection="${7}" \
-    _api_key_path="${8}" \
-    _retries_max="${9}" \
-    _currency_type="${10}" \
-    _currency_address="${11}" \
-    _target_key="${12}" \
-    _target_value="${13}" \
+    _target_network="${5}" \
+    _cache_dir="${6}" \
+    _networks_all="${7}" \
+    _rpc_selection="${8}" \
+    _api_key_path="${9}" \
+    _retries_max="${10}" \
+    _measure_unit="${11}" \
+    _currency_type="${12}" \
+    _currency_address="${13}" \
+    _target_key="${14}" \
+    _target_value="${15}" \
     _command_args=() \
     _msg=() \
     _cmd \
     _args=() \
     _network_backend \
     _node_run_opts=() \
-    _approve_call_opts=()
+    _approve_call_opts=() \
+    _rpc_backend
   shift \
-    13
+    15
   _command_args+=(
     "$@"
   )
@@ -193,7 +231,7 @@ _evm_wallet() {
       "${_retries_max}"
   )
   _rpc_backend_get \
-    "${_network}" \
+    "${_target_network}" \
     "${_rpc_selection}"
   if [[ "${_target_command}" == "get" ]]; then
     "_key_${_target_command}" \
@@ -211,6 +249,8 @@ _evm_wallet() {
       "${_target_address}" \
       "${_target_amount}"
   elif [[ "${_target_command}" == "approve" ]]; then
+    echo \
+      "WIP"
     # TODO: write approve function
     # _approve_call_opts_setup
     # evm-contract-call \
@@ -245,6 +285,21 @@ _currency_type_auto_detect() {
     "${_currency_type}"
 }
 
+_cache_dir_auto_detect() {
+  local \
+    _dir
+  _dir="${HOME}/.cache/${app_name}"
+  if [[ ! -v "override_cache_dir" ]]; then
+    mkdir \
+      -p \
+      "${_dir}"
+  fi
+  _set_override \
+    "cache" \
+    "dir" \
+    "${_dir}"
+}
+
 _set_overrides() {
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
@@ -260,6 +315,7 @@ _set_overrides() {
     "call" \
     "date" \
     "$(_get_date_human)"
+  _cache_dir_auto_detect
   _set_override \
     "target" \
     "command" \
@@ -272,6 +328,10 @@ _set_overrides() {
     "retries" \
     "max" \
     "300"
+  _set_override \
+    "measure" \
+    "unit" \
+    "ether"
   _set_override \
     "networks" \
     "all" \
@@ -298,7 +358,7 @@ _set_overrides() {
     "${explorer_selection}"
   _wallet_overrides_set \
     "evm-wallet" \
-    "default" \
+    "${wallet_name}" \
     "y"
 }
 
@@ -352,6 +412,9 @@ Usage:
      -r <retries_max>         Maximum number of retries before
                               failing.
                               Default: ${retries_max}
+     -u <measure_unit>        Measure unit. It can be
+                              'ether' or 'wei'.
+                              Default: ${measure_unit}
 
   send options:
      -t <currency_type>       Currency type.
@@ -408,11 +471,13 @@ _show_config() {
   _msg_info "${app_name} configuration"
   _msg_info "                  Call date:   ${call_date}"
   _msg_info "             Target command:   ${target_command}"
+  _msg_info "                Wallet name:   ${wallet_name}"
   _msg_info "                 Target key:   ${target_key}"
   _msg_info "               Target value:   ${target_value}"
   _msg_info "               All networks:   ${networks_all}"
   _msg_info "       RPC selection method:   ${rpc_selection}"
   _msg_info "  Explorer selection method:   ${explorer_selection}"
+  _msg_info "               Measure unit:   ${measure_unit}"
   _msg_info "             Send options:"
   _msg_info "              Currency type:   ${currency_type}"
   _msg_info "           Currency address:   ${currency_address}"
@@ -424,6 +489,8 @@ _show_config() {
   _msg_info "           LibEVM options:"
   _msg_info "             Target network:   ${target_network}"
   _msg_info "            Maximum retries:   ${retries_max}"
+  _msg_info "      Application options:"
+  _msg_info "            Cache directory:   ${cache_dir}"
 }
 
 _globals
@@ -436,7 +503,7 @@ _config_user_init \
 getopts_opts="$( \
   printf \
     "%s" \
-    "S:E:a:r:" \
+    "S:E:a:r:u:" \
     "t:C:" \
     "$(_libevm_app_getopts_params_get)" \
     "n:" \
@@ -458,12 +525,16 @@ while \
       override_networks_all="${OPTARG}" ;;
     r) \
       override_retries_max="${OPTARG}" ;;
+    u) \
+      override_measure_unit="${OPTARG}" ;;
     t) \
       override_currency_type="${OPTARG}" ;;
     C) \
       override_currency_address="${OPTARG}" ;;
     n) \
       override_target_network="${OPTARG}" ;;
+    W) \
+      override_cache_dir="${OPTARG}" ;;
     c) \
       override_color="y" ;;
     v) \
@@ -512,10 +583,12 @@ app_opts=(
   "${wallet_password}"
   "${wallet_seed}"
   "${target_network}"
+  "${cache_dir}"
   "${networks_all}"
   "${rpc_selection}"
   "${api_key}"
   "${retries_max}"
+  "${measure_unit}"
   "${currency_type}"
   "${currency_address}"
   "${target_key}"

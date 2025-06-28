@@ -91,6 +91,8 @@ Options
 -S explorer_selection   Network explorer selection method.
 -r retries_max          Maximum number of retries before
                         failing.
+-u measure_unit         Measure unit for the transaction
+                        value. It can be 'ether' or 'wei'.
 
 -h                      This message.
 -c                      Enable color output
