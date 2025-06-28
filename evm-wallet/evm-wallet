@@ -229,8 +229,8 @@ _key_get() {
       "${quiet}"
       "${_wallet_seed}"
       "${_network_backend}"
-      "${wallet_address}"
       "${_api_key_path}"
+      "${wallet_address}"
       "${_output_file}"
     )
   elif [[ "${_key}" == "seed" ]]; then
