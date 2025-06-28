@@ -117,6 +117,10 @@ async function
   _provider_get_opts= [
     _target_network,
   ];
+  if ( _output_file == undefined ) {
+    _output_file =
+      "";
+  }
   if ( _api_key_path != "" ) {
     _api_key =
       _file_read(
