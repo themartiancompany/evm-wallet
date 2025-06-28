@@ -154,6 +154,11 @@ _key_get() {
       "${_api_key_path}"
     )
   elif [[ "${_key}" == "balance" ]]; then
+    # if [[ "${_networks_all}" == "n" ]]; then
+    #   _target_networks=(
+    #     "${_target_network}"
+    #   )
+    # fi
     _output_file="${_cache_dir}/${wallet_name}/${_target_network}"
     _output_dir="$( \
       dirname \
@@ -215,6 +220,7 @@ _evm_wallet() {
     _target_key="${14}" \
     _target_value="${15}" \
     _command_args=() \
+    _target_networks=() \
     _msg=() \
     _cmd \
     _args=() \
