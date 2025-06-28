@@ -472,6 +472,7 @@ _show_config() {
   _msg_info "${app_name} configuration"
   _msg_info "                  Call date:   ${call_date}"
   _msg_info "             Target command:   ${target_command}"
+  _msg_info "                Wallet name:   ${wallet_name}"
   _msg_info "                 Target key:   ${target_key}"
   _msg_info "               Target value:   ${target_value}"
   _msg_info "               All networks:   ${networks_all}"
