@@ -144,8 +144,8 @@ _network_setup() {
     _rpc \
     _msg=()
   _msg=(
-    "looking for info on EVM blockchain"
-    "'${_chain}'"
+    "Looking for info on EVM blockchain"
+    "'${_chain}'."
   )
   _msg_info \
     "${_msg[*]}"
@@ -276,6 +276,9 @@ _evm_wallet() {
     -r
       "${_retries_max}"
   )
+  # _rpc_backend_get \
+  #   "${_target_network}" \
+  #   "${_rpc_selection}"
   _network_setup \
     "${_target_network}" \
     "${_rpc_selection}"
@@ -379,13 +382,16 @@ _set_overrides() {
     "target" \
     "network" \
     "100"
+  echo "hi"
   _api_key_auto_detect \
     "${target_network}" \
     "${explorer_selection}"
+  echo "hi2"
   _wallet_overrides_set \
     "evm-wallet" \
     "default" \
     "y"
+  echo "hi3"
 }
 
 # Show help usage, with an exit status.
