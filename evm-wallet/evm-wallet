@@ -219,16 +219,19 @@ _key_get() {
     _output_dir="$( \
       dirname \
         "${_output_file}")"
-    if [[ ! -d "${_output_dir}" ]]; then
+    if [[ ! -d "${_cache_dir}" ]]; then
       _msg=(
-        "Output file"
-        "directory '${_output_dir}'"
+        "Cache"
+        "directory '${_cache_dir}'"
         "does not exist."
       )
       _msg_error \
         "${_msg[*]}" \
         1
     fi
+    mkdir \
+      -p \
+      "${_output_dir}"
     _cmd="$( \
       "_wallet_key_cmd" \
         "${_key}" \
