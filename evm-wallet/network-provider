@@ -119,10 +119,12 @@ function
     _default_network =
       _target_network;
   }
-  if ( _default_network != "" ) {
-    _get_default_provider_opts.push(
-      _default_network);
+  if ( _default_network == "" ) {
+    _default_network =
+      "mainnet";
   }
+  _get_default_provider_opts.push(
+    _default_network);
   if ( _chain_name == "" &&
        _chain_name == undefined &&
        _chain_name == null ) {
