@@ -282,7 +282,7 @@ _currency_type_auto_detect() {
   _currency_type=""
   if [[ "${currency_address}" == "" ]]; then
     currency_type="gas"
-  elif [[ "${currency_address}" == "" ]]; then
+  elif [[ "${currency_address}" != "" ]]; then
     currency_type="erc20"
   fi
   _set_override \
