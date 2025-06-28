@@ -295,6 +295,8 @@ _evm_wallet() {
       "${_target_address}" \
       "${_target_amount}"
   elif [[ "${_target_command}" == "approve" ]]; then
+    echo \
+      "WIP"
     # TODO: write approve function
     # _approve_call_opts_setup
     # evm-contract-call \
