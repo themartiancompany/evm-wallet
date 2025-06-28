@@ -201,11 +201,25 @@ _key_get() {
     _output_file \
     _cache_dir
   _cache_dir="${HOME}/.config/${app_name}"
-  if [[ "${_key}" == "address" ]] || \
-     [[ "${_key}" == "balance" ]]; then
-    if [[ "${_key}" == "balance" ]]; then
-      _output_file="${_cache_dir}/${wallet_name}/${_target_network}"
-    fi
+  if [[ "${_key}" == "address" ]]; then
+    _cmd="$( \
+      "_wallet_key_cmd" \
+        "${_key}" \
+        "get")"
+    _args+=(
+      "${quiet}"
+      "${_wallet_seed}"
+      "${_network_backend}"
+      "${_api_key_path}"
+    )
+  elif [[ "${_key}" == "balance" ]]; then
+    _output_file="${_cache_dir}/${wallet_name}/${_target_network}"
+    _output_dir="$( \
+      dirname \
+        "${_output_file}")"
+    mkdir \
+      -p \
+      "${_output_dir}"
     _cmd="$( \
       "_wallet_key_cmd" \
         "${_key}" \
