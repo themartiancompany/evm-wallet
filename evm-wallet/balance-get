@@ -197,7 +197,10 @@ function
       target_address),
     "     Display unit: {display_unit}".replace(
       "{display_unit}",
-      display_unit)
+      display_unit),
+    "     Output file: {output_file}".replace(
+      "{output_file}",
+      output_file)
   ]
   for ( _line of _text ) {
     _msg_info(

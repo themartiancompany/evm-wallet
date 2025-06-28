@@ -52,6 +52,7 @@ _global_variables() {
   rpc_selection=""
   explorer_selection=""
   retries_max=""
+  measure_unit=""
   command_args=()
   color=""
   quiet=""
@@ -364,6 +365,10 @@ _set_overrides() {
     "max" \
     "300"
   _set_override \
+    "measure" \
+    "unit" \
+    "ether"
+  _set_override \
     "networks" \
     "all" \
     "n"
@@ -443,6 +448,9 @@ Usage:
      -r <retries_max>         Maximum number of retries before
                               failing.
                               Default: ${retries_max}
+     -u <measure_unit>        Measure unit. It can be
+                              'ether' or 'wei'.
+                              Default: ${measure_unit}
 
   send options:
      -t <currency_type>       Currency type.
@@ -504,6 +512,7 @@ _show_config() {
   _msg_info "               All networks:   ${networks_all}"
   _msg_info "       RPC selection method:   ${rpc_selection}"
   _msg_info "  Explorer selection method:   ${explorer_selection}"
+  _msg_info "               Measure unit:   ${measure_unit}"
   _msg_info "             Send options:"
   _msg_info "              Currency type:   ${currency_type}"
   _msg_info "           Currency address:   ${currency_address}"
@@ -527,7 +536,7 @@ _config_user_init \
 getopts_opts="$( \
   printf \
     "%s" \
-    "S:E:a:r:" \
+    "S:E:a:r:u:" \
     "t:C:" \
     "$(_libevm_app_getopts_params_get)" \
     "n:" \
@@ -549,6 +558,8 @@ while \
       override_networks_all="${OPTARG}" ;;
     r) \
       override_retries_max="${OPTARG}" ;;
+    u) \
+      override_measure_unit="${OPTARG}" ;;
     t) \
       override_currency_type="${OPTARG}" ;;
     C) \
