@@ -252,6 +252,7 @@ _address_get_cmd_get() {
       "${_wallet_seed}"
       "${_rpc_backend}"
       "${_api_key_path}"
+      "${_address_file}"
     )
   fi
 }
