@@ -86,7 +86,8 @@ _balance_age_get() {
   local \
     _balance_file="${1}" \
     _now \
-    _balance_modified
+    _balance_modified \
+    _msg=()
   _balance_age=""
   if [[ ! -d "${_balance_file}" ]]; then
     _msg=(
@@ -202,6 +203,11 @@ _balance_get_cmd_get() {
   if [[ "${_balance_age}" != "" ]]; then
     if (( "${_balance_age}" < 3600 )); then
       _balance_update="false"
+      _msg=(
+        "Skipping balance update."
+      )
+      _msg_info \
+        "${_msg[*]}"
     fi
   fi
   if [[ "${_balance_update}" == "true" ]]; then
