@@ -35,6 +35,8 @@ _dirname =
   _libcrash._dirname;
 _file_read =
   _libcrash._file_read;
+_file_write =
+  _libcrash._file_write;
 _path_join =
   _libcrash._path_join;
 _msg_info =
@@ -75,6 +77,8 @@ function
     "";
   chain_name =
     "";
+  output_file =
+    "";
   quiet =
     "";
 }
@@ -86,7 +90,8 @@ async function
     _target_network,
     _api_key_path,
     _chain_id,
-    _chain_name) {
+    _chain_name,
+    _output_file) {
   let
     _address,
     _api_key,
@@ -137,8 +142,12 @@ async function
       _wallet_get_opts);
   _address =
     _wallet.address;
-  console.log(
-    _address);
+  if ( _output_file != undefined ||
+       _output_file != "" ) {
+    _file_write(
+      _output_file,
+      _address);
+  }
   return _address;
 }
 
@@ -199,15 +208,19 @@ function _cmdline_parse() {
       }
       if ( _index == 3 ) {
         wallet_seed =
-	  _value;
+          _value;
       }
       if ( _index == 4 ) {
         target_network =
-	  _value;
+          _value;
       }
       if ( _index == 5 ) {
         api_key_path =
-	  _value;
+          _value;
+      }
+      if ( _index == 6 ) {
+        output_file =
+          _value;
       }
   });
   if ( wallet_seed == "" ) {
@@ -215,13 +228,27 @@ function _cmdline_parse() {
   }
 }
 
-function _overrides_set() {
+function
+  _overrides_set() {
   // if ( target_network == "" ) {
   //   target_network = "https://127.0.0.1";
   // }
   if ( chain_id == "" ) {
     chain_id = "100";
   }
+}
+
+function 
+  _address_get_cmdline(
+    _app_opts) {
+  let
+    _address;
+  _address =
+    address_get.apply(
+      null,
+      _app_opts);
+  console.log(
+    _address);
 }
 
 if ( _cmdline_check(
@@ -235,10 +262,10 @@ if ( _cmdline_check(
     target_network,
     api_key_path,
     chain_id,
-    chain_name
+    chain_name,
+    output_file
   ];
-  _address_get.apply(
-    null,
+  _address_get_cmdline(
     app_opts);
 }
 

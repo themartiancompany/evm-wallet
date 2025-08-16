@@ -202,7 +202,7 @@ _balance_get_cmd_get() {
   _balance_age_get \
     "${_balance_file}"
   if [[ "${_balance_age}" != "" ]]; then
-    if (( "${_balance_age}" < 3600 )); then
+    if (( "${_balance_age}" < "${_balance_lifespan}" )); then
       _balance_update="false"
       _msg=(
         "Skipping balance update."
@@ -230,6 +230,29 @@ _balance_get_cmd_get() {
       "${_balance_file}"
     exit \
       0
+  fi
+}
+
+_address_get_cmd_get() {
+  local \
+    _address_file
+  _address_file="${_wallet_seed%-seed.txt}-address.txt"
+  if [[ -e "${_address_file}" ]]; then
+    cat \
+      "${_address_file}"
+    exit \
+      0
+  elif [[ ! -e "${_address_file}" ]]; then
+    _cmd="$( \
+      "_wallet_key_cmd" \
+        "${_key}" \
+        "get")"
+    _args+=(
+      "${quiet}"
+      "${_wallet_seed}"
+      "${_rpc_backend}"
+      "${_api_key_path}"
+    )
   fi
 }
 
@@ -269,6 +292,67 @@ _key_get() {
     return \
       0
   fi
+}
+
+_wallets_files_get() {
+  local \
+    _dir="${1}" \
+    _find_opts=()
+  _find_opts+=(
+    -wholename
+      "*-*.txt"
+    -type \
+      "f" \
+    -print0
+  )
+  mapfile \
+    -d \
+    $'\0' \
+    _wallets_files < \
+    <(find \
+        "${_dir}" \
+        "${_find_opts[@]}" || \
+      true)
+}
+
+_contacts_list() {
+  local \
+    _msg=() \
+    _wallets_files=() \
+    _wallet \
+    _wallet_name \
+    _file_name
+  declare \
+    -A \
+    _addresses
+  declare \
+    -A \
+    _wallets
+  _own=""
+  _wallets_files_get \
+    "${_cache_dir}"
+  for _wallet \
+    in "${_wallets_files[@]}"; do
+    _file_name="$( \
+      basename \
+        "${_wallet}")"
+    if [[ "${_file_name}" == "*-seed.txt" ]]; then
+      _wallet_name="${_file_name%-seed.txt}"
+      _wallets["${_wallet_name}"]="own"
+    elif [[ "${_file_name}" == "*-address.txt" ]]; then
+      _wallet_name="${_file_name%-address.txt}"
+      _addresses["${_wallet_name}"]="$( \
+       cat \
+         "${_wallet}")" 
+    fi
+  done
+  for _wallet in \
+    "${!_wallets[@]}"; do
+    if [[ "${_addresses[${_wallet}]}" == "" ]]; then
+      exit \
+        0
+    fi
+  done
 }
 
 _evm_wallet() {
@@ -339,6 +423,8 @@ _evm_wallet() {
         "${_currency_address}" \
         "${_target_address}" \
         "${_target_amount}"
+    elif [[ "${_target_command}" == "list" ]]; then
+      _contacts_list
     elif [[ "${_target_command}" == "approve" ]]; then
       echo \
         "WIP"
@@ -451,10 +537,6 @@ _set_overrides() {
     "explorer" \
     "selection" \
     "kirsh"
-  # _set_override \
-  #   "target" \
-  #   "network" \
-  #   "100"
   target_network="${target_networks[0]}"
   _api_key_auto_detect \
     "${target_network}" \
