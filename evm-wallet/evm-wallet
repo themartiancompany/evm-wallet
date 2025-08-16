@@ -233,8 +233,9 @@ _balance_get_cmd_get() {
   fi
 }
 
-_address_get_cmd_get() {
+_address_get() {
   local \
+    _quiet="${1}" \
     _address_file
   _address_file="${_wallet_seed%-seed.txt}-address.txt"
   if [[ -e "${_address_file}" ]]; then
@@ -248,13 +249,17 @@ _address_get_cmd_get() {
         "${_key}" \
         "get")"
     _args+=(
-      "${quiet}"
+      "${_quiet}"
       "${_wallet_seed}"
       "${_rpc_backend}"
       "${_api_key_path}"
       "${_address_file}"
     )
   fi
+  node-run \
+    "${_node_run_opts[@]}" \
+    "${_cmd}" \
+    "${_args[@]}"
 }
 
 _key_get() {
@@ -263,14 +268,20 @@ _key_get() {
     _output_file \
     _output_dir
   if [[ "${_key}" == "address" ]]; then
-    "${_key}_get_cmd_get"
+    "_${_key}_get" \
+      "${quiet}"
+    exit \
+      0
   elif [[ "${_key}" == "balance" ]]; then
+    _rpc_backend_get \
+      "${_target_network}" \
+      "${_rpc_selection}"
     # if [[ "${_networks_all}" == "n" ]]; then
     #   _target_networks=(
     #     "${_target_network}"
     #   )
     # fi
-    "${_key}_get_cmd_get" \
+    "_${_key}_get_cmd_get" \
       "${wallet_name}" \
       "${_target_network}"
   elif [[ "${_key}" == "seed" ]]; then
@@ -397,9 +408,6 @@ _evm_wallet() {
   )
   for _target_network \
     in "${_target_networks[@]}"; do
-    _rpc_backend_get \
-      "${_target_network}" \
-      "${_rpc_selection}"
     if [[ "${_target_command}" == "get" ]]; then
       "_key_${_target_command}" \
         "${_target_key}"
@@ -408,6 +416,9 @@ _evm_wallet() {
           0
       fi
     elif [[ "${_target_command}" == "send" ]]; then
+      _rpc_backend_get \
+        "${_target_network}" \
+        "${_rpc_selection}"
       _target_address="${_target_key}"
       _target_amount="${_target_value}"
       _balance_send \
@@ -668,6 +679,7 @@ _show_config() {
   _msg_info "            Wallet password:   ${wallet_password}"
   _msg_info "                Wallet seed:   ${wallet_seed}"
   _msg_info "                    API key:   ${api_key}"
+  _msg_info "             Wallet address:   ${wallet_address}"
   _msg_info "           LibEVM options:"
   _msg_info "             Target network:   ${target_network}"
   _msg_info "            Maximum retries:   ${retries_max}"
