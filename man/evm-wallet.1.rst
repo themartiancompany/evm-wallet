@@ -93,6 +93,9 @@ Options
                         failing.
 -u measure_unit         Measure unit for the transaction
                         value. It can be 'ether' or 'wei'.
+-l balance_lifespan     Maximum threshold in seconds
+                        from now after which to consider
+                        balance to be outdated.
 
 -h                      This message.
 -c                      Enable color output
