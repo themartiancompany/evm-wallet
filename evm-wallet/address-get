@@ -142,7 +142,7 @@ async function
       _wallet_get_opts);
   _address =
     _wallet.address;
-  if ( _output_file != undefined ||
+  if ( _output_file != undefined &&
        _output_file != "" ) {
     _file_write(
       _output_file,
@@ -163,9 +163,12 @@ function
     "   Target network: {target_network}".replaceAll(
       "{target_network}",
       target_network),
-    "          API Key: {api_key_path}".replace(
+    "          API key: {api_key_path}".replace(
       "{api_key_path}",
-      api_key_path)
+      api_key_path),
+    "      Output file: {output_file}".replace(
+      "{output_file}",
+      output_file)
   ]
   for ( _line of _text ) {
     _msg_info(
@@ -174,7 +177,8 @@ function
 }
 
 function
-  _usage() {
+  _usage(
+    _exit_code) {
   let
     _line,
     _text;
@@ -184,13 +188,15 @@ function
     "    <quiet>",
     "    <seed_path>",
     "    (<target_network>)",
-    "    (<api_key_path>)"
+    "    (<api_key_path>)",
+    "    (<output_file>)"
   ];
   for ( _line of _text ) {
     _msg_info(
       _line);
   }
-  process.exit();
+  process.exit(
+    _exit_code);
 }
 
 
@@ -222,9 +228,22 @@ function _cmdline_parse() {
         output_file =
           _value;
       }
+      if ( _value == "-h" ||
+           _value == "--help" ) {
+        quiet =
+          "n";
+        _usage(
+          0);
+      }
   });
   if ( wallet_seed == "" ) {
-    _usage();
+    _msg_error(
+      "No arguments given.",
+      0);
+    quiet =
+      "n";
+    _usage(
+      0);
   }
 }
 
@@ -238,13 +257,13 @@ function
   }
 }
 
-function 
+async function 
   _address_get_cmdline(
     _app_opts) {
   let
     _address;
   _address =
-    _address_get.apply(
+    await _address_get.apply(
       null,
       _app_opts);
   console.log(

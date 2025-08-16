@@ -263,23 +263,14 @@ _key_get() {
     _output_file \
     _output_dir
   if [[ "${_key}" == "address" ]]; then
-    _cmd="$( \
-      "_wallet_key_cmd" \
-        "${_key}" \
-        "get")"
-    _args+=(
-      "${quiet}"
-      "${_wallet_seed}"
-      "${_rpc_backend}"
-      "${_api_key_path}"
-    )
+    "${_key}_get_cmd_get"
   elif [[ "${_key}" == "balance" ]]; then
     # if [[ "${_networks_all}" == "n" ]]; then
     #   _target_networks=(
     #     "${_target_network}"
     #   )
     # fi
-    _balance_get_cmd_get \
+    "${_key}_get_cmd_get" \
       "${wallet_name}" \
       "${_target_network}"
   elif [[ "${_key}" == "seed" ]]; then
