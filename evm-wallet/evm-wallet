@@ -101,11 +101,12 @@ _balance_age_get() {
   else 
     _now="$( \
       date \
-      "+^s")"
+      "+%s")"
     _balance_modified="$( \
       date \
         -r \
-        "${_balance_file}")"
+          "${_balance_file}" \
+        "+%s")"
     _balance_age="$(( \
       "${_now}" - \
       "${_balance_modified}" ))"
@@ -225,13 +226,10 @@ _balance_get_cmd_get() {
       "${_balance_file}"
     )
   elif [[ "${_balance_update}" == "false" ]]; then
-    _cmd="$( \
-      command \
-        -v \
-        cat)"
-    _args+=(
+    cat \
       "${_balance_file}"
-    )
+    exit \
+      0
   fi
 }
 
