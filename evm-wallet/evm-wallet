@@ -541,9 +541,11 @@ _set_overrides() {
     "selection" \
     "kirsh"
   target_network="${target_networks[0]}"
-  _api_key_auto_detect \
-    "${target_network}" \
-    "${explorer_selection}"
+  if [[ "${currency_type}" != "gas" ]]; then
+    _api_key_auto_detect \
+      "${target_network}" \
+      "${explorer_selection}"
+  fi
   _wallet_overrides_set \
     "evm-wallet" \
     "${wallet_name}" \
