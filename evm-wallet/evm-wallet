@@ -89,7 +89,7 @@ _balance_age_get() {
     _balance_modified \
     _msg=()
   _balance_age=""
-  if [[ ! -d "${_balance_file}" ]]; then
+  if [[ ! -e "${_balance_file}" ]]; then
     _msg=(
       "Balance for account"
       "'${_wallet_name}' never"
@@ -644,10 +644,10 @@ while \
     C) \
       override_currency_address="${OPTARG}" ;;
     n) \
-      override_target_network="${OPTARG}" ;;
-      # target_networks+=(
-      #   "${OPTARG}"
-      # )
+      target_networks+=(
+        "${OPTARG}"
+      ) ;;
+      # override_target_network="${OPTARG}" ;;
     W) \
       override_cache_dir="${OPTARG}" ;;
     c) \
