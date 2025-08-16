@@ -43,6 +43,8 @@ _sourced \
 _global_variables() {
   call_date=""
   cache_dir=""
+  target_networks=()
+  networks_amount=""
   target_command=""
   target_key=""
   target_value=""
@@ -53,6 +55,7 @@ _global_variables() {
   explorer_selection=""
   retries_max=""
   measure_unit=""
+  balance_lifespan=""
   command_args=()
   color=""
   quiet=""
@@ -77,6 +80,35 @@ _get_conf_dir_path() {
   _dir="${HOME}/.config/${app_name}"
   echo \
     "${_dir}"
+}
+
+_balance_age_get() {
+  local \
+    _balance_file="${1}" \
+    _now \
+    _balance_modified
+  _balance_age=""
+  if [[ ! -d "${_balance_file}" ]]; then
+    _msg=(
+      "Balance for account"
+      "'${_wallet_name}' never"
+      "retrieved for network"
+      "'${_target_network}'."
+    )
+  _msg_info \
+    "${_msg[*]}"
+  else 
+    _now="$( \
+      date \
+      "+^s")"
+    _balance_modified="$( \
+      date \
+        -r \
+        "${_balance_file}")"
+    _balance_age="$(( \
+      "${_now}" - \
+      "${_balance_modified}" ))"
+  fi
 }
 
 _balance_send() {
@@ -136,6 +168,67 @@ _wallet_key_cmd() {
     "${_lib}/${_key}-${_command}"
 }
 
+_balance_get_cmd_get() {
+  local \
+    _wallet_name="${1}" \
+    _target_network="${2}" \
+    _balance_age \
+    _balance_file \
+    _balance_dir \
+    _rpc_backend
+  _rpc_backend_get \
+    "${_target_network}" \
+    "${_rpc_selection}"
+  _balance_file="${_cache_dir}/${_wallet_name}/${_target_network}"
+  _balance_dir="$( \
+    dirname \
+      "${_balance_file}")"
+  if [[ ! -d "${_cache_dir}" ]]; then
+    _msg=(
+      "Cache directory"
+      "'${_cache_dir}'"
+      "does not exist."
+    )
+    _msg_error \
+      "${_msg[*]}" \
+      1
+  fi
+  mkdir \
+    -p \
+    "${_balance_dir}"
+  _balance_update="true"
+  _balance_age_get \
+    "${_balance_file}"
+  if [[ "${_balance_age}" != "" ]]; then
+    if (( "${_balance_age}" < 3600 )); then
+      _balance_update="false"
+    fi
+  fi
+  if [[ "${_balance_update}" == "true" ]]; then
+    _cmd="$( \
+      "_wallet_key_cmd" \
+        "${_key}" \
+        "get")"
+    _args+=(
+      "${quiet}"
+      "${_wallet_seed}"
+      "${_rpc_backend}"
+      "${_api_key_path}"
+      "${wallet_address}"
+      "${measure_unit}"
+      "${_balance_file}"
+    )
+  elif [[ "${_balance_update}" == "false" ]]; then
+    _cmd="$( \
+      command \
+        -v \
+        cat)"
+    _args+=(
+      "${_balance_file}"
+    )
+  fi
+}
+
 _key_get() {
   local \
     _key="${1}" \
@@ -158,36 +251,9 @@ _key_get() {
     #     "${_target_network}"
     #   )
     # fi
-    _output_file="${_cache_dir}/${wallet_name}/${_target_network}"
-    _output_dir="$( \
-      dirname \
-        "${_output_file}")"
-    if [[ ! -d "${_cache_dir}" ]]; then
-      _msg=(
-        "Cache"
-        "directory '${_cache_dir}'"
-        "does not exist."
-      )
-      _msg_error \
-        "${_msg[*]}" \
-        1
-    fi
-    mkdir \
-      -p \
-      "${_output_dir}"
-    _cmd="$( \
-      "_wallet_key_cmd" \
-        "${_key}" \
-        "get")"
-    _args+=(
-      "${quiet}"
-      "${_wallet_seed}"
-      "${_rpc_backend}"
-      "${_api_key_path}"
-      "${wallet_address}"
-      "${measure_unit}"
-      "${_output_file}"
-    )
+    _balance_get_cmd_get \
+      "${wallet_name}" \
+      "${_target_network}"
   elif [[ "${_key}" == "seed" ]]; then
     cat \
       "${_wallet_seed}"
@@ -207,28 +273,41 @@ _evm_wallet() {
     _wallet_path="${2}" \
     _wallet_password="${3}" \
     _wallet_seed="${4}" \
-    _target_network="${5}" \
-    _cache_dir="${6}" \
-    _networks_all="${7}" \
-    _rpc_selection="${8}" \
-    _api_key_path="${9}" \
-    _retries_max="${10}" \
-    _measure_unit="${11}" \
+    _cache_dir="${5}" \
+    _networks_all="${6}" \
+    _rpc_selection="${7}" \
+    _api_key_path="${8}" \
+    _retries_max="${9}" \
+    _measure_unit="${10}" \
+    _balance_lifespan="${11}" \
     _currency_type="${12}" \
     _currency_address="${13}" \
     _target_key="${14}" \
     _target_value="${15}" \
+    _networks_amount="${16}" \
+    _target_networks=() \
     _command_args=() \
     _target_networks=() \
     _msg=() \
     _cmd \
     _args=() \
-    _network_backend \
+    _network \
+    _rpc_backend \
     _node_run_opts=() \
     _approve_call_opts=() \
     _rpc_backend
   shift \
-    15
+    16
+  for _network \
+    in $(seq \
+           "1" \
+           "${_networks_amount}"); do
+    _network="${1}"
+    _target_networks+=(
+      "${_network}"
+    )
+    shift
+  done
   _command_args+=(
     "$@"
   )
@@ -236,44 +315,47 @@ _evm_wallet() {
     -r
       "${_retries_max}"
   )
-  _rpc_backend_get \
-    "${_target_network}" \
-    "${_rpc_selection}"
-  if [[ "${_target_command}" == "get" ]]; then
-    "_key_${_target_command}" \
-      "${_target_key}"
-    if [[ "${_target_key}" == "name" ]]; then
-      return \
-        0
+  for _target_network \
+    in "${_target_networks[@]}"; do
+    _rpc_backend_get \
+      "${_target_network}" \
+      "${_rpc_selection}"
+    if [[ "${_target_command}" == "get" ]]; then
+      "_key_${_target_command}" \
+        "${_target_key}"
+      if [[ "${_target_key}" == "name" ]]; then
+        return \
+          0
+      fi
+    elif [[ "${_target_command}" == "send" ]]; then
+      _target_address="${_target_key}"
+      _target_amount="${_target_value}"
+      _balance_send \
+        "${_currency_type}" \
+        "${_currency_address}" \
+        "${_target_address}" \
+        "${_target_amount}"
+    elif [[ "${_target_command}" == "approve" ]]; then
+      echo \
+        "WIP"
+      # TODO: write approve function
+      # _approve_call_opts_setup
+      # evm-contract-call \
+      #   "${_approve_call_opts[@]}" \
+      #   "${}"
+    else
+      _msg=(
+        "Unknown command '${_target_command}'."
+      )
+      _msg_error \
+        "${_msg[*]}" \
+        1
     fi
-  elif [[ "${_target_command}" == "send" ]]; then
-    _target_address="${_target_key}"
-    _target_amount="${_target_value}"
-    _balance_send \
-      "${_currency_type}" \
-      "${_currency_address}" \
-      "${_target_address}" \
-      "${_target_amount}"
-  elif [[ "${_target_command}" == "approve" ]]; then
-    echo \
-      "WIP"
-    # TODO: write approve function
-    # _approve_call_opts_setup
-    # evm-contract-call \
-    #   "${_approve_call_opts[@]}" \
-    #   "${}"
-  else
-    _msg=(
-      "Unknown command '${_target_command}'."
-    )
-    _msg_error \
-      "${_msg[*]}" \
-      1
-  fi
-  node-run \
-    "${_node_run_opts[@]}" \
-    "${_cmd}" \
-    "${_args[@]}"
+    node-run \
+      "${_node_run_opts[@]}" \
+      "${_cmd}" \
+      "${_args[@]}"
+  done
 }
 
 _currency_type_auto_detect() {
@@ -322,6 +404,12 @@ _set_overrides() {
     "date" \
     "$(_get_date_human)"
   _cache_dir_auto_detect
+  if [[ "${target_networks[*]}" == "" ]]; then
+    target_networks+=(
+      100
+    )
+  fi
+  networks_amount="${#target_networks[@]}"
   _set_override \
     "target" \
     "command" \
@@ -330,6 +418,10 @@ _set_overrides() {
     "target" \
     "key" \
     "name"
+  _set_override \
+    "balance" \
+    "lifespan" \
+    "3600"
   _set_override \
     "retries" \
     "max" \
@@ -355,10 +447,11 @@ _set_overrides() {
     "explorer" \
     "selection" \
     "kirsh"
-  _set_override \
-    "target" \
-    "network" \
-    "100"
+  # _set_override \
+  #   "target" \
+  #   "network" \
+  #   "100"
+  target_network="${target_networks[0]}"
   _api_key_auto_detect \
     "${target_network}" \
     "${explorer_selection}"
@@ -421,6 +514,10 @@ Usage:
      -u <measure_unit>        Measure unit. It can be
                               'ether' or 'wei'.
                               Default: ${measure_unit}
+     -l <balance_lifespan>    Maximum threshold in seconds
+                              from now after which to consider
+                              balance to be outdated.
+                              Default: ${balance_lifespan}
 
   send options:
      -t <currency_type>       Currency type.
@@ -484,6 +581,7 @@ _show_config() {
   _msg_info "       RPC selection method:   ${rpc_selection}"
   _msg_info "  Explorer selection method:   ${explorer_selection}"
   _msg_info "               Measure unit:   ${measure_unit}"
+  _msg_info "           Balance lifespan:   ${balance_lifespan}"
   _msg_info "             Send options:"
   _msg_info "              Currency type:   ${currency_type}"
   _msg_info "           Currency address:   ${currency_address}"
@@ -509,7 +607,7 @@ _config_user_init \
 getopts_opts="$( \
   printf \
     "%s" \
-    "S:E:a:r:u:" \
+    "S:E:a:r:u:l:" \
     "t:C:" \
     "$(_libevm_app_getopts_params_get)" \
     "n:" \
@@ -531,6 +629,8 @@ while \
       override_networks_all="${OPTARG}" ;;
     r) \
       override_retries_max="${OPTARG}" ;;
+    l) \
+      override_balance_lifespan="${OPTARG}" ;;
     u) \
       override_measure_unit="${OPTARG}" ;;
     t) \
@@ -539,6 +639,9 @@ while \
       override_currency_address="${OPTARG}" ;;
     n) \
       override_target_network="${OPTARG}" ;;
+      # target_networks+=(
+      #   "${OPTARG}"
+      # )
     W) \
       override_cache_dir="${OPTARG}" ;;
     c) \
@@ -588,17 +691,19 @@ app_opts=(
   "${wallet_path}"
   "${wallet_password}"
   "${wallet_seed}"
-  "${target_network}"
   "${cache_dir}"
   "${networks_all}"
   "${rpc_selection}"
   "${api_key}"
   "${retries_max}"
   "${measure_unit}"
+  "${balance_lifespan}"
   "${currency_type}"
   "${currency_address}"
   "${target_key}"
   "${target_value}"
+  "${networks_amount}"
+  "${target_networks[@]}"
 )
 _evm_wallet \
   "${app_opts[@]}"
