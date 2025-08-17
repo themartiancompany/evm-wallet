@@ -237,16 +237,12 @@ _address_get() {
   local \
     _quiet="${1}" \
     _address_file
+  _wallet_address=""
   _address_file="${_wallet_seed%-seed.txt}-address.txt"
-  if [[ -e "${_address_file}" ]]; then
-    cat \
-      "${_address_file}"
-    exit \
-      0
-  elif [[ ! -e "${_address_file}" ]]; then
+  if [[ ! -e "${_address_file}" ]]; then
     _cmd="$( \
       "_wallet_key_cmd" \
-        "${_key}" \
+        "address" \
         "get")"
     _args+=(
       "${_quiet}"
@@ -255,11 +251,14 @@ _address_get() {
       "${_api_key_path}"
       "${_address_file}"
     )
+    node-run \
+      "${_node_run_opts[@]}" \
+      "${_cmd}" \
+      "${_args[@]}"
   fi
-  node-run \
-    "${_node_run_opts[@]}" \
-    "${_cmd}" \
-    "${_args[@]}"
+  _wallet_address="$( \
+    cat \
+      "${_address_file}")"
 }
 
 _key_get() {
@@ -270,6 +269,8 @@ _key_get() {
   if [[ "${_key}" == "address" ]]; then
     "_${_key}_get" \
       "${quiet}"
+    echo \
+      "${_wallet_address}"
     exit \
       0
   elif [[ "${_key}" == "balance" ]]; then
@@ -324,25 +325,27 @@ _contacts_list() {
     _wallets_files=() \
     _wallet \
     _wallet_name \
-    _file_name
+    _file_name \
+    _config_dir
   declare \
     -A \
     _addresses
   declare \
     -A \
     _wallets
-  _own=""
+  _config_dir="$( \
+    _get_conf_dir_path)"
   _wallets_files_get \
-    "${_cache_dir}"
+    "${_config_dir}"
   for _wallet \
     in "${_wallets_files[@]}"; do
     _file_name="$( \
       basename \
         "${_wallet}")"
-    if [[ "${_file_name}" == "*-seed.txt" ]]; then
+    if [[ "${_file_name}" == *"-seed.txt" ]]; then
       _wallet_name="${_file_name%-seed.txt}"
       _wallets["${_wallet_name}"]="own"
-    elif [[ "${_file_name}" == "*-address.txt" ]]; then
+    elif [[ "${_file_name}" == *"-address.txt" ]]; then
       _wallet_name="${_file_name%-address.txt}"
       _addresses["${_wallet_name}"]="$( \
        cat \
@@ -351,11 +354,21 @@ _contacts_list() {
   done
   for _wallet in \
     "${!_wallets[@]}"; do
-    if [[ "${_addresses[${_wallet}]}" == "" ]]; then
-      exit \
-        0
+    echo "${_wallet}"
+    if [[ ! " ${!_addresses[@]} " == *" ${_wallet} "* ]]; then
+      echo "${_wallets["${_wallet}"]}"
+      _address_get \
+        "${_wallets["${_wallet}"]}"
+      echo \
+        "${_wallet_address}"
     fi
+    # if [[ "${_addresses["${_wallet}"]}" == "" ]]; then
+    #   exit \
+    #     0
+    # fi
   done
+  exit \
+    0
 }
 
 _evm_wallet() {
@@ -576,6 +589,7 @@ Usage:
     get
       <wallet_name>
       <key>
+    list
     set
       <wallet_name>
       <key>
