@@ -310,10 +310,11 @@ _key_get() {
 _wallets_files_get() {
   local \
     _dir="${1}" \
+    _filter="${2}" \
     _find_opts=()
   _find_opts+=(
     -wholename
-      "*-*.txt"
+      "*${_filter}*-*.txt"
     -type \
       "f" \
     -print0
@@ -330,6 +331,7 @@ _wallets_files_get() {
 
 _contacts_list() {
   local \
+    _filter="${1}" \
     _msg=() \
     _wallets_files=() \
     _wallet \
@@ -344,10 +346,14 @@ _contacts_list() {
   declare \
     -A \
     _wallets
+  if [[ "${_filter}" == "" ]]; then
+    _filter="*"
+  fi
   _config_dir="$( \
     _get_conf_dir_path)"
   _wallets_files_get \
-    "${_config_dir}"
+    "${_config_dir}" \
+    "${_filter}"
   for _wallet \
     in "${_wallets_files[@]}"; do
     _file_name="$( \
@@ -390,8 +396,18 @@ _contacts_list() {
   done
   for _address in \
     "${!_addresses[@]}"; do
-    echo \
-      "${_address}"
+    printf \
+      "\n%s\n" \
+      "       Name: ${_address}"
+    _wallet_address="${_addresses["${_address}"]}"
+    if [[ " ${!_wallets[@]} " == *" ${_address} "* ]]; then
+      printf \
+        "%s\n" \
+        "Private key: yes"
+    fi
+    printf \
+      "%s\n" \
+        "    Address: ${_wallet_address}"
   done
   exit \
     0
@@ -466,7 +482,8 @@ _evm_wallet() {
         "${_target_address}" \
         "${_target_amount}"
     elif [[ "${_target_command}" == "list" ]]; then
-      _contacts_list
+      _contacts_list \
+        "${_target_key}"
     elif [[ "${_target_command}" == "approve" ]]; then
       echo \
         "WIP"
@@ -520,6 +537,19 @@ _cache_dir_auto_detect() {
     "${_dir}"
 }
 
+_target_key_auto_detect() {
+  local \
+    _key
+  _key=""
+  if [[ "${target_command}" == "get" ]]; then
+    _key="name"
+  fi
+  _set_override \
+    "target" \
+    "key" \
+    "${_key}"
+}
+
 _set_overrides() {
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
@@ -546,10 +576,7 @@ _set_overrides() {
     "target" \
     "command" \
     "get"
-  _set_override \
-    "target" \
-    "key" \
-    "name"
+  _target_key_auto_detect
   _set_override \
     "balance" \
     "lifespan" \
@@ -585,10 +612,12 @@ _set_overrides() {
       "${target_network}" \
       "${explorer_selection}"
   fi
-  _wallet_overrides_set \
-    "evm-wallet" \
-    "${wallet_name}" \
-    "y"
+  if [[ "${target_command}" != "list" ]]; then
+    _wallet_overrides_set \
+      "evm-wallet" \
+      "${wallet_name}" \
+      "y"
+  fi
 }
 
 # Show help usage, with an exit status.
@@ -802,7 +831,11 @@ if (( 0 < "$#" )); then
   target_command="${1}"
 fi
 if (( 1 < "$#" )); then
-  wallet_name="${2}"
+  if [[ "${target_command}" != "list" ]]; then
+    wallet_name="${2}"
+  else
+    target_key="${2}"
+  fi
 fi
 if (( 2 < "$#" )); then
   target_key="${3}"
