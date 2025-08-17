@@ -236,6 +236,7 @@ _balance_get_cmd_get() {
 _address_get() {
   local \
     _quiet="${1}" \
+    _wallet_seed="${2}" \
     _address_file
   _wallet_address=""
   _address_file="${_wallet_seed%-seed.txt}-address.txt"
@@ -244,17 +245,25 @@ _address_get() {
       "_wallet_key_cmd" \
         "address" \
         "get")"
-    _args+=(
+    _rpc_backend=""
+    _args=(
       "${_quiet}"
       "${_wallet_seed}"
       "${_rpc_backend}"
       "${_api_key_path}"
       "${_address_file}"
     )
-    node-run \
-      "${_node_run_opts[@]}" \
-      "${_cmd}" \
-      "${_args[@]}"
+    if [[ "${quiet}" == "y" ]]; then
+      node-run \
+        "${_node_run_opts[@]}" \
+        "${_cmd}" \
+        "${_args[@]}" 1>/dev/null
+    elif [[ "${quiet}" == "n" ]]; then
+      node-run \
+        "${_node_run_opts[@]}" \
+        "${_cmd}" \
+        "${_args[@]}"
+    fi
   fi
   _wallet_address="$( \
     cat \
@@ -325,6 +334,8 @@ _contacts_list() {
     _wallets_files=() \
     _wallet \
     _wallet_name \
+    _wallet_address \
+    _wallet_seed \
     _file_name \
     _config_dir
   declare \
@@ -344,7 +355,7 @@ _contacts_list() {
         "${_wallet}")"
     if [[ "${_file_name}" == *"-seed.txt" ]]; then
       _wallet_name="${_file_name%-seed.txt}"
-      _wallets["${_wallet_name}"]="own"
+      _wallets["${_wallet_name}"]="${_config_dir}/${_file_name}"
     elif [[ "${_file_name}" == *"-address.txt" ]]; then
       _wallet_name="${_file_name%-address.txt}"
       _addresses["${_wallet_name}"]="$( \
@@ -354,18 +365,33 @@ _contacts_list() {
   done
   for _wallet in \
     "${!_wallets[@]}"; do
-    echo "${_wallet}"
     if [[ ! " ${!_addresses[@]} " == *" ${_wallet} "* ]]; then
-      echo "${_wallets["${_wallet}"]}"
+      _msg=(
+        "Getting address for own account"
+        "'${_wallet}'."
+      )
+      _msg_info \
+       "${_msg[*]}"
+      _wallet_seed="${_wallets["${_wallet}"]}"
       _address_get \
-        "${_wallets["${_wallet}"]}"
-      echo \
-        "${_wallet_address}"
+        "y" \
+        "${_wallet_seed}"
+      _addresses["${_wallet}"]="${_wallet_address}"
+      _msg=(
+        "Done."
+      )
+      _msg_info \
+        "${_msg[*]}"
     fi
     # if [[ "${_addresses["${_wallet}"]}" == "" ]]; then
     #   exit \
     #     0
     # fi
+  done
+  for _address in \
+    "${!_addresses[@]}"; do
+    echo \
+      "${_address}"
   done
   exit \
     0
