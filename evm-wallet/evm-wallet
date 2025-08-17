@@ -394,20 +394,41 @@ _contacts_list() {
     #     0
     # fi
   done
+  _addresses_keys=(
+    "${!_addresses[@]}"
+  )
+  _addresses_amount="${#_addresses_keys[@]}"
+  _counter="0"
   for _address in \
     "${!_addresses[@]}"; do
-    printf \
-      "\n%s\n" \
+    _counter="$(( \
+      "${_counter}" + \
+      1 ))"
+    _printf_args=(
       "       Name: ${_address}"
+    )
     _wallet_address="${_addresses["${_address}"]}"
     if [[ " ${!_wallets[@]} " == *" ${_address} "* ]]; then
-      printf \
-        "%s\n" \
+      _printf_args+=(
         "Private key: yes"
+      )
+    fi
+    _printf_args+=(
+      "    Address: ${_wallet_address}" \
+    )
+    _printf_template=(
+      "%s" "\n"
+      "%s" "\n"
+      "%s" "\n"
+    )
+    if [[ "${_counter}" != "${_addresses_amount}" ]]; then
+      _printf_template+=(
+        "\n"
+      )
     fi
     printf \
-      "%s\n" \
-        "    Address: ${_wallet_address}"
+      "${_printf_template[*]}" \
+      "${_printf_args[@]}"
   done
   exit \
     0
