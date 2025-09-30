@@ -277,7 +277,8 @@ _key_get() {
     _output_dir
   if [[ "${_key}" == "address" ]]; then
     "_${_key}_get" \
-      "${quiet}"
+      "${quiet}" \
+      "${_wallet_seed}"
     echo \
       "${_wallet_address}"
     exit \
