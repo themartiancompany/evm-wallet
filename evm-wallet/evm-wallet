@@ -406,7 +406,7 @@ _contacts_list() {
       "${_counter}" + \
       1 ))"
     _printf_args=(
-      "       Name: ${_address}"
+      "        Name: ${_address}"
     )
     _wallet_address="${_addresses["${_address}"]}"
     if [[ " ${!_wallets[@]} " == *" ${_address} "* ]]; then
