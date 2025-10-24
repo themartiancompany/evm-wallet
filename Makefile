@@ -57,7 +57,7 @@ _INSTALL_SCRIPTS_TARGETS=\
   install-bash-scripts \
   install-node-scripts \
   install-configs
-INSTALL_DOC_TARGETS=\
+_INSTALL_DOC_TARGETS=\
   install-doc \
   install-man
 _INSTALL_TARGETS=\
@@ -114,7 +114,6 @@ install-doc:
 	  $(DOC_FILES) \
 	  -t \
 	  "$(DOC_DIR)/"
-
 
 install-man:
 
