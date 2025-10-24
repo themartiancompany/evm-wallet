@@ -34,7 +34,7 @@ Ethereum Virtual Machine (EVM) compatible networks' wallet
 Synopsis
 ========
 
-evm-wallet *[options]* *command* *[command_args]*
+evm-wallet *[options]* *command* *[command-args]*
 
 
 Description
@@ -45,11 +45,11 @@ networks' cryptocurrency wallet.
 
 Commands
 =========
-* get  *wallet_name*  *key*
+* get  *wallet-name*  *key*
 
   Retrieves information about specific items of single wallets.
 
-* set *wallet_name* *key* *value*
+* set *wallet-name* *key* *value*
 
   Sets information about specific items of single wallets.
 
