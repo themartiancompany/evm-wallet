@@ -36,6 +36,7 @@ Synopsis
 
 evm-wallet *[options]* *command* *[command_args]*
 
+
 Description
 ===========
 Ethereum Virtual Machine (EVM) compatible
@@ -44,23 +45,46 @@ networks' cryptocurrency wallet.
 
 Commands
 =========
-* get
-    *wallet_name*
-      *key*
+* get  *wallet_name*  *key*
 
-* set
-    *wallet_name*
-      *key*
-      *value*
-* send
-    *address*
-      *amount*
+  Retrieves information about specific items of single wallets.
 
-Keys
-=====
+* set *wallet_name* *key* *value*
+
+  Sets information about specific items of single wallets.
+
+* list *filter*
+
+  Display contacts information for wallest respecting the filter.
+
+* send *address* *amount*
+
+  Sends balance to an address.
+
+
+Get and set arguments
+=======================
+
 * address
+
+  Returns wallet address.
+
 * balance
+
+  Returns balance for the wallet.
+
 * seed
+
+  Returns wallet seed phrase.
+
+List arguments
+=================
+
+* filter
+
+  Restrict the listing to wallets respecting the filter.
+  It can be a regex.
+
 
 Networks
 =========
@@ -70,32 +94,46 @@ All those supported by
 well as direct RPC addresses.
 
 
-evmfs is the reference implementation of the
-Ethereum Virtual Machine File System (EVMFS),
-a distributed, undeletable, uncensorable,
-network-indipendent file system running
-on Ethereum Virtual Machine (EVM) compatible
-blockchain networks.
-
 Options
 ========
 
--w wallet_path          Wallet path.
--p wallet_password      Wallet password.
--s wallet_seed          Wallet seed path.
+-u measure-unit         Measure unit for the transaction
+                        value. It can be 'ether' or 'wei'.
+-l balance-lifespan     Maximum threshold in seconds
+                        from now after which to consider
+                        balance to be outdated.
+
+List options
+==============
+
+-o output-type          Output type for the list option.
+                        It can be 'name', 'address',
+                        'fingerprint'.
+
+
+Network options
+================
+
 -n network              EVM network name. Accepted values
                         are all those supported by
                         evm-chains-info and RPC addresses.
--k api_key              Etherscan-like service key.
--R rpc_selection        RPC selection method.
--S explorer_selection   Network explorer selection method.
--r retries_max          Maximum number of retries before
+-R rpc-selection        RPC selection method.
+-S explorer-selection   Network explorer selection method.
+-r retries-max          Maximum number of retries before
                         failing.
--u measure_unit         Measure unit for the transaction
-                        value. It can be 'ether' or 'wei'.
--l balance_lifespan     Maximum threshold in seconds
-                        from now after which to consider
-                        balance to be outdated.
+
+
+Credentials options
+=====================
+
+-w wallet-path          Wallet path.
+-p wallet-password      Wallet password.
+-s wallet-seed          Wallet seed path.
+-k api-key              Etherscan-like service key.
+
+
+Application options
+=====================
 
 -h                      This message.
 -c                      Enable color output

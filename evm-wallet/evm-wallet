@@ -766,6 +766,7 @@ Usage:
       <wallet_name>
       <key>
     list
+      <filter>
     set
       <wallet-name>
       <key>
