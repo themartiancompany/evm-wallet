@@ -48,6 +48,7 @@ _global_variables() {
   target_command=""
   target_key=""
   target_value=""
+  output_type=""
   currency_type=""
   currency_address=""
   networks_all=""
@@ -308,6 +309,38 @@ _key_get() {
   fi
 }
 
+_wallets_sort() {
+  local \
+    _wallets_names_unsorted=() \
+    _wallet \
+    _wallet_name \
+    _msg=()
+  if (( 0 == "${#_wallets_files[@]}" )); then
+    _msg=(
+      "No wallets found."
+    )
+    _msg_info \
+      "${_msg[*]}"
+  elif (( 0 < "${#_wallets_files[@]}" )); then
+    _wallets_dir="$( \
+      dirname \
+        "${_wallets_files[@]}")"
+    for _wallet in "${_wallets_files[@]}"; do
+      _wallet_name="$( \
+        basename \
+          "${_wallet}")"
+      _wallet_names_unsorted+=(
+        "${_wallet_name}" 
+      )
+    done
+    _wallets_names=( $( \
+      printf \
+        '%s\n' \
+        "${_wallet_names_unsorted[@]}")
+    )
+  fi
+}
+
 _wallets_files_get() {
   local \
     _dir="${1}" \
@@ -330,12 +363,95 @@ _wallets_files_get() {
       true)
 }
 
+_contacts_display_full() {
+  local \
+    _address \
+    _counter \
+    _printf_args=() \
+    _printf_template=() \
+    _wallet_address
+  _counter="0"
+  for _address in \
+    "${!_addresses[@]}"; do
+    _counter="$(( \
+      "${_counter}" + \
+      1 ))"
+    _printf_args=(
+      "        Name: ${_address}"
+    )
+    _wallet_address="${_addresses["${_address}"]}"
+    if [[ " ${!_wallets[@]} " == *" ${_address} "* ]]; then
+      _printf_args+=(
+        "Private key: yes"
+      )
+    fi
+    _printf_args+=(
+      "    Address: ${_wallet_address}" \
+    )
+    _printf_template=(
+      "%s" "\n"
+      "%s" "\n"
+      "%s" "\n"
+    )
+    if [[ "${_counter}" != "${_addresses_amount}" ]]; then
+      _printf_template+=(
+        "\n"
+      )
+    fi
+    printf \
+      "${_printf_template[*]}" \
+      "${_printf_args[@]}"
+  done
+}
+
+_contacts_field_display() {
+  local \
+    _field="${1}" \
+    _address \
+    _counter \
+    _result \
+    _results=()
+  _counter="0"
+  for _address in \
+    "${!_addresses[@]}"; do
+    _counter="$(( \
+      "${_counter}" + \
+      1 ))"
+    if [[ "${_field}" == "name" ]]; then
+      _result="${_address}"
+    elif [[ "${_field}" == "address" ]]; then
+      _result="${_addresses["${_address}"]}"
+    elif [[ "${_field}" == "fingerprint" ]]; then
+      echo \
+        "TODO: GPG fingerprints display."
+    else
+      _msg=(
+        "Unknown field '${_field}'."
+      )
+      _msg_error \
+        "${_msg[*]}" \
+        1
+    fi
+    _results+=(
+      "${_result}"
+    )
+    done
+    printf \
+      '%s\n' \
+      "${_results[@]}" | \
+      sort \
+        -V
+}
+
 _contacts_list() {
   local \
     _filter="${1}" \
+    _output_type="${2}" \
     _msg=() \
     _wallets_files=() \
+    _wallets_names=() \
     _wallet \
+    _wallets_dir \
     _wallet_name \
     _wallet_address \
     _wallet_seed \
@@ -355,6 +471,7 @@ _contacts_list() {
   _wallets_files_get \
     "${_config_dir}" \
     "${_filter}"
+  _wallets_sort
   for _wallet \
     in "${_wallets_files[@]}"; do
     _file_name="$( \
@@ -399,38 +516,14 @@ _contacts_list() {
     "${!_addresses[@]}"
   )
   _addresses_amount="${#_addresses_keys[@]}"
-  _counter="0"
-  for _address in \
-    "${!_addresses[@]}"; do
-    _counter="$(( \
-      "${_counter}" + \
-      1 ))"
-    _printf_args=(
-      "        Name: ${_address}"
-    )
-    _wallet_address="${_addresses["${_address}"]}"
-    if [[ " ${!_wallets[@]} " == *" ${_address} "* ]]; then
-      _printf_args+=(
-        "Private key: yes"
-      )
-    fi
-    _printf_args+=(
-      "    Address: ${_wallet_address}" \
-    )
-    _printf_template=(
-      "%s" "\n"
-      "%s" "\n"
-      "%s" "\n"
-    )
-    if [[ "${_counter}" != "${_addresses_amount}" ]]; then
-      _printf_template+=(
-        "\n"
-      )
-    fi
-    printf \
-      "${_printf_template[*]}" \
-      "${_printf_args[@]}"
-  done
+  echo "${_output_type}"
+  if [[ "${_output_type}" == "" ]]; then
+    _contacts_display_full
+  else
+    echo "hi"
+    _contacts_field_display \
+      "${_output_type}"
+  fi
   exit \
     0
 }
@@ -450,9 +543,10 @@ _evm_wallet() {
     _balance_lifespan="${11}" \
     _currency_type="${12}" \
     _currency_address="${13}" \
-    _target_key="${14}" \
-    _target_value="${15}" \
-    _networks_amount="${16}" \
+    _output_type="${14}" \
+    _target_key="${15}" \
+    _target_value="${16}" \
+    _networks_amount="${17}" \
     _target_networks=() \
     _command_args=() \
     _target_networks=() \
@@ -465,7 +559,7 @@ _evm_wallet() {
     _approve_call_opts=() \
     _rpc_backend
   shift \
-    16
+    17
   for _network \
     in $(seq \
            "1" \
@@ -505,7 +599,8 @@ _evm_wallet() {
         "${_target_amount}"
     elif [[ "${_target_command}" == "list" ]]; then
       _contacts_list \
-        "${_target_key}"
+        "${_target_key}" \
+        "${_output_type}"
     elif [[ "${_target_command}" == "approve" ]]; then
       echo \
         "WIP"
@@ -640,6 +735,10 @@ _set_overrides() {
       "${wallet_name}" \
       "y"
   fi
+  _set_override \
+    "output" \
+    "type" \
+    ""
 }
 
 # Show help usage, with an exit status.
@@ -660,7 +759,7 @@ Usage:
   ${app_name}
     [options]
     <command>
-      (<command_args>)
+      (<command-args>)
 
   commands:
     get
@@ -668,7 +767,7 @@ Usage:
       <key>
     list
     set
-      <wallet_name>
+      <wallet-name>
       <key>
       <value>
     send
@@ -686,27 +785,35 @@ Usage:
     well as direct RPC addresses
 
   options:
-     -R <rpc_selection>       RPC selection method.
+     -R <rpc-selection>       RPC selection method.
                               Default: ${rpc_selection}
-     -S <explorer_selection>  Network explorer selection method.
+     -S <explorer-selection>  Network explorer selection method.
                               Default: ${explorer_selection}
-     -r <retries_max>         Maximum number of retries before
+     -r <retries-max>         Maximum number of retries before
                               failing.
                               Default: ${retries_max}
-     -u <measure_unit>        Measure unit. It can be
+     -u <measure-unit>        Measure unit. It can be
                               'ether' or 'wei'.
                               Default: ${measure_unit}
-     -l <balance_lifespan>    Maximum threshold in seconds
+     -l <balance-lifespan>    Maximum threshold in seconds
                               from now after which to consider
                               balance to be outdated.
                               Default: ${balance_lifespan}
 
+  list options:
+     -o <output-type>         It can be 'name', 'address',
+                              'fingerprint'.
+                              Default: ${output_type}
+
   send options:
-     -t <currency_type>       Currency type.
+     -t <currency-type>       Currency type.
                               It can be 'gas', 'erc20'.
+                              Default: ${currency_type}
+
      -C <currency>            Address of the ERC20
                               token on the network,
                               if type is 'erc20'.
+                              Default: ${currency_address}
 
   credentials options:
      -w <wallet_path>         Wallet path.
@@ -767,6 +874,8 @@ _show_config() {
   _msg_info "             Send options:"
   _msg_info "              Currency type:   ${currency_type}"
   _msg_info "           Currency address:   ${currency_address}"
+  _msg_info "             List options:"
+  _msg_info "                Output type:   ${output_type}"
   _msg_info "      Credentials options:"
   _msg_info "                Wallet path:   ${wallet_path}"
   _msg_info "            Wallet password:   ${wallet_password}"
@@ -791,7 +900,7 @@ getopts_opts="$( \
   printf \
     "%s" \
     "S:E:a:r:u:l:" \
-    "t:C:" \
+    "t:C:o:" \
     "$(_libevm_app_getopts_params_get)" \
     "n:" \
     "$(_wallet_getopts_params_get)" \
@@ -820,6 +929,8 @@ while \
       override_currency_type="${OPTARG}" ;;
     C) \
       override_currency_address="${OPTARG}" ;;
+    o) \
+      override_output_type="${OPTARG}" ;;
     n) \
       target_networks+=(
         "${OPTARG}"
@@ -887,6 +998,7 @@ app_opts=(
   "${balance_lifespan}"
   "${currency_type}"
   "${currency_address}"
+  "${output_type}"
   "${target_key}"
   "${target_value}"
   "${networks_amount}"
