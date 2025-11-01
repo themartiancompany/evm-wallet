@@ -1,0 +1,157 @@
+#!/usr/bin/env node
+
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+//    ----------------------------------------------------------------------
+//    Copyright © 2024, 2025  Pellegrino Prevete
+//
+//    All rights reserved
+//    ----------------------------------------------------------------------
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU Affero General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU Affero General Public License for more details.
+//
+//    You should have received a copy of the GNU Affero General Public License
+//    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+const
+  { ethers } =
+    require(
+      "ethers");
+_ethers =
+  ethers;
+_wei_to_ether =
+  _ethers.formatEther;
+_parse_units =
+  _ethers.parseUnits;
+const
+  _libcrash =
+    require(
+      '../libcrash-js/crash-js');
+_cmdline_check =
+  _libcrash._cmdline_check;
+_msg_info =
+  _libcrash._msg_info;
+_msg_info_obj =
+  _libcrash._msg_info_obj;
+_msg_error =
+  _libcrash._msg_error;
+
+
+function
+  _global_variables() {
+  app_name =
+    "ethers-to-wei";
+  ethers_input =
+    "";
+  quiet =
+    "";
+}
+
+function
+  _ethers_to_wei(
+    _amount) {
+  let
+    _amount_string
+  _amount_string = String(
+    _amount);
+  return _parse_units(
+    _amount_string,
+    "ether");
+}
+
+function
+  _config_show() {
+  let
+    _line,
+    _text;
+  _text = [
+    "     Input ethers: {ethers_input}".replaceAll(
+      "{ethers_input}",
+      ethers_input),
+  ]
+  for ( _line of _text ) {
+    _msg_info(
+      _line);
+  }
+}
+
+function
+  _usage(
+    _exit_code) {
+  let
+    _line,
+    _text;
+  _text = [
+    "Usage:",
+    "  ethers-to-wei",
+    "    <ethers-input>"
+  ];
+  for ( _line of _text ) {
+    _msg_info(
+      _line);
+  }
+  process.exit(
+    _exit_code);
+}
+
+
+function _cmdline_parse() {
+  let
+    _msg;
+  quiet =
+    "y";
+  process.argv.forEach(
+    function (
+      _value,
+      _index,
+      _array) {
+      if ( _index == 2 ) {
+        ethers_input =
+          _value;
+      }
+      if ( _value == "-h" ||
+           _value == "--help" ) {
+        quiet =
+          "n";
+        _usage(
+          0);
+      }
+  });
+  if ( ethers_input == "" ) {
+    _msg =
+      "No arguments given.";
+    _msg_error(
+      _msg,
+      0);
+    quiet =
+      "n";
+    _usage(
+      0);
+  }
+}
+
+if ( _cmdline_check(
+       "ethers-to-wei") ) {
+  _global_variables();
+  _cmdline_parse();
+  _config_show();
+  _wei =
+    String(
+      _ethers_to_wei(
+        ethers_input));
+  console.log(
+    _wei);
+}
+
+module.exports = {
+  _ethers_to_wei:
+    _ethers_to_wei
+};

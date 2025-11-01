@@ -31,6 +31,7 @@ Ethereum Virtual Machine (EVM) compatible networks' wallet
 :Version: evm-wallet |version|
 :Manual section: 1
 
+
 Synopsis
 ========
 
@@ -77,6 +78,7 @@ Get and set arguments
 
   Returns wallet seed phrase.
 
+
 List arguments
 =================
 
@@ -102,6 +104,7 @@ Options
 -l balance-lifespan     Maximum threshold in seconds
                         from now after which to consider
                         balance to be outdated.
+
 
 List options
 ==============
@@ -139,23 +142,27 @@ Application options
 -c                      Enable color output
 -v                      Enable verbose output
 
+
 Bugs
 ====
 
 https://github.com/themartiancompany/evm-wallet/-/issues
+
 
 Copyright
 =========
 
 Copyright Pellegrino Prevete. AGPL-3.0.
 
+
 See also
 ========
 
 * mkseed
-* key-gen
+* ether2wei
 * evm-chains-info
 * evm-chains-explorers
 * evm-contract-call
+* key-gen
 
 .. include:: variables.rst

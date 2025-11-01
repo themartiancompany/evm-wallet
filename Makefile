@@ -149,6 +149,9 @@ install-man:
 	  -vdm755 \
 	  "$(MAN_DIR)/man1"
 	rst2man \
+	  "man/ether2wei.1.rst" \
+	  "$(MAN_DIR)/man1/ether2wei.1"
+	rst2man \
 	  "man/$(_PROJECT).1.rst" \
 	  "$(MAN_DIR)/man1/$(_PROJECT).1"
 	rst2man \

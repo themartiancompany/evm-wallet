@@ -21,26 +21,28 @@
    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-=======
-mkseed
-=======
+===========
+ether2wei
+===========
+
 
 ---------------------------------------------------------
-Make Seed
+Ethers to Wei
 ---------------------------------------------------------
-:Version: mkseed |version|
+:Version: ether2wei |version|
 :Manual section: 1
 
 
 Synopsis
 ========
 
-mkseed *[options]* *out_file*
+ether2wei *[options]* *ether-amount*
 
 
 Description
 ===========
-Generates a twelve words seed phrase.
+
+Converts a given input ether amount to wei.
 
 
 Options
@@ -67,6 +69,6 @@ See also
 ========
 
 * evm-wallet
-* ether2wei
+* mkseed
 
 .. include:: variables.rst
