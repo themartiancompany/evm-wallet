@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+#    ----------------------------------------------------------------------
+#    Copyright © 2024, 2025  Pellegrino Prevete
+#
+#    All rights reserved
+#    ----------------------------------------------------------------------
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+__evm_wallet_list() {
+  local \
+    cur \
+    prev \
+    opts
+  COMPREPLY=()
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+  opts="-R -S -r -u -l -o -t -C -w -p -s -n -k -h -v -c"
+  if [[ ${cur} == * ]] ; then
+      COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+      return 0
+  fi
+}
+
+complete -F __evm_wallet_list evm-wallet
+
+# ex:et ts=2 sw=2 ft=sh

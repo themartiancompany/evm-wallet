@@ -21,10 +21,11 @@
 
 PREFIX ?= /usr/local
 _PROJECT=evm-wallet
-DOC_DIR=$(DESTDIR)$(PREFIX)/share/doc/$(_PROJECT)
+DATA_DIR=$(DESTDIR)$(PREFIX)/share
+DOC_DIR=$(DATA_DIR)/doc/$(_PROJECT)
 BIN_DIR=$(DESTDIR)$(PREFIX)/bin
 LIB_DIR=$(DESTDIR)$(PREFIX)/lib/$(_PROJECT)
-MAN_DIR?=$(DESTDIR)$(PREFIX)/share/man
+MAN_DIR?=$(DATA_DIR)/man
 
 DOC_FILES=\
   $(wildcard *.rst) \
@@ -57,15 +58,20 @@ _INSTALL_SCRIPTS_TARGETS=\
   install-bash-scripts \
   install-node-scripts \
   install-configs
+_INSTALL_COMPLETION_TARGETS=\
+  install-bash-completion \
+  install-zsh-completion
 _INSTALL_DOC_TARGETS=\
   install-doc \
   install-man
 _INSTALL_TARGETS=\
   install-scripts \
+  install-completion \
   $(_INSTALL_DOC_TARGETS)
 _INSTALL_TARGETS_ALL=\
   install \
   $(_INSTALL_TARGETS) \
+  $(_INSTALL_COMPLETION_TARGETS) \
   $(_INSTALL_SCRIPTS_TARGETS)
 
 _PHONY_TARGETS=\
@@ -84,6 +90,8 @@ install: $(_INSTALL_TARGETS)
 
 install-scripts: $(_INSTALL_SCRIPTS_TARGETS)
 
+install-completion: $(_INSTALL_COMPLETION_TARGETS)
+
 install-bash-scripts:
 
 	for _file in $(_BASH_FILES); do \
@@ -99,6 +107,18 @@ install-node-scripts:
 	    "$(_PROJECT)/$${_file}" \
 	    "$(LIB_DIR)/$${_file}"; \
 	done
+
+install-bash-completion:
+
+	$(_INSTALL_FILE) \
+	  "completion/bash_completion" \
+          "$(DATA_DIR)/bash-completion/completions/$(_PROJECT)"
+
+install-zsh-completion:
+
+	$(_INSTALL_FILE) \
+	  "completion/zsh_completion" \
+          "$(DATA_DIR)/zsh/site-functions/_$(_PROJECT)"
 
 install-configs:
 

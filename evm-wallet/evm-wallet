@@ -823,9 +823,6 @@ Usage:
                               Default: ${wallet_password}
      -s <wallet_seed>         Wallet seed path.
                               Default: ${wallet_seed}
-     -n <network>             EVM network name. Accepted values
-                              are all those supported by
-                              evm-chains-info and RPC addresses.
      -k <api_key>             Etherscan-like service key.
                               Default: ${api_key}
 

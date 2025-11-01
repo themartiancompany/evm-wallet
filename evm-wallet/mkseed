@@ -21,12 +21,11 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-_bin="$( \
+_bin="$(
   dirname \
-    "$( \
-      command \
-        -v \
-	  "env")")"
+    "$(command \
+         -v \
+	 "env")")"
 _lib="${_bin}/../lib"
 source \
   "${_lib}/libcrash-bash/crash-bash"
@@ -39,51 +38,27 @@ _global_variables() {
 }
 
 _requirements() {
-  local \
-    _app
-    _check_cmd \
-      'node' \
-      'nodejs'
+  _check_cmd \
+    'node-run'
 }
 
 _get_conf_dir_path() {
   local \
     _dir
-  _dir="${HOME}/.config/$( \
-    _get \
-      "app" \
-      "name")"
+  _dir="${HOME}/.config/${app_name}"
   echo \
     "${_dir}"
-}
-
-_node_run() {
-  local \
-    _cmd="${1}" \
-    _args=() \
-    _node_path \
-    _lib
-  shift \
-    1
-  _args=(
-    "$@"
-  )
-  _lib="$( \
-    _get_lib)"
-  _node_path="${_lib}/node_modules" 
-  export \
-    NODE_PATH="${_node_path}"
-  NODE_PATH="${_node_path}" \
-  node \
-    "${_cmd}" \
-      "${_args[@]}" || \
-    true
 }
 
 _mkseed() {
   local \
     _out_file="${1}" \
-    _lib
+    _node_run_opts=()
+  if [[ "${quiet}" == "n" ]]; then
+    _node_run_opts+=(
+      -v
+    )
+  fi
   _cmd="$( \
     _get_lib)/evm-wallet/seed-new"
   _args+=(
@@ -94,7 +69,8 @@ _mkseed() {
       "n"
     )
   fi
-  _node_run \
+  node-run \
+    "${_node_run_opts[@]}" \
     "${_cmd}" \
     "${_args[@]}"
 }
