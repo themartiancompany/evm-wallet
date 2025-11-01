@@ -34,7 +34,11 @@ _parse_units =
 const
   _libcrash =
     require(
-      '../libcrash-js/crash-js');
+      "crash-js") ||
+const
+  _libcrash =
+    require(
+      "../libcrash-js/crash-js")
 _dirname =
   _libcrash._dirname;
 _file_read =
@@ -54,11 +58,13 @@ const
 _wallet_get =
   _wallet_get_module._wallet_get;
 const
-  _balance_get_module =
+  _balance_check_module =
     require(
-      './balance-get');
-_balance_get =
-  _balance_get_module._balance_get;
+      './balance-check');
+_balance_check =
+  _balance_check_module._balance_check;
+_msg_error_balance_insufficient =
+  _balance_check_module._msg_error_balance_insufficient
 const
   _network_provider =
     require(
@@ -72,7 +78,7 @@ _msg_info_provider_generated =
 function
   _global_variables() {
   app_name =
-    "balance-check";
+    "balance-send";
   method_args =
     [];
   wallet_seed =
@@ -91,27 +97,6 @@ function
     "";
 }
 
-function
-  _msg_error_balance_insufficient(
-    _amount,
-    _unit) {
-  let
-    _msg,
-    _template;
-  _template =
-    "amount '{_amount}' '{_unit}' requested to send is less than balance.";
-  _msg =
-    _template.replaceAll(
-      "{_amount}",
-      _amount);
-  _msg =
-    _msg.replaceAll(
-      "{_unit}",
-      _unit);
-  _msg_error(
-    _msg,
-    1)
-}
 
 function
   _ethers_to_wei(
@@ -123,8 +108,9 @@ function
 
 
 async function
-  _balance_check(
+  _balance_send(
     _wallet_seed,
+    _target_address,
     _target_amount,
     _target_network,
     _api_key_path,
@@ -132,16 +118,14 @@ async function
   let
     _amount,
     _api_key,
-    _balance,
+    _balance_check_opts,
     _provider_get_opts,
+    _send_opts,
     _sender_address,
     _tx,
     _wallet_dir,
     _wallet_password,
     _wallet_path_list;
-  _target_amount =
-    Number(
-      _target_amount);
   _wallet_password =
     "";
   _wallet_dir =
@@ -186,29 +170,45 @@ async function
     _measure_unit =
       "ether";
   }
-  _balance_get_opts = [
+  _balance_check_opts = [
     _wallet_seed,
+    _target_amount,
     _target_network,
     _api_key_path,
-    _sender_address,
     _measure_unit
   ];
-  _balance =
-    await _balance_get.apply(
+  _check =
+    await _balance_check.apply(
       null,
-      _balance_get_opts);
-  _balance =
-    Number(
-      _balance);
-  if ( _balance <= _target_amount ) {
-    _msg_error(
-      `Balance is '${_balance}', requiring '${_target_amount}' `,
-      0);
-    return false;
+      _balance_check_opts);
+  if ( _check == false ) {
+    _msg_error_balance_insufficient(
+      _target_amount,
+      _measure_unit);
   }
-  else if ( _balance > _target_amount ) {
-    return true;
+  if ( _measure_unit == "wei" ) {
+    _amount =
+      target_amount;
   }
+  else if ( _measure_unit == "ether" ) {
+    _amount =
+      _ethers_to_wei(
+        _target_amount);
+  }
+  console.log(
+    "sending", _amount, _measure_unit);
+  _send_opts = {
+    'to':
+      _target_address,
+    'value':
+      _amount
+  };
+  _tx =
+    await _wallet.sendTransaction(
+      _send_opts);
+  console.log(
+    _tx);
+  return _tx;
 }
 
 function
@@ -227,6 +227,9 @@ function
     "      Wallet seed: {wallet_seed}".replaceAll(
       "{wallet_seed}",
       wallet_seed),
+    "   Target address: {target_address}".replace(
+      "{target_address}",
+      target_address),
     "    Target amount: {target_amount}".replace(
       "{target_amount}",
       target_amount),
@@ -252,12 +255,11 @@ function
     _line,
     _text;
   _text = [
-    "Checks if wallet balance is more or less than a given amount",
-    "",
     "Usage:",
-    "  balance-check",
+    "  balance-send",
     "    <quiet>",
     "    <seed_path>",
+    "    <target_address>",
     "    <amount>",
     "    (<target_network>)",
     "    (<api_key>)",
@@ -266,6 +268,7 @@ function
     "Args:",
     "  <seed_path>         Path on disk of the file",
     "                      containing the seed phrase.",
+    "  <target_address>    Address to send some balance to.",
     "  <amount>            How much balance to send.",
     "  <target_network>    Name of the network to connect to.",
     "  <api_key>           Path on disk of the API key for",
@@ -300,61 +303,52 @@ function _cmdline_parse() {
 	  _value;
       }
       if ( _index == 4 ) {
-        target_amount =
+        target_address =
 	  _value;
       }
       if ( _index == 5 ) {
-        target_network =
+        target_amount =
 	  _value;
       }
       if ( _index == 6 ) {
-        api_key =
+        target_network =
 	  _value;
       }
       if ( _index == 7 ) {
+        api_key =
+	  _value;
+      }
+      if ( _index == 8 ) {
         measure_unit =
 	  _value;
       }
   });
   if ( wallet_seed == "" ||
+       target_address == "" ||
        target_amount == "") {
     _usage();
   }
 }
 
-async function
-  _balance_check_cmdline(
-    _app_opts) {
-  let
-    _check;
-  _check =
-    await _balance_check.apply(
-      null,
-      _app_opts);
-  process.stdout.write(
-    _check.toString());
-}
-
-_global_variables();
-
-if ( require.main == module ) {
+if ( _cmdline_check(
+       "balance-send") == true ) {
+  _global_variables();
   _cmdline_parse();
-  _overrides_set();
   _config_show();
   app_opts = [
     wallet_seed,
+    target_address,
     target_amount,
     target_network,
     api_key,
     measure_unit
   ];
-  _balance_check_cmdline(
+  _balance_send.apply(
+    null,
     app_opts);
 }
 
 module.exports = {
-  _balance_check:
-    _balance_check,
-  _msg_error_balance_insufficient:
-    _msg_error_balance_insufficient
+  _balance_send:
+    _balance_send
 };
