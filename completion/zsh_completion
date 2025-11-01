@@ -1,0 +1,60 @@
+# compdef evm-wallet
+
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+#    ----------------------------------------------------------------------
+#    Copyright © 2024, 2025  Pellegrino Prevete
+#
+#    All rights reserved
+#    ----------------------------------------------------------------------
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+_evm_wallet_shortopts=(
+      '(1 -R)-R[RPC selection method.]'
+      '(1 -S)-S[Network explorer selection method.]'
+      '(1 -r)-r[Maximum number of retries before failing.]'
+      '(1 -u)-u[Measure unit. It can be "ether" or "wei".]'
+      '(1 -l)-l[Maximum threshold in seconds from now after which to consider balance to be outdated.]'
+      '(1 -o)-o[It can be "name", "address" or "fingerprint".]'
+      '(1 -t)-t[Currency type.]'
+      '(1 -C)-C[Address of the ERC20 token of the network, if type is "erc20".]'
+      '(1 -w)-w[Wallet path.]'
+      '(1 -p)-p[Wallet password path.]'
+      '(1 -s)-s[Wallet seed path.]'
+      '(1 -n)-n[EVM network name. Accepted values are all those supported by evm-chains-info and RPC addresses.]'
+      '(1 -k)-k[Etherscan-like service API key.]'
+      '(-h)-h[Displays help.]'
+      '(-c)-c[Enable color output.]'
+      '(-v)-v[Enable verbose output.]'
+)
+
+# main dispatcher
+_evm_wallet_zsh_comp() {
+  # _arguments "(1, -s)-s[Wallet seed path.]"
+  case $words[CURRENT] in
+  -*)
+    _arguments \
+      -s \
+     "${_evm_wallet_shortopts[@]}"
+  ;;
+  *)
+    _arguments \
+      -s \
+     "${_evm_wallet_shortopts[@]}"
+  ;;
+  esac
+}
+
+_evm_wallet_zsh_comp "$@"
