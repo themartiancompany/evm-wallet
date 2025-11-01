@@ -40,6 +40,7 @@ _NODE_FILES=\
   balance-check \
   balance-get \
   balance-send \
+  ethers-to-wei \
   network-provider \
   seed-new \
   wallet-get \
