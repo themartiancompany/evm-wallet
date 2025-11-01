@@ -31,19 +31,40 @@ _wei_to_ether =
   _ethers.formatEther;
 _parse_units =
   _ethers.parseUnits;
+
+function
+  _libcrash_require() {
+  let
+    _libcrash;
+  try {
+    _libcrash =
+      require(
+        "crash-js");
+  } catch(
+      _error) {
+    try {
+      _libcrash =
+        require(
+          "../libcrash-js/crash-js");
+    } catch(
+        _error) {
+      _msg =
+        "Install Crash Javascript.";
+      throw _msg;
+    }
+  }
+  return _libcrash
+}
+
 const
   _libcrash =
-    require(
-      '../libcrash-js/crash-js');
+    _libcrash_require();
 _cmdline_check =
   _libcrash._cmdline_check;
 _msg_info =
   _libcrash._msg_info;
-_msg_info_obj =
-  _libcrash._msg_info_obj;
 _msg_error =
   _libcrash._msg_error;
-
 
 function
   _global_variables() {
