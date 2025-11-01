@@ -33,6 +33,7 @@ DOC_FILES=\
 
 _BASH_FILES=\
   $(_PROJECT) \
+  ether2wei \
   mkseed
 
 _NODE_FILES=\
@@ -46,9 +47,15 @@ _NODE_FILES=\
   wallet-get \
   wallet-new
 
-_INSTALL_FILE=install -vDm644
-_INSTALL_EXE=install -vDm755
-_INSTALL_DIR=install -vdm755
+_INSTALL_FILE=\
+  install \
+    -vDm644
+_INSTALL_EXE=\
+  install \
+    -vDm755
+_INSTALL_DIR=\
+  install \
+    -vdm755
 
 _CHECK_TARGETS=\
   shellcheck
