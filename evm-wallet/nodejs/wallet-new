@@ -100,7 +100,7 @@ function
     _msg,
     _template;
   _template =
-    "the seed '{_seed}' does not exist."
+    "The seed '{_seed}' does not exist."
   _msg =
     _template.replaceAll(
       "{_seed}",
@@ -148,7 +148,6 @@ async function
       _provider);
 }
 
-
 function
   _overrides_set() {
   if ( target_network == "" ) {
@@ -159,7 +158,8 @@ function
 
 
 function
-  _usage() {
+  _usage(
+    _exit) {
   let
     _line,
     _text;
@@ -176,7 +176,8 @@ function
     _msg_info(
       _line);
   }
-  process.exit();
+  process.exit(
+    _exit);
 }
 
 
@@ -215,7 +216,8 @@ function
       }
   });
   if ( wallet_path == "" ) {
-    _usage();
+    _usage(
+      1);
   }
 }
 

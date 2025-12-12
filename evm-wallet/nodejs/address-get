@@ -38,6 +38,8 @@ function
         "crash-js");
   } catch(
       _error) {
+    console.log(
+      _error);
     try {
       _libcrash =
         require(
@@ -312,6 +314,10 @@ if ( _cmdline_check(
   ];
   _address_get_cmdline(
     app_opts);
+}
+else {
+  console.log(
+    "Running from browser.");
 }
 
 module.exports = {
