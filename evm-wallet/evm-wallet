@@ -549,7 +549,7 @@ _contacts_list() {
          )
          _msg_info \
            "${_msg[*]}"
-         _fingeprint="$(
+         _fingerprint="$(
            _key_fingerprint_get \
              "${_wallet_name}")"
          _fingerprints["${_wallet_name}"]="${_fingerprint}"
@@ -763,6 +763,7 @@ _output_type_check() {
     _output_types=() \
     _evm_gpg_available
   _output_types=(
+    ""
     "name"
     "address"
     "fingerprint"
