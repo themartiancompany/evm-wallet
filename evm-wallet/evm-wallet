@@ -21,13 +21,12 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-_bin="$( \
+_bin="$(
   dirname \
-    "$( \
-      command \
+    "$(command \
         -v \
         "env")")"
-_lib="$( \
+_lib="$(
   realpath \
     "${_bin}/../lib")"
 _crash_bash="${_lib}/libcrash-bash/crash-bash"
@@ -53,6 +52,7 @@ _global_variables() {
   currency_address=""
   networks_all=""
   rpc_selection=""
+  key_fingerprint=""
   explorer_selection=""
   retries_max=""
   measure_unit=""
@@ -100,10 +100,10 @@ _balance_age_get() {
   _msg_info \
     "${_msg[*]}"
   else 
-    _now="$( \
+    _now="$(
       date \
       "+%s")"
-    _balance_modified="$( \
+    _balance_modified="$(
       date \
         -r \
           "${_balance_file}" \
@@ -122,7 +122,7 @@ _balance_send() {
     _target_amount="${4}" \
     _lib \
     _msg=()
-  _lib="$( \
+  _lib="$(
     _get_lib)/evm-wallet"
   _cmd=""
   if [[ "${_currency_type}" == "gas" ]]; then
@@ -165,7 +165,7 @@ _wallet_key_cmd() {
     _key="${1}" \
     _command="${2}" \
     _lib
-  _lib="$( \
+  _lib="$(
     _get_lib)/evm-wallet"
   echo \
     "${_lib}/${_key}-${_command}"
@@ -183,7 +183,7 @@ _balance_get_cmd_get() {
     "${_target_network}" \
     "${_rpc_selection}"
   _balance_file="${_cache_dir}/${_wallet_name}/${_target_network}"
-  _balance_dir="$( \
+  _balance_dir="$(
     dirname \
       "${_balance_file}")"
   if [[ ! -d "${_cache_dir}" ]]; then
@@ -213,7 +213,7 @@ _balance_get_cmd_get() {
     fi
   fi
   if [[ "${_balance_update}" == "true" ]]; then
-    _cmd="$( \
+    _cmd="$(
       "_wallet_key_cmd" \
         "${_key}" \
         "get")"
@@ -242,7 +242,7 @@ _address_get() {
   _wallet_address=""
   _address_file="${_wallet_seed%-seed.txt}-address.txt"
   if [[ ! -e "${_address_file}" ]]; then
-    _cmd="$( \
+    _cmd="$(
       "_wallet_key_cmd" \
         "address" \
         "get")"
@@ -266,7 +266,7 @@ _address_get() {
         "${_args[@]}"
     fi
   fi
-  _wallet_address="$( \
+  _wallet_address="$(
     cat \
       "${_address_file}")"
 }
@@ -322,18 +322,18 @@ _wallets_sort() {
     _msg_info \
       "${_msg[*]}"
   elif (( 0 < "${#_wallets_files[@]}" )); then
-    _wallets_dir="$( \
+    _wallets_dir="$(
       dirname \
         "${_wallets_files[@]}")"
     for _wallet in "${_wallets_files[@]}"; do
-      _wallet_name="$( \
+      _wallet_name="$(
         basename \
           "${_wallet}")"
       _wallet_names_unsorted+=(
         "${_wallet_name}" 
       )
     done
-    _wallets_names=( $( \
+    _wallets_names=( $(
       printf \
         '%s\n' \
         "${_wallet_names_unsorted[@]}")
@@ -438,7 +438,7 @@ _contacts_field_display() {
     done
     printf \
       '%s\n' \
-      "${_results[@]}" | \
+      "${_results[@]}" |
       sort \
         -V
 }
@@ -466,7 +466,7 @@ _contacts_list() {
   if [[ "${_filter}" == "" ]]; then
     _filter="*"
   fi
-  _config_dir="$( \
+  _config_dir="$(
     _get_conf_dir_path)"
   _wallets_files_get \
     "${_config_dir}" \
@@ -474,7 +474,7 @@ _contacts_list() {
   _wallets_sort
   for _wallet \
     in "${_wallets_files[@]}"; do
-    _file_name="$( \
+    _file_name="$(
       basename \
         "${_wallet}")"
     if [[ "${_file_name}" == *"-seed.txt" ]]; then
@@ -482,7 +482,7 @@ _contacts_list() {
       _wallets["${_wallet_name}"]="${_config_dir}/${_file_name}"
     elif [[ "${_file_name}" == *"-address.txt" ]]; then
       _wallet_name="${_file_name%-address.txt}"
-      _addresses["${_wallet_name}"]="$( \
+      _addresses["${_wallet_name}"]="$(
        cat \
          "${_wallet}")" 
     fi
@@ -534,19 +534,20 @@ _evm_wallet() {
     _wallet_path="${2}" \
     _wallet_password="${3}" \
     _wallet_seed="${4}" \
-    _cache_dir="${5}" \
-    _networks_all="${6}" \
-    _rpc_selection="${7}" \
-    _api_key_path="${8}" \
-    _retries_max="${9}" \
-    _measure_unit="${10}" \
-    _balance_lifespan="${11}" \
-    _currency_type="${12}" \
-    _currency_address="${13}" \
-    _output_type="${14}" \
-    _target_key="${15}" \
-    _target_value="${16}" \
-    _networks_amount="${17}" \
+    _key_fingerprint="${5}"
+    _cache_dir="${6}" \
+    _networks_all="${7}" \
+    _rpc_selection="${8}" \
+    _api_key_path="${9}" \
+    _retries_max="${10}" \
+    _measure_unit="${11}" \
+    _balance_lifespan="${12}" \
+    _currency_type="${13}" \
+    _currency_address="${14}" \
+    _output_type="${15}" \
+    _target_key="${16}" \
+    _target_value="${17}" \
+    _networks_amount="${18}" \
     _target_networks=() \
     _command_args=() \
     _target_networks=() \
@@ -559,17 +560,19 @@ _evm_wallet() {
     _approve_call_opts=() \
     _rpc_backend
   shift \
-    17
-  for _network \
-    in $(seq \
-           "1" \
-           "${_networks_amount}"); do
-    _network="${1}"
-    _target_networks+=(
-      "${_network}"
-    )
-    shift
-  done
+    18
+  if (( 0 < "${_networks_amount}" )); then
+    for _network \
+      in $(seq \
+             "1" \
+             "${_networks_amount}"); do
+      _network="${1}"
+      _target_networks+=(
+        "${_network}"
+      )
+      shift
+    done
+  fi
   _command_args+=(
     "$@"
   )
@@ -667,6 +670,51 @@ _target_key_auto_detect() {
     "${_key}"
 }
 
+_key_fingerprint_auto_detect() {
+  local \
+    _evm_gpg_available \
+    _evm_gpg_opts=() \
+    _msg=()
+  _evm_gpg_available="$(
+    command \
+      -v \
+      "evm-gpg" || \
+      true)"
+  if [[ "${wallet_name}" != "" ]]; then
+    _evm_gpg_opts+=(
+      -N
+        "${wallet_name}"
+      -o
+        "fingerprint"
+    )
+  if [[ "${_evm_gpg_available}" != "" ]]; then
+    # _evm_gpg_opts+=(
+    #   -v
+    # )
+    evm-gpg \
+      -v \
+      "${_evm_gpg_opts[@]}" -- \
+      list
+    key_fingerprint="$(
+      evm-gpg \
+        "${_evm_gpg_opts[@]}" -- \
+        list)"
+    _msg_info \
+      "${_key_fingerprint[@]}"
+    elif [[ "${_evm_gpg_available}" == "" ]]; then
+      _msg=(
+        "Install Ethereum Virtual"
+        "Machine GNU Privacy Guard"
+        "to use OpenPGP on Ethereum."
+        "More information is available"
+        "by typing 'man evm-wallet'."
+      )
+      _msg_info \
+        "${_msg[*]}"
+    fi
+  fi
+}
+
 _set_overrides() {
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
@@ -735,6 +783,7 @@ _set_overrides() {
       "${wallet_name}" \
       "y"
   fi
+  _key_fingerprint_auto_detect
   _set_override \
     "output" \
     "type" \
@@ -880,6 +929,7 @@ _show_config() {
   _msg_info "                Wallet seed:   ${wallet_seed}"
   _msg_info "                    API key:   ${api_key}"
   _msg_info "             Wallet address:   ${wallet_address}"
+  _msg_info "            Key fingerprint:   ${key_fingerprint}"
   _msg_info "           LibEVM options:"
   _msg_info "             Target network:   ${target_network}"
   _msg_info "            Maximum retries:   ${retries_max}"
@@ -894,10 +944,10 @@ _libevm_global_variables
 _config_user_init \
   "${app_name}"
 # shellcheck disable=SC2034
-getopts_opts="$( \
+getopts_opts="$(
   printf \
     "%s" \
-    "S:E:a:r:u:l:" \
+    "S:E:a:r:u:f:l:" \
     "t:C:o:" \
     "$(_libevm_app_getopts_params_get)" \
     "n:" \
@@ -911,44 +961,47 @@ while \
   _libevm_app_getopts_case
   case \
     "${arg}" in
-    S) \
+    S)
       override_rpc_selection="${OPTARG}" ;;
-    E) \
+    E)
       override_explorer_selection="${OPTARG}" ;;
-    a) \
+    a)
       override_networks_all="${OPTARG}" ;;
-    r) \
+    r)
       override_retries_max="${OPTARG}" ;;
-    l) \
+    l)
       override_balance_lifespan="${OPTARG}" ;;
-    u) \
+    u)
       override_measure_unit="${OPTARG}" ;;
-    t) \
+    f)
+      override_key_fingerprint="${OPTARG}" ;;
+    t)
       override_currency_type="${OPTARG}" ;;
-    C) \
+    C)
       override_currency_address="${OPTARG}" ;;
-    o) \
+    o)
       override_output_type="${OPTARG}" ;;
-    n) \
+    n)
       target_networks+=(
         "${OPTARG}"
       ) ;;
       # override_target_network="${OPTARG}" ;;
-    W) \
+    W)
       override_cache_dir="${OPTARG}" ;;
-    c) \
+    c)
       override_color="y" ;;
-    v) \
+    v)
       override_quiet="n" ;;
-    h) \
+    h)
       _set_overrides && \
          _usage \
            0 ;;
-    *) \
+    *)
       if [[ " ${getopts_opts} " != *"${arg}"* ]]; then
         _msg_error \
           "Invalid argument '${arg}'." \
           0
+        _set_overrides
         _usage \
           1
       fi ;;
@@ -987,6 +1040,7 @@ app_opts=(
   "${wallet_path}"
   "${wallet_password}"
   "${wallet_seed}"
+  "${key_fingerprint}"
   "${cache_dir}"
   "${networks_all}"
   "${rpc_selection}"
