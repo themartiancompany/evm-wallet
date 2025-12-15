@@ -75,6 +75,40 @@ _requirements() {
     "evm-chains-explorers"
 }
 
+_key_fingerprint_requirements() {
+  local \
+    _required="${1}" \
+    _msg_type \
+    _msg_args=() \
+    _msg=()
+  _evm_gpg_available="$(
+    command \
+      -v \
+      "evm-gpg" || \
+      true)"
+  if [[ "${_evm_gpg_available}" == "" ]]; then
+    _msg=(
+      "Install Ethereum Virtual"
+      "Machine GNU Privacy Guard"
+      "to use OpenPGP on Ethereum."
+      "More information is available"
+      "by typing 'man evm-wallet'."
+    )
+    _msg_type="info"
+    _msg_args=(
+      "${_msg[*]}"
+    )
+    if [[ "${_required}" == "y" ]]; then
+      _msg_type="error"
+      _msg_args+=(
+        1
+      )
+    fi
+    "_msg_${_msg_type}" \
+      "${_msg_args[@]}" \
+  fi
+}
+
 _get_conf_dir_path() {
   local \
     _dir
@@ -427,12 +461,12 @@ _contacts_display_full() {
 _contacts_field_display() {
   local \
     _field="${1}" \
-    _address \
+    _name \
     _counter \
     _result \
     _results=()
   _counter="0"
-  for _address in \
+  for _name in \
     "${!_addresses[@]}"; do
     _counter="$(( \
       "${_counter}" + \
@@ -440,10 +474,9 @@ _contacts_field_display() {
     if [[ "${_field}" == "name" ]]; then
       _result="${_address}"
     elif [[ "${_field}" == "address" ]]; then
-      _result="${_addresses["${_address}"]}"
+      _result="${_addresses["${_name}"]}"
     elif [[ "${_field}" == "fingerprint" ]]; then
-      echo \
-        "TODO: GPG fingerprints display."
+      _result="${_fingerprints["${_name}"]}"
     else
       _msg=(
         "Unknown field '${_field}'."
@@ -476,6 +509,7 @@ _contacts_list() {
     _wallet_address \
     _wallet_seed \
     _file_name \
+    _fingerprint \
     _config_dir
   declare \
     -A \
@@ -515,20 +549,10 @@ _contacts_list() {
          )
          _msg_info \
            "${_msg[*]}"
-         _evm_gpg_opts=(
-           -N
-             "${_wallet_name}"
-           -o
-             "fingerprint"
-        )
-        evm-gpg \
-          -v \
-          "${_evm_gpg_opts[@]}" \
-          list
-        _fingerprints["${_wallet_name}"]="$(
-          evm-gpg \
-            "${_evm_gpg_opts[@]}" -- \
-            list)"
+         _fingeprint="$(
+           _key_fingerprint_get \
+             "${_wallet_name}")"
+         _fingerprints["${_wallet_name}"]="${_fingerprint}"
        fi
     fi
   done
@@ -571,6 +595,7 @@ _contacts_list() {
   exit \
     0
 }
+
 
 _evm_wallet() {
   local \
@@ -719,11 +744,8 @@ _key_fingerprint_auto_detect() {
     _evm_gpg_available \
     _evm_gpg_opts=() \
     _msg=()
-  _evm_gpg_available="$(
-    command \
-      -v \
-      "evm-gpg" || \
-      true)"
+  _key_fingerprint_requirements \
+    "n"
   if [[ "${_evm_gpg_available}" != "" ]]; then
     if [[ "${wallet_name}" != "" ]]; then
       _key_fingerprint="$(
@@ -732,18 +754,40 @@ _key_fingerprint_auto_detect() {
       _msg_info \
         "${_key_fingerprint}"
     fi
-    elif [[ "${_evm_gpg_available}" == "" ]]; then
-      _msg=(
-        "Install Ethereum Virtual"
-        "Machine GNU Privacy Guard"
-        "to use OpenPGP on Ethereum."
-        "More information is available"
-        "by typing 'man evm-wallet'."
-      )
-      _msg_info \
-        "${_msg[*]}"
-    fi
   fi
+}
+
+_output_type_check() {
+  local \
+    _output_type="${1}" \
+    _output_types=() \
+    _evm_gpg_available
+  _output_types=(
+    "name"
+    "address"
+    "fingerprint"
+  )
+  if [[ " ${_output_types[*]} " != *" ${_output_type} "* ]]; then
+    _msg=(
+      "Unknown field '${_field}'."
+    )
+    _msg_error \
+      "${_msg[*]}" \
+      1
+  fi
+  if [[ "${output_type}" == "fingerprint" ]]; then
+    _key_fingerprint_requirements \
+      "y"
+  fi
+}
+
+_output_type_auto_detect() {
+  _set_override \
+    "output" \
+    "type" \
+    ""
+  _output_type_check \
+    "${output_type}"
 }
 
 _set_overrides() {
@@ -815,10 +859,7 @@ _set_overrides() {
       "y"
   fi
   _key_fingerprint_auto_detect
-  _set_override \
-    "output" \
-    "type" \
-    ""
+  _output_type_auto_detect
 }
 
 # Show help usage, with an exit status.
