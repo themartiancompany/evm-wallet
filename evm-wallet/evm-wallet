@@ -377,18 +377,22 @@ _contacts_display_full() {
       "${_counter}" + \
       1 ))"
     _printf_args=(
-      "        Name: ${_address}"
+                "        Name: ${_address}"
     )
     _wallet_address="${_addresses["${_address}"]}"
     if [[ " ${!_wallets[@]} " == *" ${_address} "* ]]; then
       _printf_args+=(
-        "Private key: yes"
+        "           Private key: yes"
       )
     fi
     _printf_args+=(
-      "    Address: ${_wallet_address}" \
+      "               Address: ${_wallet_address}" \
+    )
+    _printf_args+=(
+      "   OpenPGP fingerprint: ${_wallet_address}" \
     )
     _printf_template=(
+      "%s" "\n"
       "%s" "\n"
       "%s" "\n"
       "%s" "\n"
@@ -463,6 +467,9 @@ _contacts_list() {
   declare \
     -A \
     _wallets
+  declare \
+    -A \
+    _fingerprints
   if [[ "${_filter}" == "" ]]; then
     _filter="*"
   fi
@@ -485,6 +492,22 @@ _contacts_list() {
       _addresses["${_wallet_name}"]="$(
        cat \
          "${_wallet}")" 
+       if [[ "${_output_type}" == "" || \
+             "${_output_type}" == "fingerprint" ]]; then
+         _msg=(
+           "Getting fingerprint for contact '${_wallet_name}'".
+         )
+         _evm_gpg_opts=(
+           -N
+             "${_wallet_name}"
+           -o
+             "fingerprint"
+        )
+         _fingerprints["${_wallet_name}"]="$(
+           evm-gpg \
+             "${_evm_gpg_opts[@]}" -- \
+             list)"
+       fi
     fi
   done
   for _wallet in \
@@ -516,7 +539,6 @@ _contacts_list() {
     "${!_addresses[@]}"
   )
   _addresses_amount="${#_addresses_keys[@]}"
-  echo "${_output_type}"
   if [[ "${_output_type}" == "" ]]; then
     _contacts_display_full
   else
@@ -534,7 +556,7 @@ _evm_wallet() {
     _wallet_path="${2}" \
     _wallet_password="${3}" \
     _wallet_seed="${4}" \
-    _key_fingerprint="${5}"
+    _key_fingerprint="${5}" \
     _cache_dir="${6}" \
     _networks_all="${7}" \
     _rpc_selection="${8}" \
