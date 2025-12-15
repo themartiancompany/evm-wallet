@@ -105,7 +105,7 @@ _key_fingerprint_requirements() {
       )
     fi
     "_msg_${_msg_type}" \
-      "${_msg_args[@]}" \
+      "${_msg_args[@]}"
   fi
 }
 
@@ -769,7 +769,7 @@ _output_type_check() {
   )
   if [[ " ${_output_types[*]} " != *" ${_output_type} "* ]]; then
     _msg=(
-      "Unknown field '${_field}'."
+      "Unknown output type '${_output_type}'."
     )
     _msg_error \
       "${_msg[*]}" \
