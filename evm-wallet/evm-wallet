@@ -271,6 +271,22 @@ _address_get() {
       "${_address_file}")"
 }
 
+_key_fingerprint_get() {
+  local \
+    _wallet_name="${1}" \
+    _evm_gpg_opts=()
+  _evm_gpg_opts+=(
+    -N
+      "${_wallet_name}"
+    -o
+      "fingerprint"
+  )
+  evm-gpg \
+    "${_evm_gpg_opts[@]}" -- \
+    "list" || \
+    true
+}
+
 _key_get() {
   local \
     _key="${1}" \
@@ -497,16 +513,22 @@ _contacts_list() {
          _msg=(
            "Getting fingerprint for contact '${_wallet_name}'".
          )
+         _msg_info \
+           "${_msg[*]}"
          _evm_gpg_opts=(
            -N
              "${_wallet_name}"
            -o
              "fingerprint"
         )
-         _fingerprints["${_wallet_name}"]="$(
-           evm-gpg \
-             "${_evm_gpg_opts[@]}" -- \
-             list)"
+        evm-gpg \
+          -v \
+          "${_evm_gpg_opts[@]}" \
+          list
+        _fingerprints["${_wallet_name}"]="$(
+          evm-gpg \
+            "${_evm_gpg_opts[@]}" -- \
+            list)"
        fi
     fi
   done
@@ -702,27 +724,14 @@ _key_fingerprint_auto_detect() {
       -v \
       "evm-gpg" || \
       true)"
-  if [[ "${wallet_name}" != "" ]]; then
-    _evm_gpg_opts+=(
-      -N
-        "${wallet_name}"
-      -o
-        "fingerprint"
-    )
   if [[ "${_evm_gpg_available}" != "" ]]; then
-    # _evm_gpg_opts+=(
-    #   -v
-    # )
-    evm-gpg \
-      -v \
-      "${_evm_gpg_opts[@]}" -- \
-      list
-    key_fingerprint="$(
-      evm-gpg \
-        "${_evm_gpg_opts[@]}" -- \
-        list)"
-    _msg_info \
-      "${_key_fingerprint[@]}"
+    if [[ "${wallet_name}" != "" ]]; then
+      _key_fingerprint="$(
+        _key_fingerprint_get \
+          "${_wallet_name}")"
+      _msg_info \
+        "${_key_fingerprint}"
+    fi
     elif [[ "${_evm_gpg_available}" == "" ]]; then
       _msg=(
         "Install Ethereum Virtual"
