@@ -344,7 +344,8 @@ _key_get() {
     _key="${1}" \
     _output_file \
     _output_dir \
-    _evm_chains_info_opts=()
+    _evm_chains_info_opts=() \
+    _network
   if [[ "${_key}" == "address" ]]; then
     "_${_key}_get" \
       "${quiet}" \
@@ -357,24 +358,9 @@ _key_get() {
     _rpc_backend_get \
       "${_target_network}" \
       "${_rpc_selection}"
-    if [[ "${_networks_all}" == "n" ]]; then
-      _evm_chains_info_opts+=(
-        -a
-        -o
-          "id"
-        -s
-          "all"
-      )
-      _target_networks=( $(
-        evm-chains-info \
-          "${_evm_chains_info_opts[@]}")
-      )
-    fi
-    for _network in "${_target_networks[@]}"; do
-      "_${_key}_get_cmd_get" \
-        "${wallet_name}" \
-        "${_target_network}"
-    done
+    "_${_key}_get_cmd_get" \
+      "${wallet_name}" \
+      "${_target_network}"
   elif [[ "${_key}" == "seed" ]]; then
     cat \
       "${_wallet_seed}"
@@ -683,6 +669,19 @@ _evm_wallet() {
     -r
       "${_retries_max}"
   )
+  if [[ "${_networks_all}" == "y" ]]; then
+    _evm_chains_info_opts+=(
+      -a
+      -o
+        "id"
+      -s
+        "all"
+    )
+    _target_networks=( $(
+      evm-chains-info \
+        "${_evm_chains_info_opts[@]}")
+    )
+  fi
   for _target_network \
     in "${_target_networks[@]}"; do
     if [[ "${_target_command}" == "get" ]]; then
@@ -784,7 +783,7 @@ _key_fingerprint_auto_detect() {
   if [[ "${_evm_gpg_available}" != "" ]]; then
     if [[ "${wallet_name}" != "" ]]; then
       _fingerprint_get \
-        "${_wallet_name}"
+        "${wallet_name}"
       _key_fingerprint="${_fingerprint}"
       _msg_info \
         "${_key_fingerprint}"
@@ -842,7 +841,12 @@ _set_overrides() {
     "date" \
     "$(_get_date_human)"
   _cache_dir_auto_detect
-  if [[ "${target_networks[*]}" == "" ]]; then
+  _set_override \
+    "networks" \
+    "all" \
+    "n"
+  if [[ "${target_networks[*]}" == "" && \
+        "${networks_all}" == "n" ]]; then
     target_networks+=(
       100
     )
@@ -866,10 +870,6 @@ _set_overrides() {
     "unit" \
     "ether"
   _set_override \
-    "networks" \
-    "all" \
-    "n"
-  _set_override \
     "currency" \
     "address" \
     ""
@@ -882,11 +882,15 @@ _set_overrides() {
     "explorer" \
     "selection" \
     "kirsh"
-  target_network="${target_networks[0]}"
+  if (( 0 < "${#target_networks[@]}" )); then
+    target_network="${target_networks[0]}"
+  fi
   if [[ "${currency_type}" != "gas" ]]; then
-    _api_key_auto_detect \
-      "${target_network}" \
-      "${explorer_selection}"
+    if [[ "${target_network}" != "" ]]; then
+      _api_key_auto_detect \
+        "${target_network}" \
+        "${explorer_selection}"
+    fi
   fi
   if [[ "${target_command}" != "list" ]]; then
     _wallet_overrides_set \
@@ -957,6 +961,8 @@ Usage:
                               from now after which to consider
                               balance to be outdated.
                               Default: ${balance_lifespan}
+     -a                       Operation valid for all available
+                              networks.
 
   list options:
      -o <output-type>         It can be 'name', 'address',
@@ -1055,7 +1061,7 @@ _config_user_init \
 getopts_opts="$(
   printf \
     "%s" \
-    "S:E:a:r:u:f:l:" \
+    "S:E:ar:u:f:l:" \
     "t:C:o:" \
     "$(_libevm_app_getopts_params_get)" \
     "n:" \
@@ -1074,7 +1080,7 @@ while \
     E)
       override_explorer_selection="${OPTARG}" ;;
     a)
-      override_networks_all="${OPTARG}" ;;
+      override_networks_all="y" ;;
     r)
       override_retries_max="${OPTARG}" ;;
     l)
