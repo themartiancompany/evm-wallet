@@ -120,7 +120,7 @@ function
          _timeout == "undefined") ||
        _timeout == "" ) {
     _timeout =
-      300;
+      1;
    _timeout_set =
     false;
   }
