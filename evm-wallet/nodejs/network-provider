@@ -30,8 +30,12 @@ const
       "ethers");
 _ethers =
   ethers;
+_fetch_request =
+  _ethers.FetchRequest;
 _get_default_provider =
   _ethers.getDefaultProvider;
+_json_rpc_provider =
+  _ethers.JsonRpcProvider;
 _network_class =
   _ethers.Network;
 
@@ -96,7 +100,9 @@ function
     _target_network,
     _api_key,
     _chain_id,
-    _chain_name) {
+    _chain_name,
+    _timeout,
+    _timeout_set) {
   let
     _default_network,
     _get_default_provider_opts,
@@ -105,6 +111,17 @@ function
     _provider,
     _provider_opts,
     _rpc;
+  if ( typeof(
+         _timeout) == "undefined" ||
+       _timeout == "" ) {
+    _timeout =
+      300;
+    _timeout_set =
+      false;
+  }
+  _timeout =
+    Number(
+      _timeout);
   _get_default_provider_opts =
     [];
   _network_new_opts = [
@@ -174,8 +191,23 @@ function
     _get_default_provider_opts.push(
      _network); 
   }
-  _get_default_provider_opts.push(
-    _provider_opts);
+  if ( _timeout_set == true ) {
+    if ( _default_network.startsWith(
+           "http") ) {
+      _request =
+        new _fetch_request(
+          _default_network);
+      _request._getConnection().timeout =
+        _timeout;
+      _provider =
+        new _json_rpc_provider(
+	  _request);
+    }
+  }
+  else if ( _timeout_set == false ) {
+    _get_default_provider_opts.push(
+      _provider_opts);
+  }
   _provider = _get_default_provider.apply(
     null,
     _get_default_provider_opts);
