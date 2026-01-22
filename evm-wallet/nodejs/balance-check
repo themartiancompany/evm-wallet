@@ -75,6 +75,8 @@ _msg_info_obj =
   _libcrash._msg_info_obj;
 _msg_error =
   _libcrash._msg_error;
+_sleep =
+  _libcrash._sleep;
 const
   _wallet_get_module =
     require(
@@ -243,7 +245,7 @@ async function
     _measure_unit
   ];
   while ( _success == false &&
-          _retry <= _retries_max ) {
+          _retry < _retries_max ) {
     try {
     _balance =
       await _balance_get.apply(
@@ -273,7 +275,7 @@ async function
       _msg,
       0);
     _sleep(
-      3);
+      3000);
 
   }
   if ( _retry == _retries_max ) {
