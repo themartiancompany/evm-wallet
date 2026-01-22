@@ -112,21 +112,17 @@ function
     _provider_opts,
     _rpc,
     _timeout_set;
+  _timeout_set =
+    false;
   if ( typeof(
          _timeout == "undefined") ||
        _timeout == "" ) {
     _timeout =
       1;
-   _timeout_set =
-    false;
   }
-  else {
-    _timeout =
-      Number(
-        _timeout);
-    _timeout_set =
-      true;
-  }
+  _timeout =
+    Number(
+      _timeout);
   _get_default_provider_opts =
     [];
   _network_new_opts = [
@@ -212,9 +208,9 @@ function
     _provider =
       _json_rpc_provider(
         _request);
-  }
   // console.log(
   //   _provider._getConnection().timeout);
+  }
   _msg_info_provider_generated(
     _provider);
   return _provider;
