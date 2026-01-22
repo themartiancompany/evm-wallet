@@ -281,14 +281,12 @@ _balance_get_cmd_get() {
         "${_node_run_opts[@]}" \
         "${_cmd}" \
         "${_args[@]}" \
-        1>"/dev/null" || \
-      true
+        1>"/dev/null"
     elif [[ "${quiet}" == "n" ]]; then
       node-run \
         "${_node_run_opts[@]}" \
         "${_cmd}" \
-        "${_args[@]}" || \
-      true
+        "${_args[@]}"
     fi
   fi
 }

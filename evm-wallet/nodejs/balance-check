@@ -193,6 +193,8 @@ async function
     0;
   _success =
     false;
+  _timeout =
+    1;
   _wallet_password =
     "";
   _wallet_dir =
@@ -266,13 +268,13 @@ async function
         return true;
       }
     } catch(
-        _err) {
+        _error) {
       _retry =
         _retry + 1;
       _msg =
-        `Error retrieving balance, retrying (${_retry} of ${_retries_max})`;
-      console.log(
-        _err);
+        `Error checking balance, retrying (${_retry} of ${_retries_max})`;
+      console.error(
+        _error);
       _msg_error(
         _msg,
         0);

@@ -148,6 +148,8 @@ async function
       Number(
         _retries_max);
   }
+  _timeout =
+    1;
   _retry =
     0;
   _success =
@@ -201,6 +203,8 @@ async function
   while ( _success == false &&
           _retry < _retries_max ) {
     try {
+      _provider._getConnection().timeout =
+        _timeout;
       _balance_wei = await
         _provider.getBalance(
           _target_address);
@@ -232,7 +236,7 @@ async function
         _retry + 1;
       _msg =
         `Error retrieving balance, retrying (${_retry} of ${_retries_max})`;
-      console.log(
+      console.error(
         _err);
       _msg_error(
         _msg,
@@ -241,8 +245,10 @@ async function
         3000);
     }
   }
-  if ( _retry == _retries_max ) {
-    throw "Error retrieving balance"
+  if ( _success == false &&
+       _retry == _retries_max ) {
+    throw "Error retrieving balance."
+    return _balance;
   }
   return _balance;
 }
@@ -388,6 +394,8 @@ async function
     _error) {
     _msg_error(
       _error,
+      1);
+    process.exit(
       1);
   }
 }
