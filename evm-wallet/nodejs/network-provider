@@ -84,14 +84,11 @@ function
   _msg_info_provider_generated(
     _provider) {
   let
-    _msg,
-    _template;
-  _template =
-    "Provider '{_provider}' generated.";
+    _msg;
+  console.log(
+    _provider);
   _msg =
-    _template.replaceAll(
-      "{_provider}",
-      _provider);
+    `Provider '${_provider}' generated.`;
   _msg_info(
     _msg);
 }
