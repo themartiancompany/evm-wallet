@@ -401,7 +401,8 @@ _key_get() {
     #   "${_rpc_selection}"
     "_${_key}_get_cmd_get" \
       "${wallet_name}" \
-      "${_target_network}"
+      "${_target_network}" \
+      "0"
   elif [[ "${_key}" == "seed" ]]; then
     cat \
       "${_wallet_seed}"
