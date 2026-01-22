@@ -916,7 +916,7 @@ _set_overrides() {
   _set_override \
     "retries" \
     "max" \
-    "300"
+    "3"
   _set_override \
     "measure" \
     "unit" \
