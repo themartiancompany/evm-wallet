@@ -194,12 +194,10 @@ function
   }
   _get_default_provider_opts.push(
     _provider_opts);
-  if ( _timeout_set == false ) {
-    _provider = _get_default_provider.apply(
-      null,
-      _get_default_provider_opts);
-  }
-  else if ( _timeout_set == true ) {
+  _provider = _get_default_provider.apply(
+    null,
+    _get_default_provider_opts);
+  if ( _timeout_set == true ) {
     _request =
       new _fetch_request(
         _default_network);
