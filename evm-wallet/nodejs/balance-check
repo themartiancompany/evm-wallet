@@ -193,8 +193,6 @@ async function
     0;
   _success =
     false;
-  _timeout =
-    1;
   _wallet_password =
     "";
   _wallet_dir =

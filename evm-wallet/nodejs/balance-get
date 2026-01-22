@@ -242,7 +242,7 @@ async function
         _msg,
         0);
       await _sleep(
-        3);
+        3000);
     }
   }
   if ( _success == false &&
