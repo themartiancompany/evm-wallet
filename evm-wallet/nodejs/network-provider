@@ -81,8 +81,9 @@ function
     "";
   chain_name =
     "";
+  connection_timeout =
+    "";
 }
-
 
 function
   _msg_info_provider_generated(
@@ -195,7 +196,7 @@ function
     _network =
       new (Function.prototype.bind.apply(
         _network_class,
-	_network_new_opts));
+        _network_new_opts));
     _get_default_provider_opts.push(
      _network); 
   }
@@ -230,18 +231,11 @@ function
     _line,
     _text;
   _text = [
-    "   Target network: {target_network}".replaceAll(
-      "{target_network}",
-      target_network),
-    "          API Key: {api_key}".replace(
-      "{api_key}",
-      api_key),
-    "        Chain ID: {chain_id}".replace(
-      "{chain_id}",
-      chain_id),
-    "      Chain Name: {chain_name}".replace(
-      "{chain_name}",
-      chain_name)
+    `   Target network: ${target_network}`,
+    `          API Key: ${api_key}`,
+    `         Chain ID: ${chain_id}`,
+    `       Chain Name: ${chain_name}`,
+    `          Timeout: ${connection-timeout}`
   ]
   for ( _line of _text ) {
     _msg_info(
@@ -332,6 +326,10 @@ function
     target_network =
       "gnosis";
   }
+  if ( connection_timeout == "" ) {
+    connection_timeout =
+      "300000";
+  }
 }
 
 if ( _cmdline_check(
@@ -344,7 +342,8 @@ if ( _cmdline_check(
     target_network,
     api_key,
     chain_id,
-    chain_name
+    chain_name,
+    connection_timeout
   ];
   _provider_get.apply(
     null,
