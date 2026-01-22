@@ -241,6 +241,9 @@ async function
         3000);
     }
   }
+  if ( _retry == _retries_max ) {
+    throw "Error retrieving balance"
+  }
   return _balance;
 }
 
@@ -373,12 +376,20 @@ async function
     _app_opts) {
   let
     _balance;
-  _balance =
-    await _balance_get.apply(
-      null,
-      _app_opts);
-  process.stdout.write(
-    _balance.toString());
+  try {
+    _balance =
+      await _balance_get.apply(
+        null,
+        _app_opts);
+    process.stdout.write(
+      _balance.toString());
+  }
+  catch(
+    _error) {
+    _msg_error(
+      _error,
+      1);
+  }
 }
 
 

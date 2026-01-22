@@ -247,38 +247,39 @@ async function
   while ( _success == false &&
           _retry < _retries_max ) {
     try {
-    _balance =
-      await _balance_get.apply(
-        null,
-        _balance_get_opts);
-    _balance =
-      Number(
-        _balance);
-    if ( _balance <= _target_amount ) {
+      _balance =
+        await _balance_get.apply(
+          null,
+          _balance_get_opts);
+      _balance =
+        Number(
+          _balance);
+      _success =
+        true;
+      if ( _balance <= _target_amount ) {
+        _msg_error(
+          `Balance is '${_balance}', requiring '${_target_amount}' `,
+          0);
+        return false;
+      }
+      else if ( _balance > _target_amount ) {
+        return true;
+      }
+    } catch(
+        _err) {
+      _retry =
+        _retry + 1;
+      _msg =
+        `Error retrieving balance, retrying (${_retry} of ${_retries_max})`;
+      console.log(
+        _err);
       _msg_error(
-        `Balance is '${_balance}', requiring '${_target_amount}' `,
+        _msg,
         0);
-      return false;
     }
-    else if ( _balance > _target_amount ) {
-      return true;
-    }
-  } catch(
-      _err) {
-    _retry =
-      _retry + 1;
-    _msg =
-      `Error retrieving balance, retrying (${_retry} of ${_retries_max})`;
-    console.log(
-      _err);
-    _msg_error(
-      _msg,
-      0);
-    _sleep(
-      3000);
-
   }
-  if ( _retry == _retries_max ) {
+  if ( _retry == _retries_max &&
+       _success == false ) {
     throw "Failing checking the balance."
   }
 }
@@ -403,12 +404,20 @@ async function
     _app_opts) {
   let
     _check;
-  _check =
-    await _balance_check.apply(
-      null,
-      _app_opts);
-  process.stdout.write(
-    _check.toString());
+  try {
+    _check =
+      await _balance_check.apply(
+        null,
+        _app_opts);
+    process.stdout.write(
+      _check.toString());
+  }
+  catch(
+    _error) {
+    _msg_error(
+      _error,
+      1);
+  }
 }
 
 _global_variables();
