@@ -85,8 +85,6 @@ function
     _provider) {
   let
     _msg;
-  console.log(
-    _provider);
   _msg =
     `Provider '${_provider}' generated.`;
   _msg_info(
