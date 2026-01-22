@@ -88,9 +88,13 @@ function
   _msg_info_provider_generated(
     _provider) {
   let
+    _timeout,
     _msg;
+  _timeout =
+    _provider._getConnection().timeout;
   _msg =
-    `Provider '${_provider}' generated.`;
+    `Provider '${_provider}' with ` +
+    `timeout '${_timeout}' generated.`;
   _msg_info(
     _msg);
 }
