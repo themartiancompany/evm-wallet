@@ -91,8 +91,23 @@ function
   let
     _timeout,
     _msg;
-  _timeout =
-    _provider._getConnection().timeout;
+  if ( typeof (
+         _provider) == "JsonRpcProvider" ) {
+    _msg =
+      "Json RPC provider."
+    _msg_info(
+      _msg);
+    if ( typeof(
+           _provider._getConnection) != "undefined" ) 
+      _timeout =
+        _provider._getConnection().timeout;
+  }
+  else {
+    _msg =
+      "The provider has no '_getConnection' method.");
+    _msg_info(
+      _msg);
+  }
   _msg =
     `Provider '${_provider}' with ` +
     `timeout '${_timeout}' generated.`;

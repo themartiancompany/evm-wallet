@@ -152,7 +152,7 @@ async function
         _retries_max);
   }
   _timeout =
-    1;
+    100000;
   _retry =
     0;
   _success =
@@ -390,8 +390,10 @@ async function
       await _balance_get.apply(
         null,
         _app_opts);
-    process.stdout.write(
+    console.log(
       _balance.toString());
+    // process.stdout.write(
+    //   _balance.toString());
   }
   catch(
     _error) {
