@@ -214,7 +214,14 @@ _balance_get_cmd_get() {
     _balance_dir \
     _node_run \
     _node_run_opts=() \
-    _rpc_backend
+    _rpc_backend \
+    _success \
+    _exit
+  _exit="1"
+  _success="true"
+  if (( 2 < "${#}" )); then
+    _exit="${3}"
+  fi
   _node_main="false"
   _node_run_opts+=(
     -r
@@ -281,12 +288,23 @@ _balance_get_cmd_get() {
         "${_node_run_opts[@]}" \
         "${_cmd}" \
         "${_args[@]}" \
-        1>"/dev/null"
+        1>"/dev/null" || \
+        _success="false"
     elif [[ "${quiet}" == "n" ]]; then
       node-run \
         "${_node_run_opts[@]}" \
         "${_cmd}" \
-        "${_args[@]}"
+        "${_args[@]}" || \
+        _success="false"
+    fi
+    if [[ "${_success}" == "false" ]]; then
+      _msg=(
+        "Error retrieving balance"
+        "for network '${_target_network}'."
+      )
+      _msg_error \
+        "${_msg[*]}" \
+        "${_exit}"
     fi
   fi
 }
