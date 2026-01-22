@@ -173,9 +173,9 @@ async function
     _wallet_dir,
     _wallet_password,
     _wallet_path_list;
-  if ( _retries_max == "" ||
-       typeof(
-         _retries_max) == "undefined" ) {
+  if ( typeof(
+         _retries_max) == 'undefined' ||
+       _retries_max == "" ( {
     _retries_max =
       3;
   }
@@ -263,18 +263,20 @@ async function
     }
   } catch(
       _err) {
-    console.log(
-      _err);
     _retry =
       _retry + 1;
     _msg =
       `Error retrieving balance, retrying (${_retry} of ${_retries_max})`;
+    console.log(
+      _err);
     _msg_error(
       _msg,
-      0
-    )
+      0);
+    _sleep(
+      3);
+
   }
-  if ( _retries_max == _retries_max ) {
+  if ( _retry == _retries_max ) {
     throw "Failing checking the balance."
   }
 }

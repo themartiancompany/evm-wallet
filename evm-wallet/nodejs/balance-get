@@ -74,6 +74,8 @@ _msg_info_obj =
   _libcrash._msg_info_obj;
 _msg_error =
   _libcrash._msg_error;
+_sleep =
+  _libcrash._sleep;
 const
   _wallet_get_module =
     require(
@@ -128,15 +130,16 @@ async function
     _balance,
     _balance_eth,
     _balance_wei,
+    _msg,
     _provider_get_opts,
     _retry,
     _success,
     _wallet_dir,
     _wallet_password,
     _wallet_path_list;
-  if ( _retries_max == "" ||
-       typeof(
-         _retries_max) == undefined ) {
+  if ( typeof(
+         _retries_max) == 'undefined' ||
+       _retries_max == "" ) {
     _retries_max =
       3;
   }
@@ -227,11 +230,15 @@ async function
         _err) {
       _retry =
         _retry + 1;
-      _msg_error(
-        "Error retrieving balance.",
-        0);
+      _msg =
+        `Error retrieving balance, retrying (${_retry} of ${_retries_max})`;
       console.log(
         _err);
+      _msg_error(
+        _msg,
+        0);
+      _sleep(
+        3);
     }
   }
   return _balance;
