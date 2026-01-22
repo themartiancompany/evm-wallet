@@ -271,7 +271,7 @@ _balance_get_cmd_get() {
         "No RPC backends found,"
         "ignoring network '${_target_network}'."
       )
-      _msg_warning \
+      _msg_info \
         "${_msg[*]}"
       _node_run="false"
     fi
