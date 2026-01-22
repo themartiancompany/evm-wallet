@@ -191,8 +191,6 @@ async function
       _provider_get_opts);
   _msg_info_provider_generated(
     _provider);
-  console.log(
-    _provider);
   if ( _target_address == "" ) {
     _wallet_get_opts = [
       _wallet_path,
