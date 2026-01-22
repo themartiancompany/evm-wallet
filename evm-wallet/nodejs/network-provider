@@ -208,15 +208,17 @@ function
       _get_default_provider_opts);
   }
   else if ( _timeout_set == true ) {
-    _network =
+    _request =
       new _fetch_request(
         _default_network);
-    _network.timeout =
+    _request.timeout =
       _timeout;
     _provider =
       _json_rpc_provider(
-        _network);
+        _request);
   }
+  // console.log(
+  //   _provider._getConnection().timeout);
   _msg_info_provider_generated(
     _provider);
   return _provider;
