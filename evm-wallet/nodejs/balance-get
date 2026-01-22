@@ -183,11 +183,12 @@ async function
     _provider_get_opts.push(
       _api_key);
   }
+  _provider_get_opts.push(
+    _timeout);
   _provider =
     _provider_get.apply(
       null,
-      _provider_get_opts,
-      _timeout);
+      _provider_get_opts);
   _msg_info_provider_generated(
     _provider);
   if ( _target_address == "" ) {
