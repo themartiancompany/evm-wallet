@@ -30,12 +30,8 @@ const
       "ethers");
 _ethers =
   ethers;
-_fetch_request =
-  _ethers.FetchRequest;
 _get_default_provider =
   _ethers.getDefaultProvider;
-_json_rpc_provider =
-  _ethers.JsonRpcProvider;
 _network_class =
   _ethers.Network;
 
@@ -88,10 +84,14 @@ function
   _msg_info_provider_generated(
     _provider) {
   let
-    _msg;
+    _msg,
+    _template;
+  _template =
+    "Provider '{_provider}' generated.";
   _msg =
-    `Provider ${_provider} ` +
-    `generated.`;
+    _template.replaceAll(
+      "{_provider}",
+      _provider);
   _msg_info(
     _msg);
 }
@@ -101,8 +101,7 @@ function
     _target_network,
     _api_key,
     _chain_id,
-    _chain_name,
-    _timeout) {
+    _chain_name) {
   let
     _default_network,
     _get_default_provider_opts,
@@ -110,19 +109,7 @@ function
     _network_new_opts,
     _provider,
     _provider_opts,
-    _rpc,
-    _timeout_set;
-  _timeout_set =
-    false;
-  if ( typeof(
-         _timeout == "undefined") ||
-       _timeout == "" ) {
-    _timeout =
-      1;
-  }
-  _timeout =
-    Number(
-      _timeout);
+    _rpc;
   _get_default_provider_opts =
     [];
   _network_new_opts = [
@@ -164,7 +151,7 @@ function
       "mainnet";
   }
   _get_default_provider_opts.push(
-    _network);
+    _default_network);
   if ( _chain_name == "" &&
        _chain_name == undefined &&
        _chain_name == null ) {
@@ -188,7 +175,7 @@ function
     _network =
       new (Function.prototype.bind.apply(
         _network_class,
-        _network_new_opts));
+	_network_new_opts));
     _get_default_provider_opts.push(
      _network); 
   }
@@ -197,18 +184,6 @@ function
   _provider = _get_default_provider.apply(
     null,
     _get_default_provider_opts);
-  // if ( _timeout_set == true ) {
-  //   _request =
-  //     new _fetch_request(
-  //       _default_network);
-  //   _request.timeout =
-  //     _timeout;
-  //   _provider =
-  //     _json_rpc_provider(
-  //       _request);
-  //   // console.log(
-  //   //   _provider._getConnection().timeout);
-  // }
   _msg_info_provider_generated(
     _provider);
   return _provider;
