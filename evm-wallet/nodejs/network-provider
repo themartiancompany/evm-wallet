@@ -119,6 +119,10 @@ function
     _timeout_set =
       false;
   }
+  else {
+    _timeout_set =
+      true;
+  }
   _timeout =
     Number(
       _timeout);
