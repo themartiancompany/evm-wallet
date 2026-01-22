@@ -212,10 +212,14 @@ _balance_get_cmd_get() {
     _balance_age \
     _balance_file \
     _balance_dir \
+    _node_run \
+    _node_run_opts=() \
     _rpc_backend
-  _rpc_backend_get \
-    "${_target_network}" \
-    "${_rpc_selection}"
+  _node_main="false"
+  _node_run_opts+=(
+    -r
+      "${_retries_max}"
+  )
   _balance_file="${_cache_dir}/${_wallet_name}/${_target_network}"
   _balance_dir="$(
     dirname \
@@ -247,11 +251,14 @@ _balance_get_cmd_get() {
     fi
   fi
   if [[ "${_balance_update}" == "true" ]]; then
+    _rpc_backend_get \
+      "${_target_network}" \
+      "${_rpc_selection}"
     _cmd="$(
       "_wallet_key_cmd" \
         "${_key}" \
         "get")"
-    _args+=(
+    _args=(
       "${quiet}"
       "${_wallet_seed}"
       "${_rpc_backend}"
@@ -259,12 +266,30 @@ _balance_get_cmd_get() {
       "${wallet_address}"
       "${measure_unit}"
       "${_balance_file}"
+      "${_retries_max}"
     )
+    _node_run="true"
   elif [[ "${_balance_update}" == "false" ]]; then
     cat \
-      "${_balance_file}"
-    exit \
-      0
+      "${_balance_file}" || \
+    true
+    _node_run="false"
+  fi
+  if [[ "${_node_run}" == "true" ]]; then
+    if [[ "${quiet}" == "y" ]]; then
+      node-run \
+        "${_node_run_opts[@]}" \
+        "${_cmd}" \
+        "${_args[@]}" \
+        1>"/dev/null" || \
+      true
+    elif [[ "${quiet}" == "n" ]]; then
+      node-run \
+        "${_node_run_opts[@]}" \
+        "${_cmd}" \
+        "${_args[@]}" || \
+      true
+    fi
   fi
 }
 
@@ -355,9 +380,9 @@ _key_get() {
     exit \
       0
   elif [[ "${_key}" == "balance" ]]; then
-    _rpc_backend_get \
-      "${_target_network}" \
-      "${_rpc_selection}"
+    # _rpc_backend_get \
+    #   "${_target_network}" \
+    #   "${_rpc_selection}"
     "_${_key}_get_cmd_get" \
       "${wallet_name}" \
       "${_target_network}"
@@ -644,6 +669,7 @@ _evm_wallet() {
     _cmd \
     _args=() \
     _network \
+    _node_main \
     _rpc_backend \
     _node_run_opts=() \
     _approve_call_opts=() \
@@ -665,6 +691,12 @@ _evm_wallet() {
   _command_args+=(
     "$@"
   )
+  _node_main="true"
+  if [[ "${quiet}" == "y" ]]; then
+    _node_run_opts+=(
+      -v
+    )
+  fi
   _node_run_opts+=(
     -r
       "${_retries_max}"
@@ -722,10 +754,13 @@ _evm_wallet() {
         "${_msg[*]}" \
         1
     fi
-    node-run \
-      "${_node_run_opts[@]}" \
-      "${_cmd}" \
-      "${_args[@]}"
+    if [[ "${_node_main}" == "true" ]]; then
+      node-run \
+        "${_node_run_opts[@]}" \
+        "${_cmd}" \
+        "${_args[@]}" || \
+      true
+    fi
   done
 }
 

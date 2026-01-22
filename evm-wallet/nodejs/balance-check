@@ -115,6 +115,8 @@ function
     "";
   measure_unit =
     "";
+  retries_max =
+    "";
   quiet =
     "";
 }
@@ -156,20 +158,39 @@ async function
     _target_amount,
     _target_network,
     _api_key_path,
-    _measure_unit) {
+    _measure_unit,
+    _retries_max) {
   let
     _amount,
     _api_key,
     _balance,
+    _msg,
     _provider_get_opts,
+    _retry,
     _sender_address,
+    _success,
     _tx,
     _wallet_dir,
     _wallet_password,
     _wallet_path_list;
+  if ( _retries_max == "" ||
+       typeof(
+         _retries_max) == "undefined" ) {
+    _retries_max =
+      3;
+  }
+  else {
+    _retries_max =
+      Number(
+        _retries_max);
+  }
   _target_amount =
     Number(
       _target_amount);
+  _retry =
+    0;
+  _success =
+    false;
   _wallet_password =
     "";
   _wallet_dir =
@@ -221,21 +242,40 @@ async function
     _sender_address,
     _measure_unit
   ];
-  _balance =
-    await _balance_get.apply(
-      null,
-      _balance_get_opts);
-  _balance =
-    Number(
-      _balance);
-  if ( _balance <= _target_amount ) {
+  while ( _success == false &&
+          _retry <= _retries_max ) {
+    try {
+    _balance =
+      await _balance_get.apply(
+        null,
+        _balance_get_opts);
+    _balance =
+      Number(
+        _balance);
+    if ( _balance <= _target_amount ) {
+      _msg_error(
+        `Balance is '${_balance}', requiring '${_target_amount}' `,
+        0);
+      return false;
+    }
+    else if ( _balance > _target_amount ) {
+      return true;
+    }
+  } catch(
+      _err) {
+    console.log(
+      _err);
+    _retry =
+      _retry + 1;
+    _msg =
+      `Error retrieving balance, retrying (${_retry} of ${_retries_max})`;
     _msg_error(
-      `Balance is '${_balance}', requiring '${_target_amount}' `,
-      0);
-    return false;
+      _msg,
+      0
+    )
   }
-  else if ( _balance > _target_amount ) {
-    return true;
+  if ( _retries_max == _retries_max ) {
+    throw "Failing checking the balance."
   }
 }
 
@@ -243,6 +283,10 @@ function
   _overrides_set() {
   if ( measure_unit == "" ) {
     measure_unit = "ether";
+  }
+  if ( retries_max == "" ) {
+    retries_max =
+      "3";
   }
 }
 
@@ -252,21 +296,11 @@ function
     _line,
     _text;
   _text = [
-    "      Wallet seed: {wallet_seed}".replaceAll(
-      "{wallet_seed}",
-      wallet_seed),
-    "    Target amount: {target_amount}".replace(
-      "{target_amount}",
-      target_amount),
-    "   Target network: {target_network}".replaceAll(
-      "{target_network}",
-      target_network),
-    "          API Key: {api_key}".replace(
-      "{api_key}",
-      api_key),
-    "     Measure unit: {measure_unit}".replace(
-      "{measure_unit}",
-      measure_unit)
+    `      Wallet seed: ${wallet_seed}`,
+    `    Target amount: ${target_amount}`,
+    `   Target network: ${target_network}`,
+    `          API Key: ${api_key}`,
+    `     Measure unit: ${measure_unit}`
   ]
   for ( _line of _text ) {
     _msg_info(
@@ -291,16 +325,21 @@ function
     "    (<api_key>)",
     "    (<measure_unit>)",
     "",
-    "Args:",
-    "  <seed_path>         Path on disk of the file",
+    "Arguments:",
+    "  <seed-path>         Path on disk of the file",
     "                      containing the seed phrase.",
     "  <amount>            How much balance to send.",
-    "  <target_network>    Name of the network to connect to.",
-    "  <api_key>           Path on disk of the API key for",
+    "",
+    "Optional arguments:",
+    "  <target-network>    Name of the network to connect to.",
+    "  <api-key>           Path on disk of the API key for",
     "                      the network service provider.",
     "                      Default: the wallet address.",
-    "  <measure_unit>      Can be 'wei' or 'ether'.",
-    "                      Default: 'ether'",
+    "                      corresponding to the seed.",
+    "  <measure-unit>      Can be 'wei' or 'ether'.",
+    `                      Default: '${display_unit}'`,
+    "  <retries-max>       Maximum number of retries.",
+    `                      Default: ${retries_max}`,
   ];
   for ( _line of _text ) {
     console.log(
@@ -321,31 +360,36 @@ function _cmdline_parse() {
       _array) {
       if ( _index == 2 ) {
         quiet =
-	  _value;
+          _value;
       }
       if ( _index == 3 ) {
         wallet_seed =
-	  _value;
+          _value;
       }
       if ( _index == 4 ) {
         target_amount =
-	  _value;
+          _value;
       }
       if ( _index == 5 ) {
         target_network =
-	  _value;
+          _value;
       }
       if ( _index == 6 ) {
         api_key =
-	  _value;
+          _value;
       }
       if ( _index == 7 ) {
         measure_unit =
-	  _value;
+          _value;
+      }
+      if ( _index == 8 ) {
+        retries_max =
+          _value;
       }
   });
   if ( wallet_seed == "" ||
        target_amount == "") {
+    _overrides_set();
     _usage();
   }
 }
@@ -374,7 +418,8 @@ if ( require.main == module ) {
     target_amount,
     target_network,
     api_key,
-    measure_unit
+    measure_unit,
+    retries_max,
   ];
   _balance_check_cmdline(
     app_opts);

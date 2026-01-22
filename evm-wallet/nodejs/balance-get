@@ -108,6 +108,8 @@ function
     "";
   output_file =
     "";
+  retries_max =
+    "";
   quiet =
     "";
 }
@@ -120,15 +122,33 @@ async function
     _api_key_path,
     _target_address,
     _display_unit,
-    _output_file) {
+    _output_file,
+    _reries_max) {
   let
     _balance,
     _balance_eth,
     _balance_wei,
     _provider_get_opts,
+    _retry,
+    _success,
     _wallet_dir,
     _wallet_password,
     _wallet_path_list;
+  if ( _retries_max == "" ||
+       typeof(
+         _retries_max) == undefined ) {
+    _retries_max =
+      3;
+  }
+  else {
+    _retries_max =
+      Number(
+        _retries_max);
+  }
+  _retry =
+    0;
+  _success =
+    false;
   _wallet_password =
     "";
   _wallet_dir =
@@ -175,28 +195,44 @@ async function
     _target_address =
       _wallet.address;
   }
-  _balance_wei = await
-    _provider.getBalance(
-      _target_address);
-  if ( _display_unit == "" ) {
-    _display_unit =
-      "ether";
-  }
-  if ( _display_unit == "wei" ) {
-    _balance =
-      _balance_wei;
-  }
-  else if ( _display_unit == "ether" ) {
-    _balance_ether =
-      _wei_to_ether(
-        _balance_wei);
-    _balance =
-      _balance_ether;
-  }
-  if ( _output_file != "" ) {
-      _file_write(
-        _output_file,
-        _balance.toString());
+  while ( _success == false &&
+          _retry <= _retries_max ) {
+    try {
+      _balance_wei = await
+        _provider.getBalance(
+          _target_address);
+      if ( _display_unit == "" ) {
+        _display_unit =
+          "ether";
+      }
+      if ( _display_unit == "wei" ) {
+        _balance =
+          _balance_wei;
+      }
+      else if ( _display_unit == "ether" ) {
+        _balance_ether =
+          _wei_to_ether(
+            _balance_wei);
+        _balance =
+          _balance_ether;
+      }
+      if ( _output_file != "" ) {
+          _file_write(
+            _output_file,
+            _balance.toString());
+      }
+      _success =
+        true;
+    } catch(
+        _err) {
+      _retry =
+        _retry + 1;
+      _msg_error(
+        "Error retrieving balance.",
+        0);
+      console.log(
+        _err);
+    }
   }
   return _balance;
 }
@@ -204,7 +240,12 @@ async function
 function
   _overrides_set() {
   if ( display_unit == "" ) {
-    display_unit = "ether";
+    display_unit =
+      "ether";
+  }
+  if ( retries_max == "" ) {
+    retries_max =
+      "3";
   }
 }
 
@@ -214,24 +255,13 @@ function
     _line,
     _text;
   _text = [
-    "      Wallet seed: {wallet_seed}".replaceAll(
-      "{wallet_seed}",
-      wallet_seed),
-    "   Target network: {target_network}".replaceAll(
-      "{target_network}",
-      target_network),
-    "          API Key: {api_key}".replace(
-      "{api_key}",
-      api_key),
-    "   Target address: {target_address}".replace(
-      "{target_address}",
-      target_address),
-    "     Display unit: {display_unit}".replace(
-      "{display_unit}",
-      display_unit),
-    "     Output file: {output_file}".replace(
-      "{output_file}",
-      output_file)
+    `      Wallet seed: ${wallet_seed}`,
+    `   Target network: ${target_network}`,
+    `          API Key: ${api_key}`,
+    `   Target address: ${target_address}`,
+    `     Display unit: ${display_unit}`,
+    `      Output file: ${output_file}`,
+    `  Maximum retries: ${retries_max}`
   ]
   for ( _line of _text ) {
     _msg_info(
@@ -249,23 +279,29 @@ function
     "Usage:",
     "  balance-get",
     "    <quiet>",
-    "    <seed_path>",
-    "    (<target_network>)",
-    "    (<api_key>)",
-    "    (<target_address>)",
-    "    (<display_unit>)",
+    "    <seed-path>",
+    "    <target-network>",
+    "    (<api-keys-path)",
+    "    (<target-address>)",
+    "    (<display-unit>)",
+    "    (<retries-max>)",
     "",
-    "Args:",
-    "  <seed_path>         Path on disk of the file",
+    "Arguments:",
+    "  <seed-path>         Path on disk of the file",
     "                      containing the seed phrase.",
-    "  <target_network>    Name of the network to connect to.",
-    "  <api_key>           Path on disk of the API key for",
+    "  <target-network>    Name of the network to connect to.",
+    "",
+    "Optional arguments:",
+    "  <api-key-path>      Path on disk of the API key for",
     "                      the network service provider.",
-    "  <target_address>    Address of which to return",
+    "  <target-address>    Address of which to return",
     "                      the balance of.",
     "                      Default: the wallet address.",
-    "  <display_unit>      Can be 'wei' or 'ether'.",
-    "                      Default: 'ether'",
+    "                      corresponding to the seed.",
+    "  <display-unit>      Can be 'wei' or 'ether'.",
+    `                      Default: '${display_unit}'`,
+    "  <retries-max>       Maximum number of retries.",
+    `                      Default: ${retries_max}`,
   ];
   for ( _line of _text ) {
     console.log(
@@ -274,7 +310,6 @@ function
   process.exit(
     _exit_code);
 }
-
 
 
 function _cmdline_parse() {
@@ -313,9 +348,14 @@ function _cmdline_parse() {
         output_file =
 	  _value;
       }
+      if ( _index == 9 ) {
+        retries_max =
+	  _value;
+      }
   });
   if ( wallet_seed == "" &&
-       target_address == "") {
+       target_address == "" ) {
+    _overrides_set();
     _usage(
       1);
   }
@@ -346,7 +386,8 @@ if ( _cmdline_check(
     api_key,
     target_address,
     display_unit,
-    output_file
+    output_file,
+    retries_max
   ];
   _balance_get_cmdline(
     app_opts);
