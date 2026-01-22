@@ -32,6 +32,8 @@ _ethers =
   ethers;
 _wei_to_ether =
   _ethers.formatEther;
+_fetchRequest =
+  _ethers.FetchRequest;
 
 function
   _libcrash_require() {
@@ -133,6 +135,7 @@ async function
     _msg,
     _provider_get_opts,
     _retry,
+    _request,
     _success,
     _wallet_dir,
     _wallet_password,
@@ -166,7 +169,7 @@ async function
   _wallet_path =
     _path_join(
       _wallet_path_list);
-  _provider_get_opts= [
+  _provider_get_opts = [
     _target_network,
   ];
   if ( _output_file == undefined ) {
@@ -183,7 +186,8 @@ async function
   _provider =
     _provider_get.apply(
       null,
-      _provider_get_opts);
+      _provider_get_opts,
+      _timeout);
   _msg_info_provider_generated(
     _provider);
   if ( _target_address == "" ) {
@@ -203,8 +207,6 @@ async function
   while ( _success == false &&
           _retry < _retries_max ) {
     try {
-      _provider._getConnection().timeout =
-        _timeout;
       _balance_wei = await
         _provider.getBalance(
           _target_address);
