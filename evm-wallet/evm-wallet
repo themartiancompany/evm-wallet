@@ -211,7 +211,7 @@ _balance_get_cmd_get() {
     _target_network="${2}" \
     _balance_age \
     _balance_file \
-    _balance_dir \
+    _network_dir \
     _node_run \
     _node_run_opts=() \
     _rpc_backend \
@@ -227,10 +227,18 @@ _balance_get_cmd_get() {
     -r
       "${_retries_max}"
   )
-  _balance_file="${_cache_dir}/${_wallet_name}/${_target_network}"
-  _balance_dir="$(
-    dirname \
-      "${_balance_file}")"
+  _network_dir="${_cache_dir}/${_wallet_name}/${_target_network}"
+  _balance_file="${_network_dir}/balance"
+  _disabled_file="${_network_dir}/disabled"
+  if [[ -e "${_disabled_file}" ]]; then
+    _msg=(
+      "Network '${_target_network}' disabled,"
+      "skipping."
+    )
+    _msg_info \
+      "${_msg[*]}"
+    return
+  fi
   if [[ ! -d "${_cache_dir}" ]]; then
     _msg=(
       "Cache directory"
@@ -243,7 +251,7 @@ _balance_get_cmd_get() {
   fi
   mkdir \
     -p \
-    "${_balance_dir}"
+    "${_network_dir}"
   _balance_update="true"
   _balance_age_get \
     "${_balance_file}"
@@ -274,6 +282,8 @@ _balance_get_cmd_get() {
       _msg_info \
         "${_msg[*]}"
       _node_run="false"
+      touch \
+        "${_disabled_file}"
     fi
     _args=(
       "${quiet}"
@@ -309,8 +319,10 @@ _balance_get_cmd_get() {
     if [[ "${_success}" == "false" ]]; then
       _msg=(
         "Error retrieving balance"
-        "for network '${_target_network}'."
+        "for network '${_target_network}', disabling."
       )
+      touch \
+        "${_disabled_file}"
       _msg_error \
         "${_msg[*]}" \
         "${_exit}"
