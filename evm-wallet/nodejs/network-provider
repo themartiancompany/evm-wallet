@@ -90,7 +90,7 @@ function
   let
     _msg;
   _msg =
-    `Provider ${_provider}` +
+    `Provider ${_provider} ` +
     `generated.`;
   _msg_info(
     _msg);
@@ -101,7 +101,8 @@ function
     _target_network,
     _api_key,
     _chain_id,
-    _chain_name) {
+    _chain_name,
+    _timeout) {
   let
     _default_network,
     _get_default_provider_opts,
@@ -110,7 +111,6 @@ function
     _provider,
     _provider_opts,
     _rpc,
-    _timeout,
     _timeout_set;
   if ( typeof(
          _timeout == "undefined") ||

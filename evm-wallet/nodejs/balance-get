@@ -183,8 +183,8 @@ async function
     _provider_get_opts.push(
       _api_key);
   }
-  _provider_get_opts.push(
-    _timeout);
+  // _provider_get_opts.push(
+  //   _timeout);
   _provider =
     _provider_get.apply(
       null,
