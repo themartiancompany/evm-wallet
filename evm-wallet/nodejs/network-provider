@@ -107,6 +107,12 @@ function
       "The provider has no '_getConnection' method.";
     _msg_info(
       _msg);
+    for ( _key in _provider) {
+    _msg =
+      `Provider key: ${_key}`;
+    _msg_info(
+      _msg);
+    }
   }
   _msg =
     `Provider '${_provider}' with ` +
