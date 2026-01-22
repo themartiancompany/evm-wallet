@@ -104,7 +104,7 @@ function
   }
   else {
     _msg =
-      "The provider has no '_getConnection' method.");
+      "The provider has no '_getConnection' method.";
     _msg_info(
       _msg);
   }
