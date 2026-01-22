@@ -258,6 +258,7 @@ _balance_get_cmd_get() {
     fi
   fi
   if [[ "${_balance_update}" == "true" ]]; then
+    _node_run="true"
     _rpc_backend_get \
       "${_target_network}" \
       "${_rpc_selection}"
@@ -265,6 +266,15 @@ _balance_get_cmd_get() {
       "_wallet_key_cmd" \
         "${_key}" \
         "get")"
+    if [[ "${_rpc_backend}" == "" ]]; then
+      _msg=(
+        "No RPC backends found,"
+        "ignoring network '${_target_network}'."
+      )
+      _msg_warning \
+        "${_msg[*]}"
+      _node_run="false"
+    fi
     _args=(
       "${quiet}"
       "${_wallet_seed}"
@@ -275,7 +285,6 @@ _balance_get_cmd_get() {
       "${_balance_file}"
       "${_retries_max}"
     )
-    _node_run="true"
   elif [[ "${_balance_update}" == "false" ]]; then
     cat \
       "${_balance_file}" || \
