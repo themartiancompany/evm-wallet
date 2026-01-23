@@ -443,7 +443,6 @@ _balance_get_async() {
     _network="${_networks["${_index}"]}"
     _balance_get_opts=(
       "${_balance_get_base_opts[@]}"
-      "${_wallet_name}"
       "${_network}"
       "0"
     )
@@ -815,18 +814,24 @@ _evm_wallet_sync() {
   done
 }
 
-_evm_wallet_async() {
+_key_get_async() {
   local \
+    _key="${1}" \
     _exit
   _exit="0"
+  if [[ "${_target_key}" == "balance" ]]; then
+    _balance_get_async \
+      "${_tasks_parallel}" \
+      "${wallet_name}" \
+      "${_exit}" \
+      "${_target_networks[@]}"
+  fi
+}
+
+_evm_wallet_async() {
   if [[ "${_target_command}" == "get" ]]; then
-    if [[ "${_target_key}" == "balance" ]]; then
-      _balance_get_async \
-        "${_tasks_parallel}" \
-        "${wallet_name}" \
-        "${_exit}" \
-        "${_target_networks[@]}"
-    fi
+    _key_get_async \
+      "${_target_key}"
   fi
 }
 

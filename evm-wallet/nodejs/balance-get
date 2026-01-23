@@ -127,7 +127,7 @@ async function
     _target_address,
     _display_unit,
     _output_file,
-    _reries_max) {
+    _retries_max) {
   let
     _balance,
     _balance_eth,
@@ -264,7 +264,7 @@ function
   }
   if ( retries_max == "" ) {
     retries_max =
-      "3";
+      "1";
   }
 }
 
