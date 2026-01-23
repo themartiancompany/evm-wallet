@@ -436,7 +436,7 @@ _balance_get_async() {
   _index=0
   while \
     [ "${_index}" -le "$(("${_networks_total}" - 1))" ] && \
-    [ "${#_pendings}" -le "${_tasks_parallel}" ]; do
+    [ "${#_pendings[@]}" -le "${_tasks_parallel}" ]; do
     _network="${_networks["${_index}"]}"
     _balance_get_opts=(
       "${_balance_get_base_opts[@]}"
@@ -495,11 +495,15 @@ _key_get() {
     # _rpc_backend_get \
     #   "${_target_network}" \
     #   "${_rpc_selection}"
-    # _balance_get_async
-    "_${_key}_get_cmd_get" \
+    _balance_get_async \
+      "${_tasks_parallel}" \
       "${wallet_name}" \
       "${_target_network}" \
       "0"
+    # "_${_key}_get_cmd_get" \
+    #   "${wallet_name}" \
+    #   "${_target_network}" \
+    #   "0"
   elif [[ "${_key}" == "seed" ]]; then
     cat \
       "${_wallet_seed}"
