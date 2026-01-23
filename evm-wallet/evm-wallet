@@ -56,6 +56,7 @@ _global_variables() {
   key_fingerprint=""
   explorer_selection=""
   retries_max=""
+  call_timeout=""
   measure_unit=""
   balance_lifespan=""
   command_args=()
@@ -172,6 +173,8 @@ _balance_send() {
     )
   elif [[ "${_currency_type}" == "erc20" ]]; then
     _cmd="${_lib}/token-send"
+    _call_timeout="$((
+      _call_timeout * 1000))"
     _args+=(
       "${quiet}"
       "${retries_max}"
@@ -448,7 +451,7 @@ _balance_get_async() {
     )
     _run \
       "_balance_get_${_index}_${_network}" \
-      "0" \
+      "${_call_timeout}" \
       "async" \
       "_balance_get_cmd_get" \
         "${_balance_get_opts[@]}"
@@ -848,14 +851,15 @@ _evm_wallet() {
     _api_key_path="${9}" \
     _retries_max="${10}" \
     _tasks_parallel="${11}" \
-    _measure_unit="${12}" \
-    _balance_lifespan="${13}" \
-    _currency_type="${14}" \
-    _currency_address="${15}" \
-    _output_type="${16}" \
-    _target_key="${17}" \
-    _target_value="${18}" \
-    _networks_amount="${19}" \
+    _call_timeout="${12}" \
+    _measure_unit="${13}" \
+    _balance_lifespan="${14}" \
+    _currency_type="${15}" \
+    _currency_address="${16}" \
+    _output_type="${17}" \
+    _target_key="${18}" \
+    _target_value="${19}" \
+    _networks_amount="${20}" \
     _target_networks=() \
     _command_args=() \
     _target_networks=() \
@@ -869,7 +873,7 @@ _evm_wallet() {
     _approve_call_opts=() \
     _rpc_backend
   shift \
-    19
+    20
   if (( 0 < "${_networks_amount}" )); then
     for _network \
       in $(seq \
@@ -1015,6 +1019,19 @@ _output_type_auto_detect() {
     "${output_type}"
 }
 
+_call_timeout_auto_detect() {
+  local \
+    _timeout
+  _timeout="300"
+  if [[ "${target_command}" == "get" ]]; then
+    _timeout="3"
+  fi
+  _set_override \
+    "call" \
+    "timeout" \
+    "${_timeout}"
+}
+
 _set_overrides() {
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
@@ -1034,6 +1051,7 @@ _set_overrides() {
     "tasks" \
     "parallel" \
     "1"
+  _call_timeout_auto_detect
   _cache_dir_auto_detect
   _set_override \
     "networks" \
@@ -1259,7 +1277,7 @@ _config_user_init \
 getopts_opts="$(
   printf \
     "%s" \
-    "P:S:E:ar:u:f:l:" \
+    "P:S:E:ar:T:u:f:l:" \
     "t:C:o:" \
     "$(_libevm_app_getopts_params_get)" \
     "n:" \
@@ -1283,6 +1301,8 @@ while \
       override_networks_all="y" ;;
     r)
       override_retries_max="${OPTARG}" ;;
+    T)
+      override_call_timeout="${OPTARG}" ;;
     l)
       override_balance_lifespan="${OPTARG}" ;;
     u)
@@ -1363,6 +1383,7 @@ app_opts=(
   "${rpc_selection}"
   "${api_key}"
   "${retries_max}"
+  "${call_timeout}"
   "${tasks_parallel}"
   "${measure_unit}"
   "${balance_lifespan}"
