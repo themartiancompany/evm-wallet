@@ -449,6 +449,7 @@ _balance_get_async() {
       "${_network}"
       "0"
     )
+    _call_timeout="0"
     _run \
       "_balance_get_${_index}_${_network}" \
       "${_call_timeout}" \
@@ -1024,7 +1025,7 @@ _call_timeout_auto_detect() {
     _timeout
   _timeout="300"
   if [[ "${target_command}" == "get" ]]; then
-    _timeout="3"
+    _timeout="30"
   fi
   _set_override \
     "call" \
@@ -1260,6 +1261,7 @@ _show_config() {
   _msg_info "            Key fingerprint:   ${key_fingerprint}"
   _msg_info "          Network options:"
   _msg_info "            Maximum retries:   ${retries_max}"
+  _msg_info "               Call timeout:   ${call_timeout}"
   _msg_info "             Parallel tasks:   ${tasks_parallel}"
   _msg_info "           LibEVM options:"
   _msg_info "             Target network:   ${target_network}"
