@@ -407,6 +407,8 @@ _fingerprint_get() {
 _balance_get_async() {
   local \
     _tasks_parallel="${1}" \
+    _wallet_name="${2}" \
+    _exit="${3}" \
     _balance_get_base_opts=() \
     _balance_get_opts=() \
     _networks=() \
@@ -418,15 +420,16 @@ _balance_get_async() {
     _msg=() \
     _job \
     _wait_opts=()
+  _node_main="false"
   _balance_get_base_opts+=(
     "${wallet_name}"
   )
   shift \
-    1
+    3
   _networks=(
     "$@"
   )
-  _networks_total="${#_networks}"
+  _networks_total="${#_target_networks[@]}"
   _wait_opts+=(
     -f
     -p
@@ -440,15 +443,15 @@ _balance_get_async() {
     _network="${_networks["${_index}"]}"
     _balance_get_opts=(
       "${_balance_get_base_opts[@]}"
-      "${wallet_name}" \
-      "${_network}" \
+      "${_wallet_name}"
+      "${_network}"
       "0"
     )
     _run \
-      "balance_get_${_index}_${_network}" \
+      "_balance_get_${_index}_${_network}" \
       "0" \
       "async" \
-      "_${_key}_get_cmd_get" \
+      "_balance_get_cmd_get" \
         "${_balance_get_opts[@]}"
     _pendings+=(
       "$(_get_pid \
@@ -456,7 +459,7 @@ _balance_get_async() {
     )
     _index="$((
       _index + 1 ))"
-    if [[ "${#_pendings}" == "${_tasks_parallel}" ]]; then 
+    if [[ "${#_pendings[@]}" == "${_tasks_parallel}" ]]; then 
       wait \
         "${_wait_opts[@]}" \
         "${_pendings[@]}"
@@ -474,6 +477,8 @@ _balance_get_async() {
       _job=""
     fi
   done
+  wait \
+    "${_pendings[@]}"
 }
 
 _key_get() {
@@ -492,18 +497,18 @@ _key_get() {
     exit \
       0
   elif [[ "${_key}" == "balance" ]]; then
-    # _rpc_backend_get \
-    #   "${_target_network}" \
-    #   "${_rpc_selection}"
-    _balance_get_async \
-      "${_tasks_parallel}" \
-      "${wallet_name}" \
+    _rpc_backend_get \
       "${_target_network}" \
-      "0"
-    # "_${_key}_get_cmd_get" \
+      "${_rpc_selection}"
+    # _balance_get_async \
+    #   "${_tasks_parallel}" \
     #   "${wallet_name}" \
     #   "${_target_network}" \
     #   "0"
+    "_${_key}_get_cmd_get" \
+      "${wallet_name}" \
+      "${_target_network}" \
+      "0"
   elif [[ "${_key}" == "seed" ]]; then
     cat \
       "${_wallet_seed}"
@@ -759,6 +764,71 @@ _contacts_list() {
     0
 }
 
+_evm_wallet_sync() {
+  for _target_network \
+    in "${_target_networks[@]}"; do
+    if [[ "${_target_command}" == "get" ]]; then
+      "_key_${_target_command}" \
+        "${_target_key}"
+      if [[ "${_target_key}" == "name" ]]; then
+        return \
+          0
+      fi
+    elif [[ "${_target_command}" == "send" ]]; then
+      _rpc_backend_get \
+        "${_target_network}" \
+        "${_rpc_selection}"
+      _target_address="${_target_key}"
+      _target_amount="${_target_value}"
+      _balance_send \
+        "${_currency_type}" \
+        "${_currency_address}" \
+        "${_target_address}" \
+        "${_target_amount}"
+    elif [[ "${_target_command}" == "list" ]]; then
+      _contacts_list \
+        "${_target_key}" \
+        "${_output_type}"
+    elif [[ "${_target_command}" == "approve" ]]; then
+      echo \
+        "WIP"
+      # TODO: write approve function
+      # _approve_call_opts_setup
+      # evm-contract-call \
+      #   "${_approve_call_opts[@]}" \
+      #   "${}"
+    else
+      _msg=(
+        "Unknown command '${_target_command}'."
+      )
+      _msg_error \
+        "${_msg[*]}" \
+        1
+    fi
+    if [[ "${_node_main}" == "true" ]]; then
+      node-run \
+        "${_node_run_opts[@]}" \
+        "${_cmd}" \
+        "${_args[@]}" || \
+      true
+    fi
+  done
+}
+
+_evm_wallet_async() {
+  local \
+    _exit
+  _exit="0"
+  if [[ "${_target_command}" == "get" ]]; then
+    if [[ "${_target_key}" == "balance" ]]; then
+      _balance_get_async \
+        "${_tasks_parallel}" \
+        "${wallet_name}" \
+        "${_exit}" \
+        "${_target_networks[@]}"
+    fi
+  fi
+}
 
 _evm_wallet() {
   local \
@@ -833,54 +903,15 @@ _evm_wallet() {
         "${_evm_chains_info_opts[@]}")
     )
   fi
-  for _target_network \
-    in "${_target_networks[@]}"; do
-    if [[ "${_target_command}" == "get" ]]; then
-      "_key_${_target_command}" \
-        "${_target_key}"
-      if [[ "${_target_key}" == "name" ]]; then
-        return \
-          0
-      fi
-    elif [[ "${_target_command}" == "send" ]]; then
-      _rpc_backend_get \
-        "${_target_network}" \
-        "${_rpc_selection}"
-      _target_address="${_target_key}"
-      _target_amount="${_target_value}"
-      _balance_send \
-        "${_currency_type}" \
-        "${_currency_address}" \
-        "${_target_address}" \
-        "${_target_amount}"
-    elif [[ "${_target_command}" == "list" ]]; then
-      _contacts_list \
-        "${_target_key}" \
-        "${_output_type}"
-    elif [[ "${_target_command}" == "approve" ]]; then
-      echo \
-        "WIP"
-      # TODO: write approve function
-      # _approve_call_opts_setup
-      # evm-contract-call \
-      #   "${_approve_call_opts[@]}" \
-      #   "${}"
+  if [[ "${_target_command}" == "get" ]]; then
+    if [[ "${_target_key}" == "balance" ]]; then
+      _evm_wallet_async
     else
-      _msg=(
-        "Unknown command '${_target_command}'."
-      )
-      _msg_error \
-        "${_msg[*]}" \
-        1
+      _evm_wallet_sync
     fi
-    if [[ "${_node_main}" == "true" ]]; then
-      node-run \
-        "${_node_run_opts[@]}" \
-        "${_cmd}" \
-        "${_args[@]}" || \
-      true
-    fi
-  done
+  else
+    _evm_wallet_sync
+  fi
 }
 
 _currency_type_auto_detect() {
@@ -1204,9 +1235,11 @@ _show_config() {
   _msg_info "                    API key:   ${api_key}"
   _msg_info "             Wallet address:   ${wallet_address}"
   _msg_info "            Key fingerprint:   ${key_fingerprint}"
+  _msg_info "          Network options:"
+  _msg_info "            Maximum retries:   ${retries_max}"
+  _msg_info "             Parallel tasks:   ${tasks_parallel}"
   _msg_info "           LibEVM options:"
   _msg_info "             Target network:   ${target_network}"
-  _msg_info "            Maximum retries:   ${retries_max}"
   _msg_info "      Application options:"
   _msg_info "            Cache directory:   ${cache_dir}"
 }
