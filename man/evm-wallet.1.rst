@@ -104,6 +104,9 @@ Options
 -l balance-lifespan     Maximum threshold in seconds
                         from now after which to consider
                         balance to be outdated.
+-a                      Operation valid for all available
+                        networks.
+-P tasks-parallel       Tasks to perform in parallel.
 
 
 List options
