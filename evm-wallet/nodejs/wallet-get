@@ -88,60 +88,42 @@ function _wallet_exists(
   _path) {
   let
     _exists,
-    _template,
     _msg; 
   _exists =
     _file_exists(
       _path);
   if ( _exists == true ) {
-    _template =
-      "Wallet '{_path}' already exists.";
     _msg =
-      _template.replaceAll(
-        '{_path}',
-      _path);
+      `Wallet '${_path}' already exists.`;
     _msg_error(
       _msg,
       "1");
   }
 }
 
-
 function
   _msg_error_seed_empty(
     _seed) {
   let
-    _msg,
-    _template;
-  _template =
-    "the seed '{_seed}' is empty.";
+    _msg;
   _msg =
-    _template.replaceAll(
-      "{_seed}",
-      _seed);
+    `The seed '${_seed}' is empty.`;
   _msg_error(
     _msg,
     1)
 }
-
 
 function
   _seed_missing_error(
     _seed) {
   let
-    _msg,
-    _template;
-  _template =
-    "the seed '{_seed}' does not exist.";
+    _msg;
   _msg =
-    _template.replaceAll(
-      "{_seed}",
-      _seed);
+    `The seed '${_seed}' does not exist.`;
   _msg_error(
     _msg,
     1)
 }
-
 
 function _wallet_get(
   _path,

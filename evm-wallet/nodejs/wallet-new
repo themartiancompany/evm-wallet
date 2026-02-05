@@ -70,10 +70,11 @@ _msg_info_obj =
 _msg_error = 
   _libcrash._msg_error;
 const
-  _wallet_get =
+  _wallet_get_module =
     require(
       './wallet-get');
-
+_wallet_get =
+  _wallet_get_module._wallet_get;
 
 function
   _global_variables() {
@@ -89,30 +90,23 @@ function
     "";
   target_network =
     "";
-  api_key =
+  api_key_path =
     "";
   quiet =
     "";
 }
 
-
 function
   _seed_missing_error(
     _seed) {
   let
-    _msg,
-    _template;
-  _template =
-    "The seed '{_seed}' does not exist."
+    _msg;
   _msg =
-    _template.replaceAll(
-      "{_seed}",
-      _seed);
+    `The seed '${_seed}' does not exist.`;
   _msg_error(
     _msg,
     1)
 }
-
 
 async function
   _wallet_new(
@@ -120,16 +114,16 @@ async function
     _password,
     _seed,
     _network,
-    _api_key) {
+    _api_key_path) {
   let
     _password_show,
     _provider;
   _provider =
     _network_provider._provider_get(
       _network,
-      _api_key);
+      _api_key_path);
   _msg_info_obj(
-    "wallet path",
+    "Wallet path",
     _path);
   _password_show =
     "";
@@ -138,17 +132,18 @@ async function
       "****";
   }
   _msg_info_obj(
-    "wallet password",
+    "Wallet password",
     _password_show);
   _msg_info_obj(
-    "seed path",
+    "Seed path",
     _seed);
   _wallet =
-    _wallet_get._wallet_get(
+    _wallet_get(
       _path,
       _password,
       _seed,
       _provider);
+  return _wallet;
 }
 
 function
@@ -159,7 +154,6 @@ function
   }
 }
 
-
 function
   _usage(
     _exit) {
@@ -168,13 +162,26 @@ function
     _text;
   _text = [
     "Usage:",
+    "  Returns a Wallet object.",
+    "",
     "  wallet-new",
     "    <path>",
     "    <password>",
     "    <seed>",
     "    <network>",
-    "    <api_key>",
-    "    <quiet>"];
+    "    <api-key-path>",
+    "    <quiet>",
+    "",
+    "Arguments:",
+    "  <path>              Wallet path.",
+    "  <password>          Wallet password path",
+    "  <seed>              Seed file path.",
+    "  <network>           Network RPC.",
+    "  <api-key-path>      Path on disk of the API key for",
+    "                      the network service provider.",
+    "  <quiet>             Whether to display additional output.",
+    `                      Default: ${quiet}`
+  ];
   for ( _line in _text ) {
     _msg_info(
       _line);
@@ -183,6 +190,17 @@ function
     _exit);
 }
 
+_wallet_new_cmdline(
+  app_opts) {
+  let
+    _wallet;
+  _wallet =
+    _wallet_new.apply(
+      null,
+      app_opts);
+  console.log(
+    _wallet);
+}
 
 function
   _cmdline_parse() {
@@ -210,7 +228,7 @@ function
           _value;
       }
       if ( _index == 6 ) {
-        api_key =
+        api_key_path =
           _value;
       }
       if ( _index == 6 ) {
@@ -235,7 +253,7 @@ if ( _cmdline_check(
     wallet_password,
     wallet_seed,
     target_network,
-    api_key,
+    api_key_path,
     quiet
   ];
   _wallet_new.apply(

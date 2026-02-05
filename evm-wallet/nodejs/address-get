@@ -96,8 +96,6 @@ function
   _global_variables() {
   app_name =
     "address-get";
-  method_args =
-    [];
   wallet_seed =
     "";
   target_network =
