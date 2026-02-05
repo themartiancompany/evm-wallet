@@ -430,6 +430,6 @@ if ( _cmdline_check(
 }
 
 module.exports = {
-  _price_gas:
-    _price_gas
+  _price_gas_get:
+    _price_gas_get
 };
