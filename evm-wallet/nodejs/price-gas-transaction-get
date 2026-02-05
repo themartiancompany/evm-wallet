@@ -144,7 +144,7 @@ async function
          _selection_mode) == 'undefined' ||
        _selection_mode == "" ) {
     _selection_mode =
-      "simple";
+      "rpc";
   }
   if ( typeof(
          _retries_max) == 'undefined' ||
@@ -242,13 +242,26 @@ async function
       _price_gas =
         Number(
           _price_gas);
-      _price_gas_target =
-        Math.floor(
-          _price_gas * 12 / 10);
+      if ( _selection_mode == "simple" ) {
+        _price_gas_target =
+          Math.floor(
+            _price_gas * 12 / 10);
+      }
+      else if ( _selection_mode == "rpc" ) {
+        _price_gas_target =
+          _price_gas;
+      }
+      else {
+        _msg =
+          `Unknown selection mode '${_selection_mode}'.`;
+        _msg_error(
+          _msg,
+          1);
+      }
       if ( _output_file != "" ) {
           _file_write(
             _output_file,
-            _price_gas.toString());
+            _price_gas_target.toString());
       }
       _success =
         true;
