@@ -153,7 +153,7 @@ async function
          _display_unit) == 'undefined' ||
        _display_unit == "" ) {
     _display_unit =
-      "ether";
+      "wei";
   }
   _timeout =
     100000;
