@@ -380,8 +380,12 @@ function _cmdline_parse() {
 	  _value;
       }
   });
-  if ( wallet_seed == "" &&
-       target_address == "" ) {
+  if ( target_network == "" ) {
+    _msg =
+      "No input network given."
+    _msg_error(
+      _msg,
+      1);
     _overrides_set();
     _usage(
       1);
@@ -428,7 +432,7 @@ if ( _cmdline_check(
     output_file,
     retries_max
   ];
-  _price_gas_cmdline(
+  _price_gas_get_cmdline(
     app_opts);
 }
 
