@@ -44,6 +44,7 @@ _NODE_FILES=\
   ethers-to-wei \
   network-provider \
   price-gas-get \
+  price-gas-transaction-get \
   seed-new \
   wallet-get \
   wallet-new
