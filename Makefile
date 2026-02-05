@@ -41,9 +41,9 @@ _NODE_FILES=\
   balance-check \
   balance-get \
   balance-send \
-  gas-price-get \
   ethers-to-wei \
   network-provider \
+  price-gas-get \
   seed-new \
   wallet-get \
   wallet-new
