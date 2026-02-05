@@ -227,7 +227,7 @@ async function
           _price_gas_get_args);
       if ( quiet == "n" ) {
         _msg =
-          `Got gas price '${_price_gas}' ${_display_unit}` +
+          `Got gas price '${_price_gas}' ${_display_unit} ` +
           `for network '${_target_network}'.`;
         _msg_info(
           _msg);
@@ -307,10 +307,11 @@ function
     _text;
   _text = [
     "Usage:",
-    "  price-gas-get",
+    "  price-gas-transaction-get",
     "    <quiet>",
     "    <target-network>",
     "    (<api-keys-path)",
+    "    (<selection-mode>)",
     "    (<display-unit>)",
     "    (<seed-path>)",
     "    (<target-address>)",
@@ -323,6 +324,8 @@ function
     "Optional arguments:",
     "  <api-key-path>      Path on disk of the API key for",
     "                      the network service provider.",
+    "  <selection-mode>    Can be 'auto'.",
+    `                      Default: '${selection_mode}'`,
     "  <display-unit>      Can be 'wei' or 'ether'.",
     `                      Default: '${display_unit}'`,
     "  <seed-path>         Path on disk of the file",
@@ -365,25 +368,29 @@ function _cmdline_parse() {
         api_key =
           _value;
       }
-      if ( _index == 7 ) {
-        display_unit =
+      if ( _index == 5 ) {
+        selection_mode =
           _value;
       }
       if ( _index == 6 ) {
-        target_address =
-	  _value;
+        display_unit =
+          _value;
       }
-      if ( _index == 3 ) {
-        wallet_seed =
+      if ( _index == 7 ) {
+        target_address =
           _value;
       }
       if ( _index == 8 ) {
-        output_file =
-	  _value;
+        wallet_seed =
+          _value;
       }
       if ( _index == 9 ) {
+        output_file =
+          _value;
+      }
+      if ( _index == 10 ) {
         retries_max =
-	  _value;
+          _value;
       }
   });
   if ( target_network == "" ) {
@@ -429,6 +436,7 @@ if ( _cmdline_check(
   _cmdline_parse();
   _config_show();
   app_opts = [
+    selection_mode,
     target_network,
     api_key,
     display_unit,

@@ -359,7 +359,7 @@ function _cmdline_parse() {
         api_key =
           _value;
       }
-      if ( _index == 7 ) {
+      if ( _index == 5 ) {
         display_unit =
           _value;
       }
@@ -367,17 +367,17 @@ function _cmdline_parse() {
         target_address =
 	  _value;
       }
-      if ( _index == 3 ) {
+      if ( _index == 7 ) {
         wallet_seed =
           _value;
       }
       if ( _index == 8 ) {
         output_file =
-	  _value;
+          _value;
       }
       if ( _index == 9 ) {
         retries_max =
-	  _value;
+          _value;
       }
   });
   if ( target_network == "" ) {
