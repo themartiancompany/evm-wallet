@@ -459,8 +459,8 @@ if ( _cmdline_check(
   _config_show();
   app_opts = [
     target_network,
-    api_key,
     selection_mode,
+    api_key,
     display_unit,
     wallet_seed,
     target_address,
