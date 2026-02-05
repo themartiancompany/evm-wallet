@@ -239,8 +239,12 @@ async function
         _msg_info(
           _msg);
       }
+      _price_gas =
+        Number(
+          _price_gas);
       _price_gas_target =
-        _price_gas * 12 / 10;
+        Math.floor(
+          _price_gas * 12 / 10);
       if ( _output_file != "" ) {
           _file_write(
             _output_file,
@@ -375,12 +379,12 @@ function _cmdline_parse() {
         target_network =
           _value;
       }
-      if ( _index == 4 ) {
-        api_key =
-          _value;
-      }
       if ( _index == 5 ) {
         selection_mode =
+          _value;
+      }
+      if ( _index == 4 ) {
+        api_key =
           _value;
       }
       if ( _index == 6 ) {
