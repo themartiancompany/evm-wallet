@@ -210,7 +210,7 @@ async function
           _retry < _retries_max ) {
     try {
       _fee_data = await
-        provider.getFeeData();
+        _provider.getFeeData();
       console.log(
         _fee_data);
       // _balance_wei = await
@@ -236,8 +236,8 @@ async function
       //       _output_file,
       //       _balance.toString());
       // }
-      // _success =
-      //   true;
+      _success =
+        true;
     } catch(
         _err) {
       _retry =
