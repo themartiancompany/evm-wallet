@@ -417,7 +417,6 @@ async function
   }
 }
 
-
 if ( _cmdline_check(
        "price-gas-get") ) {
   _global_variables();
