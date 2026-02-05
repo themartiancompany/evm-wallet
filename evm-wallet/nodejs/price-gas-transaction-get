@@ -379,11 +379,11 @@ function _cmdline_parse() {
         target_network =
           _value;
       }
-      if ( _index == 5 ) {
+      if ( _index == 4 ) {
         selection_mode =
           _value;
       }
-      if ( _index == 4 ) {
+      if ( _index == 5 ) {
         api_key =
           _value;
       }
