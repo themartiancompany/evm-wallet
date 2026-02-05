@@ -412,7 +412,7 @@ async function
 
 
 if ( _cmdline_check(
-       "price-gas") ) {
+       "price-gas-get") ) {
   _global_variables();
   _cmdline_parse();
   _config_show();
