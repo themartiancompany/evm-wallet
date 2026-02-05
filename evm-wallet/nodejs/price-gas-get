@@ -265,7 +265,7 @@ function
   _overrides_set() {
   if ( display_unit == "" ) {
     display_unit =
-      "ether";
+      "wei";
   }
   if ( retries_max == "" ) {
     retries_max =

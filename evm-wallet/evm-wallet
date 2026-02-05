@@ -767,6 +767,51 @@ _contacts_list() {
     0
 }
 
+_price_gas_get() {
+ local \
+    _quiet="${1}" \
+    _target_network="${2}" \
+    _lib \
+    _price_gas_file \
+    _rpc_backend
+  _wallet_address=""
+  _price_gas_file=""
+  _lib="$(
+    _get_lib)/evm-wallet"
+  _rpc_backend_get \
+    "${_target_network}" \
+    "${_rpc_selection}"
+  "" "ether" "3"
+  if [[ ! -e "${_address_file}" ]]; then
+    _cmd="${_lib}/price-gas-get"
+    _rpc_backend=""
+    _args=(
+      "${_quiet}"
+      "${_rpc_backend}"
+      "${_api_key_path}"
+      "${_measure_unit}"
+      "" # wallet seed
+      "" # target address
+      "" # output file
+      "${_retries_max}"
+    )
+    if [[ "${quiet}" == "y" ]]; then
+      node-run \
+        "${_node_run_opts[@]}" \
+        "${_cmd}" \
+        "${_args[@]}" 1>/dev/null
+    elif [[ "${quiet}" == "n" ]]; then
+      node-run \
+        "${_node_run_opts[@]}" \
+        "${_cmd}" \
+        "${_args[@]}"
+    fi
+  fi
+  _wallet_address="$(
+    cat \
+      "${_address_file}")"
+}
+
 _evm_wallet_sync() {
   for _target_network \
     in "${_target_networks[@]}"; do
@@ -777,6 +822,9 @@ _evm_wallet_sync() {
         return \
           0
       fi
+    elif [[ "${_target_command}" == "gas" ]]; then
+      _price_gas_get \
+        "${target_network}"
     elif [[ "${_target_command}" == "send" ]]; then
       _rpc_backend_get \
         "${_target_network}" \
