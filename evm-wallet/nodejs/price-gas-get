@@ -2,7 +2,6 @@
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-
 /**    ----------------------------------------------------------------------
  *     Copyright ©
  *       Pellegrino Prevete
@@ -33,8 +32,8 @@ _ethers =
   ethers;
 _wei_to_ether =
   _ethers.formatEther;
-_parse_units =
-  _ethers.parseUnits;
+_fetchRequest =
+  _ethers.FetchRequest;
 
 function
   _libcrash_require() {
@@ -67,6 +66,8 @@ _dirname =
   _libcrash._dirname;
 _file_read =
   _libcrash._file_read;
+_file_write =
+  _libcrash._file_write;
 _path_join =
   _libcrash._path_join;
 _msg_info =
@@ -80,19 +81,13 @@ _sleep =
 const
   _wallet_get_module =
     require(
-      './wallet-get');
+      '../evm-wallet/wallet-get');
 _wallet_get =
   _wallet_get_module._wallet_get;
 const
-  _balance_get_module =
-    require(
-      './balance-get');
-_balance_get =
-  _balance_get_module._balance_get;
-const
   _network_provider =
     require(
-      './network-provider');
+      '../evm-wallet/network-provider');
 _provider_get =
   _network_provider._provider_get;
 _msg_info_provider_generated =
@@ -102,20 +97,20 @@ _msg_info_provider_generated =
 function
   _global_variables() {
   app_name =
-    "balance-check";
+    "price-gas-get";
   method_args =
     [];
   wallet_seed =
-    "";
-  target_address =
-    "";
-  target_amount =
     "";
   target_network =
     "";
   api_key =
     "";
-  measure_unit =
+  target_address =
+    "";
+  display_unit =
+    "";
+  output_file =
     "";
   retries_max =
     "";
@@ -123,55 +118,26 @@ function
     "";
 }
 
-function
-  _msg_error_balance_insufficient(
-    _amount,
-    _unit) {
-  let
-    _msg,
-    _template;
-  _template =
-    "amount '{_amount}' '{_unit}' requested to send is less than balance.";
-  _msg =
-    _template.replaceAll(
-      "{_amount}",
-      _amount);
-  _msg =
-    _msg.replaceAll(
-      "{_unit}",
-      _unit);
-  _msg_error(
-    _msg,
-    1)
-}
-
-function
-  _ethers_to_wei(
-    _amount) {
-  return _parse_units(
-    _amount,
-    "ether");
-}
-
 
 async function
-  _balance_check(
+  _price_gas_get(
     _wallet_seed,
-    _target_amount,
     _target_network,
     _api_key_path,
-    _measure_unit,
+    _target_address,
+    _display_unit,
+    _output_file,
     _retries_max) {
   let
-    _amount,
-    _api_key,
     _balance,
+    _balance_eth,
+    _balance_wei,
+    _fee_data,
     _msg,
     _provider_get_opts,
     _retry,
-    _sender_address,
+    _request,
     _success,
-    _tx,
     _wallet_dir,
     _wallet_password,
     _wallet_path_list;
@@ -186,9 +152,8 @@ async function
       Number(
         _retries_max);
   }
-  _target_amount =
-    Number(
-      _target_amount);
+  _timeout =
+    100000;
   _retry =
     0;
   _success =
@@ -206,8 +171,12 @@ async function
     _path_join(
       _wallet_path_list);
   _provider_get_opts = [
-    _target_network
+    _target_network,
   ];
+  if ( _output_file == undefined ) {
+    _output_file =
+      "";
+  }
   if ( _api_key_path != "" ) {
     _api_key =
       _file_read(
@@ -215,83 +184,92 @@ async function
     _provider_get_opts.push(
       _api_key);
   }
+  _provider_get_opts.push(
+    _timeout);
   _provider =
     _provider_get.apply(
       null,
       _provider_get_opts);
   _msg_info_provider_generated(
     _provider);
-  _wallet_get_opts = [
-    _wallet_path,
-    _wallet_password,
-    _wallet_seed,
-    _provider
-  ];
-  _wallet =
-    _wallet_get.apply(
-      null,
-      _wallet_get_opts);
-  _sender_address =
-    _wallet.address;
-  if ( _measure_unit == "" ) {
-    _measure_unit =
-      "ether";
-  }
-  _balance_get_opts = [
-    _wallet_seed,
-    _target_network,
-    _api_key_path,
-    _sender_address,
-    _measure_unit
-  ];
+  // if ( _target_address == "" ) {
+  //   _wallet_get_opts = [
+  //     _wallet_path,
+  //     _wallet_password,
+  //     _wallet_seed,
+  //     _provider
+  //   ];
+  //   _wallet =
+  //     _wallet_get.apply(
+  //       null,
+  //       _wallet_get_opts);
+  //   _target_address =
+  //     _wallet.address;
+  // }
   while ( _success == false &&
           _retry < _retries_max ) {
     try {
-      _balance =
-        await _balance_get.apply(
-          null,
-          _balance_get_opts);
-      _balance =
-        Number(
-          _balance);
-      _success =
-        true;
-      if ( _balance <= _target_amount ) {
-        _msg_error(
-          `Balance is '${_balance}', requiring '${_target_amount}' `,
-          0);
-        return false;
-      }
-      else if ( _balance > _target_amount ) {
-        return true;
-      }
+      _fee_data = await
+        provider.getFeeData();
+      console.log(
+        _fee_data);
+      // _balance_wei = await
+      //   _provider.getBalance(
+      //     _target_address);
+      // if ( _display_unit == "" ) {
+      //   _display_unit =
+      //     "ether";
+      // }
+      // if ( _display_unit == "wei" ) {
+      //   _balance =
+      //     _balance_wei;
+      // }
+      // else if ( _display_unit == "ether" ) {
+      //   _balance_ether =
+      //     _wei_to_ether(
+      //       _balance_wei);
+      //   _balance =
+      //     _balance_ether;
+      // }
+      // if ( _output_file != "" ) {
+      //     _file_write(
+      //       _output_file,
+      //       _balance.toString());
+      // }
+      // _success =
+      //   true;
     } catch(
-        _error) {
+        _err) {
       _retry =
         _retry + 1;
       _msg =
-        `Error checking balance, retrying (${_retry} of ${_retries_max})`;
+        `Error retrieving gas price, retrying (${_retry} of ${_retries_max})`;
       console.error(
-        _error);
+        _err);
       _msg_error(
         _msg,
         0);
+      await _sleep(
+        3000);
     }
   }
-  if ( _retry == _retries_max &&
-       _success == false ) {
-    throw "Failing checking the balance."
+  if ( _success == false &&
+       _retry == _retries_max ) {
+    throw "Error retrieving balance."
+    return _balance;
   }
+  return _balance;
 }
 
 function
   _overrides_set() {
-  if ( measure_unit == "" ) {
-    measure_unit = "ether";
+  if ( display_unit == "" ) {
+    display_unit =
+      "ether";
   }
   if ( retries_max == "" ) {
     retries_max =
-      "3";
+      "1";
   }
 }
 
@@ -302,10 +280,12 @@ function
     _text;
   _text = [
     `      Wallet seed: ${wallet_seed}`,
-    `    Target amount: ${target_amount}`,
     `   Target network: ${target_network}`,
     `          API Key: ${api_key}`,
-    `     Measure unit: ${measure_unit}`
+    `   Target address: ${target_address}`,
+    `     Display unit: ${display_unit}`,
+    `      Output file: ${output_file}`,
+    `  Maximum retries: ${retries_max}`
   ]
   for ( _line of _text ) {
     _msg_info(
@@ -314,34 +294,35 @@ function
 }
 
 function
-  _usage() {
+  _usage(
+    _exit_code) {
   let
     _line,
     _text;
   _text = [
-    "Checks if wallet balance is more or less than a given amount",
-    "",
     "Usage:",
-    "  balance-check",
+    "  balance-get",
     "    <quiet>",
-    "    <seed_path>",
-    "    <amount>",
-    "    (<target_network>)",
-    "    (<api_key>)",
-    "    (<measure_unit>)",
+    "    <seed-path>",
+    "    <target-network>",
+    "    (<api-keys-path)",
+    "    (<target-address>)",
+    "    (<display-unit>)",
+    "    (<retries-max>)",
     "",
     "Arguments:",
     "  <seed-path>         Path on disk of the file",
     "                      containing the seed phrase.",
-    "  <amount>            How much balance to send.",
+    "  <target-network>    Name of the network to connect to.",
     "",
     "Optional arguments:",
-    "  <target-network>    Name of the network to connect to.",
-    "  <api-key>           Path on disk of the API key for",
+    "  <api-key-path>      Path on disk of the API key for",
     "                      the network service provider.",
+    "  <target-address>    Address of which to return",
+    "                      the balance of.",
     "                      Default: the wallet address.",
     "                      corresponding to the seed.",
-    "  <measure-unit>      Can be 'wei' or 'ether'.",
+    "  <display-unit>      Can be 'wei' or 'ether'.",
     `                      Default: '${display_unit}'`,
     "  <retries-max>       Maximum number of retries.",
     `                      Default: ${retries_max}`,
@@ -350,9 +331,9 @@ function
     console.log(
       _line);
   }
-  process.exit();
+  process.exit(
+    _exit_code);
 }
-
 
 
 function _cmdline_parse() {
@@ -365,82 +346,90 @@ function _cmdline_parse() {
       _array) {
       if ( _index == 2 ) {
         quiet =
-          _value;
+	  _value;
       }
       if ( _index == 3 ) {
         wallet_seed =
-          _value;
+	  _value;
       }
       if ( _index == 4 ) {
-        target_amount =
-          _value;
+        target_network =
+	  _value;
       }
       if ( _index == 5 ) {
-        target_network =
-          _value;
+        api_key =
+	  _value;
       }
       if ( _index == 6 ) {
-        api_key =
-          _value;
+        target_address =
+	  _value;
       }
       if ( _index == 7 ) {
-        measure_unit =
-          _value;
+        display_unit =
+	  _value;
       }
       if ( _index == 8 ) {
+        output_file =
+	  _value;
+      }
+      if ( _index == 9 ) {
         retries_max =
-          _value;
+	  _value;
       }
   });
-  if ( wallet_seed == "" ||
-       target_amount == "") {
+  if ( wallet_seed == "" &&
+       target_address == "" ) {
     _overrides_set();
-    _usage();
+    _usage(
+      1);
   }
 }
 
 async function
-  _balance_check_cmdline(
+  _price_gas_get_cmdline(
     _app_opts) {
   let
-    _check;
+    _price_gas;
   try {
-    _check =
-      await _balance_check.apply(
+    _price_gas =
+      await _price_gas_get.apply(
         null,
         _app_opts);
-    process.stdout.write(
-      _check.toString());
+    console.log(
+      _price_gas.toString());
+    // process.stdout.write(
+    //   _balance.toString());
   }
   catch(
     _error) {
     _msg_error(
       _error,
       1);
+    process.exit(
+      1);
   }
 }
 
-_global_variables();
 
-if ( require.main == module ) {
+if ( _cmdline_check(
+       "price-gas") ) {
+  _global_variables();
   _cmdline_parse();
-  _overrides_set();
   _config_show();
   app_opts = [
     wallet_seed,
-    target_amount,
     target_network,
     api_key,
-    measure_unit,
-    retries_max,
+    target_address,
+    display_unit,
+    output_file,
+    retries_max
   ];
-  _balance_check_cmdline(
+  _price_gas_cmdline(
     app_opts);
 }
 
 module.exports = {
-  _balance_check:
-    _balance_check,
-  _msg_error_balance_insufficient:
-    _msg_error_balance_insufficient
+  _price_gas:
+    _price_gas
 };
