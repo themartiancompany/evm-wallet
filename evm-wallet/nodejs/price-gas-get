@@ -340,6 +340,8 @@ function
 
 
 function _cmdline_parse() {
+  let
+    _msg;
   quiet =
     "y";
   process.argv.forEach(
@@ -378,6 +380,13 @@ function _cmdline_parse() {
       if ( _index == 9 ) {
         retries_max =
           _value;
+      }
+      if ( _value == "-h" ||
+           _value == "--help" ) {
+        quiet =
+          "n";
+        _usage(
+          0);
       }
   });
   if ( target_network == "" ) {
