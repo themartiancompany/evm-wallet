@@ -89,6 +89,7 @@ function
   _msg_info_provider_generated(
     _provider) {
   let
+    _key,
     _timeout,
     _msg;
   if ( typeof (
@@ -103,12 +104,19 @@ function
         _provider._getConnection().timeout;
   }
   else {
-    _msg =
-      "The provider has no '_getConnection' method.";
-    _msg_info(
-      _msg);
+    // _msg =
+    //   "The provider has no '_getConnection' method.";
+    // _msg_info(
+    //   _msg);
+    // if ( quiet == "n" ) {
+    //   console.log(
+    //     typeof(
+    //       _provider));
+    //   console.log(
+    //     _provider.connection);
+    // }
     for ( _key in _provider) {
-    _msg =
+    _msg=
       `Provider key: ${_key}`;
     _msg_info(
       _msg);
@@ -273,18 +281,18 @@ function
   _text = [
     "Usage:",
     "  network-provider",
-    "    <target_network>",
-    "    <api_key>",
-    "    (<chain_id>)",
-    "    (<chain_name>)",
+    "    <target-network>",
+    "    <api-key-path>",
+    "    (<chain-id>)",
+    "    (<chain-name>)",
     "",
     "Args:",
-    "  <target_network>                 Network on which the transaction",
+    "  <target-network>                 Network on which the transaction",
     "                                   resides.",
-    "  <api_key_path>                   Path of the API key for the",
+    "  <api-key-path>                   Path of the API key for the",
     "                                   contract ABI provider service.",
-    "  <chain_id>                       Chain ID for the network.",
-    "  <chain_name>                     Name for the network.",
+    "  <chain-id>                       Chain ID for the network.",
+    "  <chain-name>                     Name for the network.",
     "",
     "  Options:",
     "    -h                             This help."
@@ -296,7 +304,6 @@ function
   process.exit(
     _exit_code);
 }
-
 
 function
   _cmdline_parse() {

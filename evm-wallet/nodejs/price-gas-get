@@ -129,11 +129,11 @@ async function
     _output_file,
     _retries_max) {
   let
-    _balance,
-    _balance_eth,
-    _balance_wei,
     _fee_data,
     _msg,
+    _price_gas,
+    _price_gas_ether,
+    _price_gas_wei,
     _provider_get_opts,
     _retry,
     _request,
@@ -151,6 +151,12 @@ async function
     _retries_max =
       Number(
         _retries_max);
+  }
+  if ( typeof(
+         _display_unit) == 'undefined' ||
+       _display_unit == "" ) {
+    _display_unit =
+      "ether";
   }
   _timeout =
     100000;
@@ -211,31 +217,28 @@ async function
     try {
       _fee_data = await
         _provider.getFeeData();
-      console.log(
-        _fee_data);
-      // _balance_wei = await
-      //   _provider.getBalance(
-      //     _target_address);
-      // if ( _display_unit == "" ) {
-      //   _display_unit =
-      //     "ether";
-      // }
-      // if ( _display_unit == "wei" ) {
-      //   _balance =
-      //     _balance_wei;
-      // }
-      // else if ( _display_unit == "ether" ) {
-      //   _balance_ether =
-      //     _wei_to_ether(
-      //       _balance_wei);
-      //   _balance =
-      //     _balance_ether;
-      // }
-      // if ( _output_file != "" ) {
-      //     _file_write(
-      //       _output_file,
-      //       _balance.toString());
-      // }
+      if ( quiet == "n" ) {
+        console.log(
+          _fee_data);
+      }
+      _price_gas_wei =
+        _fee_data.gasPrice;
+      if ( _display_unit == "wei" ) {
+        _price_gas =
+          _price_gas_wei;
+      }
+      else if ( _display_unit == "ether" ) {
+        _price_gas_ether =
+          _wei_to_ether(
+            _price_gas_wei);
+        _price_gas =
+          _price_gas_ether;
+      }
+      if ( _output_file != "" ) {
+          _file_write(
+            _output_file,
+            _price_gas.toString());
+      }
       _success =
         true;
     } catch(
@@ -243,7 +246,8 @@ async function
       _retry =
         _retry + 1;
       _msg =
-        `Error retrieving gas price, retrying (${_retry} of ${_retries_max})`;
+        `Error retrieving gas price, ` +
+	`retrying (${_retry} of ${_retries_max})`;
       console.error(
         _err);
       _msg_error(
@@ -255,10 +259,9 @@ async function
   }
   if ( _success == false &&
        _retry == _retries_max ) {
-    throw "Error retrieving balance."
-    return _balance;
+    throw "Error retrieving balance.";
   }
-  return _balance;
+  return _price_gas;
 }
 
 function

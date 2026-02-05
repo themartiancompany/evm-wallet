@@ -130,7 +130,7 @@ async function
     _retries_max) {
   let
     _balance,
-    _balance_eth,
+    _balance_ether,
     _balance_wei,
     _msg,
     _provider_get_opts,
