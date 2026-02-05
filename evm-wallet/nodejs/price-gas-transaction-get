@@ -118,6 +118,7 @@ function
 async function
   _price_gas_transaction_get(
     _target_network,
+    _selection_mode,
     _api_key_path,
     _display_unit,
     _wallet_seed,
@@ -139,6 +140,12 @@ async function
     _wallet_path_list;
   _price_gas_get_args =
     [];
+  if ( typeof(
+         _selection_mode) == 'undefined' ||
+       _selection_mode == "" ) {
+    _selection_mode =
+      "simple";
+  }
   if ( typeof(
          _retries_max) == 'undefined' ||
        _retries_max == "" ) {
@@ -233,7 +240,7 @@ async function
           _msg);
       }
       _price_gas_target =
-        _price_gas;
+        _price_gas * 12 / 10;
       if ( _output_file != "" ) {
           _file_write(
             _output_file,
@@ -266,6 +273,10 @@ async function
 
 function
   _overrides_set() {
+  if ( selection_mode == "" ) {
+    selection_mode =
+      "simple";
+  }
   if ( display_unit == "" ) {
     display_unit =
       "ether";
@@ -310,8 +321,8 @@ function
     "  price-gas-transaction-get",
     "    <quiet>",
     "    <target-network>",
-    "    (<api-keys-path)",
     "    (<selection-mode>)",
+    "    (<api-keys-path)",
     "    (<display-unit>)",
     "    (<seed-path>)",
     "    (<target-address>)",
@@ -320,12 +331,12 @@ function
     "",
     "Arguments:",
     "  <target-network>    Name of the network to connect to.",
+    "  <selection-mode>    Can be 'simple'.",
+    `                      Default: '${selection_mode}'`,
     "",
     "Optional arguments:",
     "  <api-key-path>      Path on disk of the API key for",
     "                      the network service provider.",
-    "  <selection-mode>    Can be 'auto'.",
-    `                      Default: '${selection_mode}'`,
     "  <display-unit>      Can be 'wei' or 'ether'.",
     `                      Default: '${display_unit}'`,
     "  <seed-path>         Path on disk of the file",
@@ -436,9 +447,9 @@ if ( _cmdline_check(
   _cmdline_parse();
   _config_show();
   app_opts = [
-    selection_mode,
     target_network,
     api_key,
+    selection_mode,
     display_unit,
     wallet_seed,
     target_address,
