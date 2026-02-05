@@ -247,6 +247,11 @@ async function
           Math.floor(
             _price_gas * 12 / 10);
       }
+      if ( _selection_mode == "fast" ) {
+        _price_gas_target =
+          Math.floor(
+            _price_gas * 2);
+      }
       else if ( _selection_mode == "rpc" ) {
         _price_gas_target =
           _price_gas;
