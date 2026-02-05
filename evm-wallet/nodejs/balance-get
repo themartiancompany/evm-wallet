@@ -81,25 +81,22 @@ _sleep =
 const
   _wallet_get_module =
     require(
-      '../evm-wallet/wallet-get');
+      './wallet-get');
 _wallet_get =
   _wallet_get_module._wallet_get;
 const
   _network_provider =
     require(
-      '../evm-wallet/network-provider');
+      './network-provider');
 _provider_get =
   _network_provider._provider_get;
 _msg_info_provider_generated =
   _network_provider._msg_info_provider_generated;
 
-
 function
   _global_variables() {
   app_name =
     "balance-get";
-  method_args =
-    [];
   wallet_seed =
     "";
   target_network =
