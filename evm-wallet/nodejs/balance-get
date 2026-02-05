@@ -303,6 +303,7 @@ function
     "    (<api-keys-path)",
     "    (<target-address>)",
     "    (<display-unit>)",
+    "    (<output-file>)",
     "    (<retries-max>)",
     "",
     "Arguments:",
@@ -319,6 +320,8 @@ function
     "                      corresponding to the seed.",
     "  <display-unit>      Can be 'wei' or 'ether'.",
     `                      Default: '${display_unit}'`,
+    "  <output-file>       File in which to save the balance.",
+    `                      Default: '${output_file}'`,
     "  <retries-max>       Maximum number of retries.",
     `                      Default: ${retries_max}`,
   ];
@@ -332,6 +335,8 @@ function
 
 
 function _cmdline_parse() {
+  let
+    _msg;
   quiet =
     "y";
   process.argv.forEach(
@@ -341,39 +346,46 @@ function _cmdline_parse() {
       _array) {
       if ( _index == 2 ) {
         quiet =
-	  _value;
+          _value;
       }
       if ( _index == 3 ) {
         wallet_seed =
-	  _value;
+          _value;
       }
       if ( _index == 4 ) {
         target_network =
-	  _value;
+          _value;
       }
       if ( _index == 5 ) {
         api_key =
-	  _value;
+          _value;
       }
       if ( _index == 6 ) {
         target_address =
-	  _value;
+          _value;
       }
       if ( _index == 7 ) {
         display_unit =
-	  _value;
+          _value;
       }
       if ( _index == 8 ) {
         output_file =
-	  _value;
+          _value;
       }
       if ( _index == 9 ) {
         retries_max =
-	  _value;
+          _value;
       }
   });
   if ( wallet_seed == "" &&
        target_address == "" ) {
+    _msg =
+      "You need to input either " +
+      "a seed file path or a target " +
+      "address."
+    _msg_error(
+      _msg,
+      0);
     _overrides_set();
     _usage(
       1);
