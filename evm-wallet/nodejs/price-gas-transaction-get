@@ -403,6 +403,13 @@ function _cmdline_parse() {
         retries_max =
           _value;
       }
+      if ( _value == "-h" ||
+           _value == "--help" ) {
+        quiet =
+          "n";
+        _usage(
+          0);
+      }
   });
   if ( target_network == "" ) {
     _msg =
