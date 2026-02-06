@@ -107,6 +107,8 @@ function
     "";
   display_unit =
     "";
+  output_type =
+    "";
   output_file =
     "";
   retries_max =
@@ -145,6 +147,12 @@ async function
        _selection_mode == "" ) {
     _selection_mode =
       "rpc";
+  }
+  if ( typeof(
+         _output_type) == 'undefined' ||
+       _output_type == "" ) {
+    _output_type =
+      "price";
   }
   if ( typeof(
          _retries_max) == 'undefined' ||
@@ -226,6 +234,7 @@ async function
         _display_unit,
         _wallet_seed,
         _target_address,
+        _output_type,
         "", // Output file
         _retries_max);
       _price_gas = await
@@ -235,6 +244,7 @@ async function
       if ( quiet == "n" ) {
         _msg =
           `Got gas price '${_price_gas}' ${_display_unit} ` +
+          `of output type '${_output_type}' ` +
           `for network '${_target_network}'.`;
         _msg_info(
           _msg);
@@ -303,6 +313,10 @@ function
     display_unit =
       "wei";
   }
+  if ( output_type == "" ) {
+    output_type =
+      "price";
+  }
   if ( retries_max == "" ) {
     retries_max =
       "1";
@@ -315,15 +329,16 @@ function
     _line,
     _text;
   _text = [
-    `       Target network: ${target_network}`,
-    `              API Key: ${api_key}`,
     `         Display unit: ${display_unit}`,
     `       Selection mode: ${selection_mode}`,
+    `          Output type: ${output_type}`,
+    `          Output file: ${output_file}`,
     `Credentials options:`,
     `          Wallet seed: ${wallet_seed}`,
     `       Target address: ${target_address}`,
-    `          Output file: ${output_file}`,
     `    Network options:`,
+    `       Target network: ${target_network}`,
+    `              API Key: ${api_key}`,
     `      Maximum retries: ${retries_max}`
   ]
   for ( _line of _text ) {
@@ -348,6 +363,7 @@ function
     "    (<display-unit>)",
     "    (<seed-path>)",
     "    (<target-address>)",
+    "    (<output-type>)",
     "    (<output-file>)",
     "    (<retries-max>)",
     "",
@@ -367,6 +383,8 @@ function
     "                      the gas price (not used).",
     "                      Default: the wallet address.",
     "                      corresponding to the seed.",
+    "  <output-type>       Type of price output to return.",
+    `                      Default: '${output_type}'`,
     "  <output-file>       File in which to save the balance.",
     `                      Default: '${output_file}'`,
     "  <retries-max>       Maximum number of retries.",
@@ -418,10 +436,14 @@ function _cmdline_parse() {
           _value;
       }
       if ( _index == 9 ) {
-        output_file =
+        output_type =
           _value;
       }
       if ( _index == 10 ) {
+        output_file =
+          _value;
+      }
+      if ( _index == 11 ) {
         retries_max =
           _value;
       }
@@ -482,6 +504,7 @@ if ( _cmdline_check(
     display_unit,
     wallet_seed,
     target_address,
+    output_type,
     output_file,
     retries_max
   ];
