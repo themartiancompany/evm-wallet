@@ -241,14 +241,12 @@ async function
         _price_gas_get.apply(
           null,
           _price_gas_get_args);
-      if ( quiet == "n" ) {
-        _msg =
-          `Got gas price '${_price_gas}' ${_display_unit} ` +
-          `of output type '${_output_type}' ` +
-          `for network '${_target_network}'.`;
-        _msg_info(
-          _msg);
-      }
+      _msg =
+        `Got gas price '${_price_gas}' ${_display_unit} ` +
+        `of output type '${_output_type}' ` +
+        `for network '${_target_network}'.`;
+      _msg_info(
+        _msg);
       _price_gas =
         Number(
           _price_gas);
