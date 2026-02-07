@@ -102,6 +102,11 @@ function
            _provider._getConnection) != "undefined" ) 
       _timeout =
         _provider._getConnection().timeout;
+      _msg =
+        `Provider '${_provider}' with ` +
+        `timeout '${_timeout}' generated.`;
+      _msg_info(
+        _msg);
   }
   else {
     // _msg =
@@ -122,11 +127,6 @@ function
       _msg);
     }
   }
-  _msg =
-    `Provider '${_provider}' with ` +
-    `timeout '${_timeout}' generated.`;
-  _msg_info(
-    _msg);
 }
 
 function

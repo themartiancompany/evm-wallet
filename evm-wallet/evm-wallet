@@ -423,6 +423,8 @@ _balance_get_async() {
     _msg=() \
     _job \
     _wait_opts=()
+  echo \
+    "tasks parallel: ${_tasks_parallel}"
   _node_main="false"
   _balance_get_base_opts+=(
     "${wallet_name}"
@@ -442,14 +444,14 @@ _balance_get_async() {
   _index=0
   while \
     [ "${_index}" -le "$(("${_networks_total}" - 1))" ] && \
-    [ "${#_pendings[@]}" -le "${_tasks_parallel}" ]; do
+    ! (( "${_tasks_parallel}" < "${#_pendings[@]}" )); do
     _network="${_networks["${_index}"]}"
     _balance_get_opts=(
       "${_balance_get_base_opts[@]}"
       "${_network}"
       "0"
     )
-    _call_timeout="0"
+    _call_timeout="30"
     _run \
       "_balance_get_${_index}_${_network}" \
       "${_call_timeout}" \
@@ -462,7 +464,11 @@ _balance_get_async() {
     )
     _index="$((
       _index + 1 ))"
-    if [[ "${#_pendings[@]}" == "${_tasks_parallel}" ]]; then 
+    if ! (( "${#_pendings[@]}" < "${_tasks_parallel}" )); then 
+      _msg=(
+        "Reached maximum number of parallel tasks,"
+        "waiting for a task to finish."
+      )
       wait \
         "${_wait_opts[@]}" \
         "${_pendings[@]}"
@@ -478,6 +484,13 @@ _balance_get_async() {
         "${_pendings_new[@]}"
       )
       _job=""
+    else
+      _msg=(
+        "Number of active tasks: '${#_pendings[@]}',"
+        "Maximum amount of tasks: '${_tasks_parallel}'."
+      )
+      _msg_info \
+        "${_msg[*]}"
     fi
   done
   wait \
@@ -865,7 +878,7 @@ _key_get_async() {
     _key="${1}" \
     _exit
   _exit="0"
-  if [[ "${_target_key}" == "balance" ]]; then
+  if [[ "${_key}" == "balance" ]]; then
     _balance_get_async \
       "${_tasks_parallel}" \
       "${wallet_name}" \
@@ -1075,6 +1088,20 @@ _call_timeout_auto_detect() {
     "${_timeout}"
 }
 
+_tasks_parallel_auto_detect() {
+  local \
+    _tasks
+  if [[ "${_networks_all}" == "y" ]]; then
+    _tasks="10"
+  else
+    _tasks="1"
+  fi
+  _set_override \
+    "tasks" \
+    "parallel" \
+    "${_tasks}"
+}
+
 _set_overrides() {
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
@@ -1090,10 +1117,7 @@ _set_overrides() {
     "call" \
     "date" \
     "$(_get_date_human)"
-  _set_override \
-    "tasks" \
-    "parallel" \
-    "1"
+  _tasks_parallel_auto_detect
   _call_timeout_auto_detect
   _cache_dir_auto_detect
   _set_override \
@@ -1119,7 +1143,7 @@ _set_overrides() {
   _set_override \
     "retries" \
     "max" \
-    "1"
+    "2"
   _set_override \
     "measure" \
     "unit" \
@@ -1427,8 +1451,8 @@ app_opts=(
   "${rpc_selection}"
   "${api_key}"
   "${retries_max}"
-  "${call_timeout}"
   "${tasks_parallel}"
+  "${call_timeout}"
   "${measure_unit}"
   "${balance_lifespan}"
   "${currency_type}"
