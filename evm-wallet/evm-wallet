@@ -1091,7 +1091,7 @@ _call_timeout_auto_detect() {
 _tasks_parallel_auto_detect() {
   local \
     _tasks
-  if [[ "${_networks_all}" == "y" ]]; then
+  if [[ "${networks_all}" == "y" ]]; then
     _tasks="10"
   else
     _tasks="1"
