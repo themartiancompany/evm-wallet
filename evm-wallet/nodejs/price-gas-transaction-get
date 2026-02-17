@@ -260,6 +260,11 @@ async function
           Math.floor(
             _price_gas * 20 / 10 );
       }
+      else if ( _selection_mode == "nextblock" ) {
+        _price_gas_target =
+          Math.floor(
+            _price_gas * 50 / 10 );
+      }
       else if ( _selection_mode == "rpc" ) {
         _price_gas_target =
           _price_gas;
