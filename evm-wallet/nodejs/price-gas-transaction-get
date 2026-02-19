@@ -146,7 +146,12 @@ async function
          _selection_mode) == 'undefined' ||
        _selection_mode == "" ) {
     _selection_mode =
-      "rpc";
+      "auto";
+    _msg =
+      "No selection mode set. " +
+      `Setting '${_selection_mode}'.`;
+    _msg_info(
+      _msg);
   }
   if ( typeof(
          _output_type) == 'undefined' ||
@@ -250,12 +255,16 @@ async function
       _price_gas =
         Number(
           _price_gas);
+      if ( _selection_mode == "auto" ) {
+        _selection_mode =
+          "rpc";
+      }
       if ( _selection_mode == "simple" ) {
         _price_gas_target =
           Math.floor(
             _price_gas * 12 / 10);
       }
-      if ( _selection_mode == "fast" ) {
+      else if ( _selection_mode == "fast" ) {
         _price_gas_target =
           Math.floor(
             _price_gas * 20 / 10 );
