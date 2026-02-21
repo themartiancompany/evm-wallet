@@ -81,8 +81,8 @@ const
   _msg_error =
     _libcrash._msg_error;
 const
-  _process_exit_get =
-    _libcrash._process_exit_get;
+  _process_exit =
+    _libcrash._process_exit;
 const
   _wallet_get_module =
     require(
@@ -346,7 +346,7 @@ function
     console.log(
       _line);
   }
-  process.exit();
+  _process_exit();
 }
 
 function _cmdline_parse() {
@@ -359,31 +359,31 @@ function _cmdline_parse() {
       _array) {
       if ( _index == 2 ) {
         quiet =
-	  _value;
+          _value;
       }
       if ( _index == 3 ) {
         wallet_seed =
-	  _value;
+          _value;
       }
       if ( _index == 4 ) {
         target_address =
-	  _value;
+          _value;
       }
       if ( _index == 5 ) {
         target_amount =
-	  _value;
+          _value;
       }
       if ( _index == 6 ) {
         target_network =
-	  _value;
+          _value;
       }
       if ( _index == 7 ) {
         api_key =
-	  _value;
+          _value;
       }
       if ( _index == 8 ) {
         measure_unit =
-	  _value;
+        _value;
       }
   });
   if ( wallet_seed == "" ||
