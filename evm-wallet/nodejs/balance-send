@@ -314,7 +314,14 @@ async function
         _send_opts);
   console.log(
     _tx);
-  return _tx;
+  const
+    _receipt =
+      await _tx.wait(
+        1,
+        _call_timeout);
+  console.log(
+    _receipt);
+  return _receipt;
 }
 
 function
