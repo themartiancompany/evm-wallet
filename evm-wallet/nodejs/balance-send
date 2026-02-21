@@ -62,60 +62,105 @@ function
 const
   _libcrash =
     _libcrash_require();
-_dirname =
-  _libcrash._dirname;
-_file_read =
-  _libcrash._file_read;
-_path_join =
-  _libcrash._path_join;
-_msg_info =
-  _libcrash._msg_info;
-_msg_info_obj =
-  _libcrash._msg_info_obj;
-_msg_error =
-  _libcrash._msg_error;
+const
+  _dirname =
+    _libcrash._dirname;
+const
+  _file_read =
+    _libcrash._file_read;
+const
+  _path_join =
+    _libcrash._path_join;
+const
+  _msg_info =
+    _libcrash._msg_info;
+const
+  _msg_info_obj =
+    _libcrash._msg_info_obj;
+const
+  _msg_error =
+    _libcrash._msg_error;
+const
+  _process_exit_get =
+    _libcrash._process_exit_get;
 const
   _wallet_get_module =
     require(
       './wallet-get');
-_wallet_get =
-  _wallet_get_module._wallet_get;
+const
+  _wallet_get =
+    _wallet_get_module._wallet_get;
 const
   _balance_check_module =
     require(
       './balance-check');
-_balance_check =
-  _balance_check_module._balance_check;
-_msg_error_balance_insufficient =
-  _balance_check_module._msg_error_balance_insufficient
+const
+  _balance_check =
+    _balance_check_module._balance_check;
+const
+  _msg_error_balance_insufficient =
+    _balance_check_module._msg_error_balance_insufficient
 const
   _network_provider =
     require(
       './network-provider');
-_provider_get =
-  _network_provider._provider_get;
-_msg_info_provider_generated =
-  _network_provider._msg_info_provider_generated;
-
+const
+  _provider_get =
+    _network_provider._provider_get;
+const
+  _msg_info_provider_generated =
+    _network_provider._msg_info_provider_generated;
 
 function
   _global_variables() {
+  /* global
+       app_name:
+         writable */
   app_name =
     "balance-send";
+  /* global
+       app_opts:
+         writable */
+  app_opts =
+    [];
+  /* global
+       method_args:
+         writable */
   method_args =
     [];
+  /* global
+       wallet_seed:
+         writable */
   wallet_seed =
     "";
+  /* global
+       target_address:
+         writable */
   target_address =
     "";
+  /* global
+       target_amount:
+         writable */
   target_amount =
     "";
+  /* global
+       target_network:
+         writable */
   target_network =
     "";
+  /* global
+       api_key:
+         writable */
   api_key =
     "";
+  /* global
+       measure_unit:
+         writable */
   measure_unit =
     "";
+  /* global
+       quiet:
+         writable */
   quiet =
     "";
 }
@@ -140,59 +185,64 @@ async function
     _measure_unit) {
   let
     _amount,
-    _api_key,
     _balance_check_opts,
     _provider_get_opts,
-    _send_opts,
-    _sender_address,
-    _tx,
-    _wallet_dir,
-    _wallet_password,
-    _wallet_path_list;
-  _wallet_password =
-    "";
-  _wallet_dir =
-    _dirname(
-      _wallet_seed);
-  _wallet_path_list = [
-    _wallet_dir,
-    "wallet.dat"
-  ];
-  _wallet_path =
-    _path_join(
-      _wallet_path_list);
+    _send_opts;
+  if ( typeof(
+         _measure_unit) === "undefined"  ||
+         _measure_unit == "" ) {
+    _measure_unit =
+      "ether";
+  }
+  const
+    _wallet_password =
+      "";
+  const
+    _wallet_dir =
+      _dirname(
+        _wallet_seed);
+  const
+    _wallet_path_list = [
+      _wallet_dir,
+      "wallet.dat"
+    ];
+  const
+    _wallet_path =
+      _path_join(
+        _wallet_path_list);
   _provider_get_opts = [
     _target_network
   ];
   if ( _api_key_path != "" ) {
-    _api_key =
-      _file_read(
-        _api_key_path);
+    const
+      _api_key =
+        _file_read(
+          _api_key_path);
     _provider_get_opts.push(
       _api_key);
   }
-  _provider =
-    _provider_get.apply(
-      null,
-      _provider_get_opts);
+  const
+    _provider =
+      _provider_get.apply(
+        null,
+        _provider_get_opts);
   _msg_info_provider_generated(
     _provider);
-  _wallet_get_opts = [
-    _wallet_path,
-    _wallet_password,
-    _wallet_seed,
-    _provider
-  ];
-  _wallet =
-    _wallet_get.apply(
-      null,
-      _wallet_get_opts);
-  _sender_address =
-    _wallet.address;
-  if ( _measure_unit == "" ) {
-    _measure_unit =
-      "ether";
-  }
+  const
+    _wallet_get_opts = [
+      _wallet_path,
+      _wallet_password,
+      _wallet_seed,
+      _provider
+    ];
+  const
+    _wallet =
+      _wallet_get.apply(
+        null,
+        _wallet_get_opts);
+  const
+    _sender_address =
+      _wallet.address;
   _balance_check_opts = [
     _wallet_seed,
     _target_amount,
@@ -211,24 +261,28 @@ async function
   }
   if ( _measure_unit == "wei" ) {
     _amount =
-      target_amount;
+      _target_amount;
   }
   else if ( _measure_unit == "ether" ) {
     _amount =
       _ethers_to_wei(
         _target_amount);
   }
-  console.log(
-    "sending", _amount, _measure_unit);
+  _msg =
+    `Sending '${_amount}' '${_measure_unit}' ` +
+    `to address '${_target_address}'.`;
+  _msg_info(
+    _msg);
   _send_opts = {
     'to':
       _target_address,
     'value':
       _amount
   };
-  _tx =
-    await _wallet.sendTransaction(
-      _send_opts);
+  const
+    _tx =
+      await _wallet.sendTransaction(
+        _send_opts);
   console.log(
     _tx);
   return _tx;
@@ -244,28 +298,16 @@ function
 function
   _config_show() {
   let
-    _line,
-    _text;
-  _text = [
-    "      Wallet seed: {wallet_seed}".replaceAll(
-      "{wallet_seed}",
-      wallet_seed),
-    "   Target address: {target_address}".replace(
-      "{target_address}",
-      target_address),
-    "    Target amount: {target_amount}".replace(
-      "{target_amount}",
-      target_amount),
-    "   Target network: {target_network}".replaceAll(
-      "{target_network}",
-      target_network),
-    "          API Key: {api_key}".replace(
-      "{api_key}",
-      api_key),
-    "     Measure unit: {measure_unit}".replace(
-      "{measure_unit}",
-      measure_unit)
-  ]
+    _line;
+  const
+    _text = [
+      `      Wallet seed: ${wallet_seed}`,
+      `   Target address: ${target_address}`,
+      `    Target amount: ${target_amount}`,
+      `   Target network: ${target_network}`,
+      `          API Key: ${api_key}`,
+      `     Measure unit: ${measure_unit}`,
+    ]
   for ( _line of _text ) {
     _msg_info(
       _line);
@@ -306,8 +348,6 @@ function
   }
   process.exit();
 }
-
-
 
 function _cmdline_parse() {
   quiet =
