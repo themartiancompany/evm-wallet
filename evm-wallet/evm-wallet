@@ -170,6 +170,7 @@ _balance_send() {
       "${_target_amount}"
       "${_rpc_backend}"
       "${_api_key_path}"
+      "${_measure_unit}"
     )
   elif [[ "${_currency_type}" == "erc20" ]]; then
     _cmd="${_lib}/token-send"
