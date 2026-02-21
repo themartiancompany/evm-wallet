@@ -212,6 +212,9 @@ async function
     _measure_unit_converted,
     _provider_get_opts,
     _send_opts;
+  const
+    _call_timeout =
+      300000;
   if ( typeof(
          _measure_unit) === "undefined"  ||
          _measure_unit == "" ) {
