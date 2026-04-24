@@ -113,9 +113,7 @@ _requirements_qr_support() {
     )
     _msg_info \
       "${_msg[*]}"
-    _qr_support="false"
-  else
-    _qr_support="true"
+    _qr_support="n"
   fi
 }
 
@@ -163,6 +161,12 @@ _key_fingerprint_requirements() {
     fi
     "_msg_${_msg_type}" \
       "${_msg_args[@]}"
+  else
+    _msg=(
+      "EVM GNUPG installed."
+    )
+    # _msg_info \
+    #   "${_msg[*]}"
   fi
 }
 
@@ -1083,18 +1087,27 @@ _key_fingerprint_auto_detect() {
     _evm_gpg_available \
     _evm_gpg_opts=() \
     _msg=() \
+    _key_fingerprint \
     _fingerprint
+  _key_fingerprint=""
   _key_fingerprint_requirements \
     "n"
+  _evm_gpg_available="$(
+    command \
+      -v \
+      "evm-gpg" || \
+      true)"
   if [[ "${_evm_gpg_available}" != "" ]]; then
     if [[ "${wallet_name}" != "" ]]; then
       _fingerprint_get \
         "${wallet_name}"
       _key_fingerprint="${_fingerprint}"
-      _msg_info \
-        "${_key_fingerprint}"
     fi
   fi
+  _set_override \
+    "key" \
+    "fingerprint" \
+    "${_key_fingerprint}"
 }
 
 _output_type_check() {
@@ -1161,6 +1174,7 @@ _tasks_parallel_auto_detect() {
 _qr_support_auto_detect() {
   local \
     _qr_support
+  _qr_support="y"
   _requirements_qr_support
   _set_override \
     "qr" \
@@ -1246,6 +1260,8 @@ _set_overrides() {
   _key_fingerprint_auto_detect
   _output_type_auto_detect
   _qr_support_auto_detect
+  # if [[ "${qr_support}" == "y" ]]; then
+  # fi
 }
 
 # Show help usage, with an exit status.
