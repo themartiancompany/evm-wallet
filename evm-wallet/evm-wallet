@@ -113,12 +113,9 @@ _requirements_qr_support() {
     )
     _msg_info \
       "${_msg[*]}"
+    _qr_support="false"
   else
-    _msg=(
-      "GNUPG version '${_gpg_version}'."
-    )
-    _msg_info \
-      "${_msg[*]}"
+    _qr_support="true"
   fi
 }
 
@@ -1161,6 +1158,16 @@ _tasks_parallel_auto_detect() {
     "${_tasks}"
 }
 
+_qr_support_auto_detect() {
+  local \
+    _qr_support
+  _requirements_qr_support
+  _set_override \
+    "qr" \
+    "support" \
+    "${_qr_support}"
+}
+
 _set_overrides() {
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
@@ -1238,6 +1245,7 @@ _set_overrides() {
   fi
   _key_fingerprint_auto_detect
   _output_type_auto_detect
+  _qr_support_auto_detect
 }
 
 # Show help usage, with an exit status.
@@ -1386,6 +1394,7 @@ _show_config() {
   _msg_info "                    API key:   ${api_key}"
   _msg_info "             Wallet address:   ${wallet_address}"
   _msg_info "            Key fingerprint:   ${key_fingerprint}"
+  _msg_info " Quantum Resistance ciphers:   ${qr_support}"
   _msg_info "          Network options:"
   _msg_info "            Maximum retries:   ${retries_max}"
   _msg_info "               Call timeout:   ${call_timeout}"
