@@ -70,10 +70,56 @@ _global_variables() {
   quiet=""
 }
 
+_verlte() {
+  printf \
+    '%s\n' \
+    "${1}" \
+    "${2}" |
+    sort \
+      -C \
+      -V
+}
+
+_verlt() {
+  ! _verlte \
+      "${2}" \
+      "${1}"
+}
+
 _requirements_qr_support() {
+  local \
+    _gpg_version
   _check_cmd \
     'evm-contract-call' \
     'evm-contract-tools'
+  _gpg_version="$(
+    gpg \
+      --version |
+      head \
+        -n \
+          1 |
+          awk \
+            '{print $3}' |
+          cut \
+            -d \
+              "-" \
+            -f \
+              1)"
+  if "_verlt" "${_gpg_version}" "2.5" ; then
+    _msg=(
+      "GNUPG version '${_gpg_version}'."
+      "Required version of GNUPG >=2.5 to"
+      "to enable quantum resistant ciphers."
+    )
+    _msg_info \
+      "${_msg[*]}"
+  else
+    _msg=(
+      "GNUPG version '${_gpg_version}'."
+    )
+    _msg_info \
+      "${_msg[*]}"
+  fi
 }
 
 _requirements() {
@@ -1257,6 +1303,8 @@ Usage:
                               networks.
      -P <tasks-parallel>      Tasks to perform in parallel.
                               Default: ${tasks_parallel}
+     -Q <y/n>                 Quantum resistance support.
+                              Default: ${qr_support}
 
   list options:
      -o <output-type>         It can be 'name', 'address',
@@ -1358,7 +1406,7 @@ _config_user_init \
 getopts_opts="$(
   printf \
     "%s" \
-    "P:S:E:ar:T:u:f:l:" \
+    "P:S:E:ar:T:u:f:l:Q:" \
     "t:C:o:" \
     "$(_libevm_app_getopts_params_get)" \
     "n:" \
@@ -1386,6 +1434,8 @@ while \
       override_call_timeout="${OPTARG}" ;;
     l)
       override_balance_lifespan="${OPTARG}" ;;
+    Q)
+      override_qr_support="${OPTARG}" ;;
     u)
       override_measure_unit="${OPTARG}" ;;
     f)
