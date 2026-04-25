@@ -1182,6 +1182,22 @@ _qr_support_auto_detect() {
     "${_qr_support}"
 }
 
+_qr_keys_auto_detect() {
+  local \
+    _qr_fingerprints=()
+  _evm_gpg_available="$(
+    command \
+      -v \
+      "evm-gpg" || \
+    true)"
+  if [[ "${_evm_gpg_available}" != "" ]]; then
+    _msg=(
+      "Getting fingerprints"
+      "for QR Ethereum addresses."
+    )
+  fi
+}
+
 _set_overrides() {
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
@@ -1261,6 +1277,7 @@ _set_overrides() {
   _output_type_auto_detect
   _qr_support_auto_detect
   # if [[ "${qr_support}" == "y" ]]; then
+  #   _qr_fingerprints_auto_detect
   # fi
 }
 
