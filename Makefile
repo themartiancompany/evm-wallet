@@ -112,6 +112,11 @@ install-bash-scripts:
 
 install-node-scripts:
 
+	git \
+	  submodule \
+	    update \
+	    --init \
+	      "$(_PROJECT)/nodejs"
 	for _file in $(_NODE_FILES); do \
 	  $(_INSTALL_EXE) \
 	    "$(_PROJECT)/nodejs/lib/$${_file}" \
