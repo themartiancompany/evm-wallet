@@ -1,3 +1,6 @@
 [submodule "evm-wallet/nodejs"]
 	path = evm-wallet/nodejs
 	url = https://github.com/themartiancompany/evm-wallet.js
+[submodule "man"]
+	path = man
+	url = https://github.com/themartiancompany/evm-wallet-man
