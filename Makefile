@@ -114,7 +114,7 @@ install-node-scripts:
 
 	for _file in $(_NODE_FILES); do \
 	  $(_INSTALL_EXE) \
-	    "$(_PROJECT)/nodejs/$${_file}" \
+	    "$(_PROJECT)/nodejs/lib/$${_file}" \
 	    "$(LIB_DIR)/$${_file}"; \
 	done
 
