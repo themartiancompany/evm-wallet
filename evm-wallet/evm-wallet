@@ -1198,6 +1198,32 @@ _qr_keys_auto_detect() {
   fi
 }
 
+_qr_fingerprint_get() {
+  local \
+    _config_dir
+  _config_dir="${HOME}/.config/evm-wallet"
+  _qr_dir="${_config_dir}/qr"
+  _fingerprint_file="${_qr_dir}/${wallet_name}-fingerprint.txt"
+  if [[ -e "${_fingerprint_file}" ]]; then
+    _fingerprint="$(
+      cat \
+        "${_fingerprint_file}")"
+  else
+    _msg=(
+      "Found no quantum resistant"
+      "associated address,"
+      "generating."
+    )
+    _msg_info \
+      "${_msg[*]}"
+    mkdir \
+      -p \
+      "${_qr_dir}"
+    mkseed \
+      "${_fingerprint_file}"
+  fi
+}
+
 _set_overrides() {
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
@@ -1277,7 +1303,7 @@ _set_overrides() {
   _output_type_auto_detect
   _qr_support_auto_detect
   # if [[ "${qr_support}" == "y" ]]; then
-  #   _qr_fingerprints_auto_detect
+  #   _qr_fingerprint_auto_detect
   # fi
 }
 
