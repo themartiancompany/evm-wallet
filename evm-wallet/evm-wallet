@@ -360,6 +360,12 @@ _balance_get_cmd_get() {
       "${_retries_max}"
     )
   elif [[ "${_balance_update}" == "false" ]]; then
+    _msg=(
+      "returning local value."
+    )
+    _msg_info \
+      "${_msg[*]}"
+    _cmd="mm"
     cat \
       "${_balance_file}" || \
     true
@@ -879,9 +885,17 @@ _price_gas_get() {
 }
 
 _evm_wallet_sync() {
+  local \
+    _msg=() \
+    _target_network
   for _target_network \
     in "${_target_networks[@]}"; do
     if [[ "${_target_command}" == "get" ]]; then
+      _msg=(
+        "Get routine."
+      )
+      _msg_info \
+        "${_msg[*]}"
       "_key_${_target_command}" \
         "${_target_key}"
       if [[ "${_target_key}" == "name" ]]; then
@@ -951,6 +965,35 @@ _evm_wallet_async() {
   if [[ "${_target_command}" == "get" ]]; then
     _key_get_async \
       "${_target_key}"
+  fi
+}
+
+_get_value_allowed() {
+  local \
+    _flag \
+    _value \
+    _values_allowed=()
+  _flag="false"
+  _values_allowed+=(
+    "address"
+    "balance"
+    "fingerprint"
+    "name"
+    "seed" 
+  )
+  for _value \
+    in "${_values_allowed[@]}"; do
+    if [[ "${target_key}" == "${_value}" ]]; then
+      _flag="true"
+      break
+    fi
+  done
+  if [[ "${_flag}" == "false" ]]; then
+    return \
+      1
+  elif [[ "${_flag}" == "true" ]]; then
+    return \
+      0
   fi
 }
 
@@ -1029,6 +1072,7 @@ _evm_wallet() {
     )
   fi
   if [[ "${_target_command}" == "get" ]]; then
+    _get_value_allowed
     if [[ "${_target_key}" == "balance" ]]; then
       _evm_wallet_async
     else
@@ -1344,6 +1388,7 @@ Usage:
   keys:
     address
     balance
+    name
     seed
 
   networks:
