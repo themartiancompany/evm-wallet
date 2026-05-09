@@ -46,6 +46,7 @@ _sourced \
 # shellcheck disable=SC2034
 _global_variables() {
   call_date=""
+  config_dir=""
   cache_dir=""
   tasks_parallel=""
   target_networks=()
@@ -1034,21 +1035,22 @@ _evm_wallet() {
     _wallet_password="${3}" \
     _wallet_seed="${4}" \
     _key_fingerprint="${5}" \
-    _cache_dir="${6}" \
-    _networks_all="${7}" \
-    _rpc_selection="${8}" \
-    _api_key_path="${9}" \
-    _retries_max="${10}" \
-    _tasks_parallel="${11}" \
-    _call_timeout="${12}" \
-    _measure_unit="${13}" \
-    _balance_lifespan="${14}" \
-    _currency_type="${15}" \
-    _currency_address="${16}" \
-    _output_type="${17}" \
-    _target_key="${18}" \
-    _target_value="${19}" \
-    _networks_amount="${20}" \
+    _config_dir="${6}" \
+    _cache_dir="${7}" \
+    _networks_all="${8}" \
+    _rpc_selection="${9}" \
+    _api_key_path="${10}" \
+    _retries_max="${11}" \
+    _tasks_parallel="${12}" \
+    _call_timeout="${13}" \
+    _measure_unit="${14}" \
+    _balance_lifespan="${15}" \
+    _currency_type="${16}" \
+    _currency_address="${17}" \
+    _output_type="${18}" \
+    _target_key="${19}" \
+    _target_value="${20}" \
+    _networks_amount="${21}" \
     _target_networks=() \
     _command_args=() \
     _target_networks=() \
@@ -1062,7 +1064,7 @@ _evm_wallet() {
     _approve_call_opts=() \
     _rpc_backend
   shift \
-    20
+    21
   if (( 0 < "${_networks_amount}" )); then
     for _network \
       in $(seq \
@@ -1126,6 +1128,21 @@ _currency_type_auto_detect() {
     "currency" \
     "type" \
     "${_currency_type}"
+}
+
+_config_dir_auto_detect() {
+  local \
+    _dir
+  _dir="${HOME}/.config/${app_name}"
+  if [[ ! -v "override_cache_dir" ]]; then
+    mkdir \
+      -p \
+      "${_dir}"
+  fi
+  _set_override \
+    "config" \
+    "dir" \
+    "${_dir}"
 }
 
 _cache_dir_auto_detect() {
@@ -1269,6 +1286,10 @@ _qr_keys_auto_detect() {
       "Getting fingerprints"
       "for QR Ethereum addresses."
     )
+    _msg_info \
+      "${_msg[*]}"
+    if [[]]; then
+    fi
   fi
 }
 
@@ -1315,6 +1336,7 @@ _set_overrides() {
     "$(_get_date_human)"
   _tasks_parallel_auto_detect
   _call_timeout_auto_detect
+  _config_dir_auto_detect
   _cache_dir_auto_detect
   _set_override \
     "networks" \
@@ -1554,7 +1576,7 @@ getopts_opts="$(
     "$(_libevm_app_getopts_params_get)" \
     "n:" \
     "$(_wallet_getopts_params_get)" \
-    "W:cvh")"
+    "w:W:cvh")"
 while \
   getopts \
     "${getopts_opts}" \
@@ -1594,6 +1616,8 @@ while \
         "${OPTARG}"
       ) ;;
       # override_target_network="${OPTARG}" ;;
+    w)
+      override_config_dir="${OPTARG}" ;;
     W)
       override_cache_dir="${OPTARG}" ;;
     c)
@@ -1652,6 +1676,7 @@ app_opts=(
   "${wallet_password}"
   "${wallet_seed}"
   "${key_fingerprint}"
+  "${config_dir}"
   "${cache_dir}"
   "${networks_all}"
   "${rpc_selection}"
