@@ -466,7 +466,6 @@ _fingerprint_get() {
   local \
     _wallet_name="${1}" \
     _address_file \
-    _config_dir \
     _msg=()
   _msg=(
     "Returning fingerprint"
@@ -474,8 +473,6 @@ _fingerprint_get() {
   )
   _msg_info \
     "${_msg[*]}"
-  _config_dir="$(
-    _get_conf_dir_path)"
   _fingerprint_file="${_config_dir}/${_wallet_name}-fingerprint.txt"
   if [[ ! -e "${_fingerprint_file}" ]]; then
     _key_fingerprint_get \
@@ -789,8 +786,7 @@ _contacts_list() {
     _wallet_address \
     _wallet_seed \
     _file_name \
-    _fingerprint \
-    _config_dir
+    _fingerprint
   declare \
     -A \
     _addresses
@@ -803,8 +799,6 @@ _contacts_list() {
   if [[ "${_filter}" == "" ]]; then
     _filter="*"
   fi
-  _config_dir="$(
-    _get_conf_dir_path)"
   _wallets_files_get \
     "${_config_dir}" \
     "${_filter}"
@@ -1283,31 +1277,72 @@ _qr_keys_auto_detect() {
     true)"
   if [[ "${_evm_gpg_available}" != "" ]]; then
     _msg=(
-      "Getting fingerprints"
+      "Getting fingerprint(s)"
       "for QR Ethereum addresses."
     )
     _msg_info \
       "${_msg[*]}"
-    if [[]]; then
-    fi
+    _qr_fingerprint_get \
+      "${wallet_name}"
   fi
+}
+
+_qr_fingerprint_new() {
+  local \
+    _wallet_name="${1}" \
+    _evm_gpg_opts=() 
+  _evm_gpg_opts+=(
+  )
 }
 
 _qr_fingerprint_get() {
   local \
-    _config_dir
-  _config_dir="${HOME}/.config/evm-wallet"
-  _qr_dir="${_config_dir}/qr"
-  _fingerprint_file="${_qr_dir}/${wallet_name}-fingerprint.txt"
+    _wallet_name="${1}" \
+    _qr_dir \
+    _fingerprint_file \
+    _fingerprint
+  _qr_dir="${config_dir}/qr"
+  _fingerprint_file="${_qr_dir}/${_wallet_name}-fingerprint.txt"
+  _seed_file="${_qr_dir}/${_wallet_name}-seed.txt"
   if [[ -e "${_fingerprint_file}" ]]; then
     _fingerprint="$(
       cat \
         "${_fingerprint_file}")"
+    if [[ "${_fingerprint}" == "" ]]; then
+      _msg=(
+        "Fingerprint file empty,"
+        "retrieving."
+      )
+      _msg_info \
+        "${_msg[*]}"
+    fi
+  else
+    if [[ ! -e "${_seed_file}" ]]; then
+      _qr_eoa_new \
+        "${_wallet_name}"
+    fi
+    if [[ ]]; then
+    fi
+  fi
+}
+
+_qr_eoa_new() {
+  local \
+    _wallet_name="${1}" \
+    _seed_file \
+    _msg=()
+  _seed_file="${_qr_dir}/${_wallet_name}-seed.txt"
+  if [[ -e "${_seed_file}" ]]; then
+    _msg=(
+      "Seed file already existing."
+    )
+    _msg_error \
+      "${_msg[*]}" \
+      1
   else
     _msg=(
-      "Found no quantum resistant"
-      "associated address,"
-      "generating."
+      "Generating seed phrase at"
+      "'${_seed_file}'."
     )
     _msg_info \
       "${_msg[*]}"
@@ -1315,8 +1350,13 @@ _qr_fingerprint_get() {
       -p \
       "${_qr_dir}"
     mkseed \
-      "${_fingerprint_file}"
+      "${_seed_file}"
   fi
+}
+
+_qr_address_get() {
+  local \
+    _wallet_name="${1}" 
 }
 
 _set_overrides() {
@@ -1558,6 +1598,7 @@ _show_config() {
   _msg_info "           LibEVM options:"
   _msg_info "             Target network:   ${target_network}"
   _msg_info "      Application options:"
+  _msg_info "    Configuration directory:   ${config_dir}"
   _msg_info "            Cache directory:   ${cache_dir}"
 }
 
