@@ -1542,6 +1542,11 @@ Usage:
                               evm-chains-info and RPC addresses.
 
   application options:
+     -K <config-dir>          Configuration directory.
+                              Default: ${config_dir}
+     -W <cache-dir>           Cache directory.
+                              Default: ${cache_dir}
+
      -h                       This message.
      -c                       Enable color output
      -v                       Enable verbose output
@@ -1618,7 +1623,7 @@ getopts_opts="$(
     "$(_libevm_app_getopts_params_get)" \
     "n:" \
     "$(_wallet_getopts_params_get)" \
-    "w:W:cvh")"
+    "K:W:cvh")"
 while \
   getopts \
     "${getopts_opts}" \
@@ -1658,7 +1663,7 @@ while \
         "${OPTARG}"
       ) ;;
       # override_target_network="${OPTARG}" ;;
-    w)
+    K)
       override_config_dir="${OPTARG}" ;;
     W)
       override_cache_dir="${OPTARG}" ;;
