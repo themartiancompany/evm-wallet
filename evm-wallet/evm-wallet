@@ -1490,9 +1490,9 @@ Usage:
     well as direct RPC addresses
 
   options:
-     -R <rpc-selection>       RPC selection method.
+     -S <rpc-selection>       RPC selection method.
                               Default: ${rpc_selection}
-     -S <explorer-selection>  Network explorer selection method.
+     -E <explorer-selection>  Network explorer selection method.
                               Default: ${explorer_selection}
      -r <retries-max>         Maximum number of retries before
                               failing.
@@ -1703,10 +1703,10 @@ if (( 1 < "${#}" )); then
     target_key="${2}"
   fi
 fi
-if (( 2 < "$#" )); then
+if (( 2 < "${#}" )); then
   target_key="${3}"
 fi
-if (( 3 < $# )); then
+if (( 3 < "${#}" )); then
   target_value="${4}"
 fi
 shift \
