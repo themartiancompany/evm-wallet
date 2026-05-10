@@ -1374,14 +1374,18 @@ _set_overrides() {
     "call" \
     "date" \
     "$(_get_date_human)"
-  _tasks_parallel_auto_detect
-  _call_timeout_auto_detect
-  _config_dir_auto_detect
-  _cache_dir_auto_detect
   _set_override \
     "networks" \
     "all" \
     "n"
+  _set_override \
+    "target" \
+    "command" \
+    "get"
+  _tasks_parallel_auto_detect
+  _call_timeout_auto_detect
+  _config_dir_auto_detect
+  _cache_dir_auto_detect
   if [[ "${target_networks[*]}" == "" && \
         "${networks_all}" == "n" ]]; then
     target_networks+=(
@@ -1389,10 +1393,6 @@ _set_overrides() {
     )
   fi
   networks_amount="${#target_networks[@]}"
-  _set_override \
-    "target" \
-    "command" \
-    "get"
   _target_key_auto_detect
   _set_override \
     "balance" \
@@ -1433,6 +1433,7 @@ _set_overrides() {
     _wallet_overrides_set \
       "evm-wallet" \
       "${wallet_name}" \
+      "y" \
       "y"
   fi
   _key_fingerprint_auto_detect
@@ -1455,7 +1456,7 @@ _usage() {
       _usage_text << \
         ENDUSAGETEXT || true
 
-EVM network wallet
+EVM networks wallet
 
 Usage:
   ${app_name}
@@ -1526,13 +1527,13 @@ Usage:
                               Default: ${currency_address}
 
   credentials options:
-     -w <wallet_path>         Wallet path.
+     -w <wallet-path>         Wallet path.
                               Default: ${wallet_path}
-     -p <wallet_password>     Wallet password.
+     -p <wallet-password>     Wallet password.
                               Default: ${wallet_password}
-     -s <wallet_seed>         Wallet seed path.
+     -s <wallet-seed>         Wallet seed path.
                               Default: ${wallet_seed}
-     -k <api_key>             Etherscan-like service key.
+     -k <api-key>             Etherscan-like service key.
                               Default: ${api_key}
 
   libEVM options:
