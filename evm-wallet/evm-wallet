@@ -1053,7 +1053,6 @@ _evm_wallet() {
     _args=() \
     _network \
     _node_main \
-    _rpc_backend \
     _node_run_opts=() \
     _approve_call_opts=() \
     _rpc_backend
