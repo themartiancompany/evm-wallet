@@ -425,7 +425,8 @@ _address_get() {
       node-run \
         "${_node_run_opts[@]}" \
         "${_cmd}" \
-        "${_args[@]}" 1>/dev/null
+        "${_args[@]}" \
+        1>"/dev/null"
     elif [[ "${quiet}" == "n" ]]; then
       node-run \
         "${_node_run_opts[@]}" \
@@ -465,14 +466,22 @@ _key_fingerprint_get() {
 _fingerprint_get() {
   local \
     _wallet_name="${1}" \
+    _exit \
     _address_file \
     _msg=()
+  _exit="1"
+  if (( 1 < "${#}" )); then
+    _exit="${2}"
+  fi
   _msg=(
     "Returning fingerprint"
     "for wallet '${_wallet_name}'."
   )
   _msg_info \
     "${_msg[*]}"
+  if [[ ! -v "_config_dir" ]]; then
+    _config_dir="${config_dir}"
+  fi
   _fingerprint_file="${_config_dir}/${_wallet_name}-fingerprint.txt"
   if [[ ! -e "${_fingerprint_file}" ]]; then
     _key_fingerprint_get \
@@ -488,7 +497,7 @@ _fingerprint_get() {
     )
     _msg_error \
       "${_msg[*]}" \
-      1
+      "${_exit}"
   elif [[ "${_fingerprint}" != "" ]]; then
     echo \
       "${_fingerprint}"
@@ -630,6 +639,55 @@ _key_get() {
     _fingerprint_get \
       "${wallet_name}"
     return \
+      0
+  fi
+}
+
+_key_set() {
+  local \
+    _key="${1}" \
+    _output_file \
+    _output_dir \
+    _evm_chains_info_opts=() \
+    _network \
+    _msg=()
+  if [[ "${_key}" == "seed" ]]; then
+    _address_get \
+      "y" \
+      "${_wallet_seed}" || \
+      true
+    if [[ "${_wallet_address}" == "" ]]; then
+      _msg=(
+        "Invalid seed '${_seed}'."
+      )
+      _msg_error \
+        "${_msg[*]}" \
+        1
+    else
+      chmod \
+        600 \
+        "${_wallet_seed}"
+      printf \
+        "%s" \
+        "${_target_value}" > \
+        "${_wallet_seed}"
+      chmod \
+        400 \
+        "${_wallet_seed}"
+      exit \
+        0
+    fi
+  elif [[ "${_key}" == "name" ]]; then
+    echo \
+      "To be implemented."
+    return \
+      0
+  else
+    _msg=(
+      "Unknown key '${_key}'."
+    )
+    _msg_error \
+      "${_msg[*]}" \
       0
   fi
 }
@@ -924,6 +982,9 @@ _evm_wallet_sync() {
         return \
           0
       fi
+    elif [[ "${_target_command}" == "set" ]]; then
+      "_key_${_target_command}" \
+        "${_target_key}"
     elif [[ "${_target_command}" == "gas" ]]; then
       _price_gas_get \
         "${quiet}" \
@@ -1184,7 +1245,8 @@ _key_fingerprint_auto_detect() {
   if [[ "${_evm_gpg_available}" != "" ]]; then
     if [[ "${wallet_name}" != "" ]]; then
       _fingerprint_get \
-        "${wallet_name}"
+        "${wallet_name}" \
+        0
       _key_fingerprint="${_fingerprint}"
     fi
   fi
@@ -1319,8 +1381,6 @@ _qr_fingerprint_get() {
     if [[ ! -e "${_seed_file}" ]]; then
       _qr_eoa_new \
         "${_wallet_name}"
-    fi
-    if [[ ]]; then
     fi
   fi
 }
