@@ -643,6 +643,19 @@ _key_get() {
   fi
 }
 
+_seed_set() {
+  local \
+    _seed="${1}" \
+    _rpc_backend
+  _rpc_backend=""
+  _address_get_args+=(
+    "y" # quiet
+    "${}" # wallet_seed
+    "${_rpc_backend}"
+    "${_api_key_path}"
+    "${_address_file}"
+}
+
 _key_set() {
   local \
     _key="${1}" \
@@ -652,6 +665,11 @@ _key_set() {
     _network \
     _msg=()
   if [[ "${_key}" == "seed" ]]; then
+      "${_quiet}"
+      "${_wallet_seed}"
+      "${_rpc_backend}"
+      "${_api_key_path}"
+      "${_address_file}"
     _address_get \
       "y" \
       "${_wallet_seed}" || \
