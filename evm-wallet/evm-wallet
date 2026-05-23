@@ -654,6 +654,7 @@ _seed_set() {
     "${_rpc_backend}"
     "${_api_key_path}"
     "${_address_file}"
+  )
 }
 
 _key_set() {
