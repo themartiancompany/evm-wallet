@@ -144,6 +144,8 @@ build-man:
 
 build-npm:
 
+	make \
+	  build-man
 	git \
 	  submodule \
 	    update \
