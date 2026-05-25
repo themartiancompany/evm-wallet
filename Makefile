@@ -41,6 +41,7 @@ _NODE_FILES=\
   balance-check \
   balance-get \
   balance-send \
+  block-number-get \
   ethers-to-wei \
   network-provider \
   price-gas-get \
@@ -90,11 +91,78 @@ _PHONY_TARGETS=\
 
 all:
 
+build-man:
+
+	git \
+	  submodule \
+	    update \
+	    --init \
+	      "man" || \
+	true; \
+	cd \
+	  "man"; \
+	make
+	mkdir \
+	  -p \
+	  "build/man"; \
+	cp \
+	  "man/variables.rst" \
+	  "man/gas-transfer.1.rst" \
+	  "man/block-number.1.rst" \
+	  "man/$(_PROJECT).1.rst" \
+	  "build/man"; \
+	_tag="$$( \
+	  git \
+	    tag | \
+	    sort \
+	      -V | \
+              head \
+	        -n \
+	          1)"; \
+	sed \
+	  "s/insert.version.here/$${_tag}/" \
+	  -i \
+	  "build/man/variables.rst"; \
+	cat \
+	  "man/$(_PROJECT).1.rst" | \
+	  sed \
+	    "s/$(_PROJECT_NPM)/$(_PROJECT)/g" > \
+	    "build/man/$(_PROJECT_NPM).1.rst"; \
+        for _file \
+	  in "gas-transfer" \
+	     "block-number" \
+	     "$(_PROJECT_NPM)"; do \
+	  rst2man \
+	    "build/man/$${_file}.1.rst" \
+	    "build/man/$${_file}.1"; \
+	done; \
+	rm \
+	  "build/man/$(_PROJECT).1.rst" \
+	  "build/man/$(_PROJECT_NPM).1.rst"; \
+	rm \
+	  "build/man/variables.rst"
+
+build-npm:
+
+	git \
+	  submodule \
+	    update \
+	    --init \
+	      "$(_PROJECT)/nodejs" || \
+	true
+	cd \
+	  "$(_PROJECT)/nodejs"; \
+	make \
+	  build-npm
+
 check: shellcheck
 
 shellcheck:
 
-	shellcheck -s bash $(_BASH_FILES)
+	shellcheck \
+	  -s \
+	    "bash" \
+	  $(_BASH_FILES)
 
 install: $(_INSTALL_TARGETS)
 
