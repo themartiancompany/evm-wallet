@@ -38,20 +38,6 @@ _BASH_FILES=\
 	    ether2wei \
 	    mkseed
 
-_NODE_FILES=\
-  address-get \
-  balance-check \
-  balance-get \
-  balance-send \
-  block-number-get \
-  ethers-to-wei \
-  network-provider \
-  price-gas-get \
-  price-gas-transaction-get \
-  seed-new \
-  wallet-get \
-  wallet-new
-
 _INSTALL_FILE=\
   install \
     -vDm644
