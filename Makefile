@@ -213,17 +213,20 @@ install-node-scripts:
 	    _name="$$( \
 	      basename \
 	        "$${_file}")"; \
+	    rm \
+	      "$(LIB_DIR)/$${_name}"; \
 	    ln \
 	      -s \
-	      "$(PREFIX)/lib/$(_PROJECT)/nodejs/lib/$${_file}" \
+	      "$(PREFIX)/lib/$(_PROJECT)/nodejs/lib/$${_name}" \
 	      "$(LIB_DIR)/$${_name}" || \
 	      true; \
 	  done; \
-	  ln \
-	    -s \
-	    "$(PREFIX)/lib/$(_PROJECT)/nodejs" \
-	    "$(DESTDIR)$(PREFIX)/lib/node_modules/$(_PROJECT_NPM)" || \
-	    true; \
+	  if [[ ! -d "$(DESTDIR)$(PREFIX)/lib/node_modules/$(_PROJECT_NPM)" ]]; then \
+	    ln \
+	      -s \
+	      "$(PREFIX)/lib/$(_PROJECT)/nodejs" \
+	      "$(DESTDIR)$(PREFIX)/lib/node_modules/$(_PROJECT_NPM)"; \
+	  fi; \
 	elif [[ "$(_NPM)" == "true" ]]; then \
 	  make \
 	    install-npm; \
