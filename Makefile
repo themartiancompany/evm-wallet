@@ -196,7 +196,7 @@ install-node-scripts:
 	      --init \
 	        "$(_PROJECT)/nodejs"; \
 	fi
-	if [[ "$(_NPM)" == "false" ]]; then
+	if [[ "$(_NPM)" == "false" ]]; then \
 	  $(_INSTALL_DIR) \
 	    "$(LIB_DIR)/nodejs"; \
 	  cp \
