@@ -186,11 +186,16 @@ install-bash-scripts:
 
 install-node-scripts:
 
-	git \
-	  submodule \
-	    update \
-	    --init \
-	      "$(_PROJECT)/nodejs"
+	_node_submodule="$$( \
+          ls \
+	    "$(_PROJECT)/nodejs")";
+	if [[ "$${_node_submodule}" == "" ]]; then \
+	  git \
+	    submodule \
+	      update \
+	      --init \
+	        "$(_PROJECT)/nodejs"; \
+	fi
 	if [[ "$(_NPM)" == "false" ]]; then
 	  $(_INSTALL_DIR) \
 	    "$(LIB_DIR)/nodejs"
@@ -205,7 +210,7 @@ install-node-scripts:
 	                '.files[]')) \
 	    "$(LIB_DIR)/nodejs"; \
 	  for _file in "$(_PROJECT)/nodejs/lib/"*; do \
-	    _name="$$(
+	    _name="$$( \
 	      basename \
 	        "$${_file}")"; \
 	    ln \
