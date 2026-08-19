@@ -21,6 +21,7 @@
 
 PREFIX ?= /usr/local
 _PROJECT=evm-wallet
+_PROJECT_NPM=$(_PROJECT).js
 DATA_DIR=$(DESTDIR)$(PREFIX)/share
 DOC_DIR=$(DATA_DIR)/doc/$(_PROJECT)
 BIN_DIR=$(DESTDIR)$(PREFIX)/bin
@@ -215,14 +216,14 @@ install-node-scripts:
 	  ln \
 	    -s \
 	    "$(PREFIX)/lib/$(_PROJECT)/nodejs" \
-	    "$(DESTDIR)$(PREFIX)/lib/node_modules/$(_PROJECT).js" || \
+	    "$(DESTDIR)$(PREFIX)/lib/node_modules/$(_PROJECT_NPM)" || \
 	    true; \
 	elif [[ "$(_NPM)" == "true" ]]; then
 	  make \
 	    install-npm; \
 	  ln \
 	   -s \
-	   "$(PREFIX)/lib/node_modules/$(_PROJECT).js" \
+	   "$(PREFIX)/lib/node_modules/$(_PROJECT_NPM)" \
 	   "$(LIB_DIR)/nodejs"; \
 	fi
 
