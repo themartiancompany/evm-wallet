@@ -28,13 +28,13 @@ LIB_DIR=$(DESTDIR)$(PREFIX)/lib/$(_PROJECT)
 MAN_DIR?=$(DATA_DIR)/man
 
 DOC_FILES=\
-  $(wildcard *.rst) \
-  $(wildcard *.md)
+	  $(wildcard *.rst) \
+	  $(wildcard *.md)
 
 _BASH_FILES=\
-  $(_PROJECT) \
-  ether2wei \
-  mkseed
+	    $(_PROJECT) \
+	    ether2wei \
+	    mkseed
 
 _NODE_FILES=\
   address-get \
@@ -161,6 +161,8 @@ check: shellcheck
 
 shellcheck:
 
+	cd \
+	  "$(_PROJECT)/bash"; \
 	shellcheck \
 	  -s \
 	    "bash" \
@@ -176,7 +178,7 @@ install-bash-scripts:
 
 	for _file in $(_BASH_FILES); do \
 	  $(_INSTALL_EXE) \
-	    "$(_PROJECT)/$${_file}" \
+	    "$(_PROJECT)/bash/$${_file}" \
 	    "$(BIN_DIR)/$${_file}"; \
 	done
 
@@ -187,11 +189,55 @@ install-node-scripts:
 	    update \
 	    --init \
 	      "$(_PROJECT)/nodejs"
-	for _file in $(_NODE_FILES); do \
-	  $(_INSTALL_EXE) \
-	    "$(_PROJECT)/nodejs/lib/$${_file}" \
-	    "$(LIB_DIR)/$${_file}"; \
-	done
+	if [[ "$(_NPM)" == "false" ]]; then
+	  $(_INSTALL_DIR) \
+	    "$(LIB_DIR)/nodejs"
+	  cp \
+	    -r \
+	    $$(printf \
+	         "${PWD}/$(_PROJECT)/nodejs/%s " \
+	         $$(cat \
+	              "$(_PROJECT)/nodejs/package.json" | \
+	              jq \
+	                --raw-output \
+	                '.files[]')) \
+	    "$(LIB_DIR)/nodejs"; \
+	  for _file in "$(_PROJECT)/nodejs/lib/"*; do \
+	    _name="$$(
+	      basename \
+	        "$${_file}")"; \
+	    ln \
+	      -s \
+	      "$(PREFIX)/lib/$(_PROJECT)/nodejs/lib/$${_file}" \
+	      "$(LIB_DIR)/$${_file}"; || \
+	      true; \
+	  done; \
+	  ln \
+	    -s \
+	    "$(PREFIX)/lib/$(_PROJECT)/nodejs" \
+	    "$(DESTDIR)$(PREFIX)/lib/node_modules/$(_PROJECT).js" || \
+	    true; \
+	elif [[ "$(_NPM)" == "true" ]]; then
+	  make \
+	    install-npm; \
+	  ln \
+	   -s \
+	   "$(PREFIX)/lib/node_modules/$(_PROJECT).js" \
+	   "$(LIB_DIR)/nodejs"; \
+	fi
+
+install-npm:
+
+	git \
+	  submodule \
+	    update \
+	    --init \
+	      "$(_PROJECT)/nodejs" || \
+	true
+	cd \
+	  "$(_PROJECT)/nodejs"; \
+	make \
+	  install-npm
 
 install-bash-completion:
 
