@@ -188,7 +188,7 @@ install-node-scripts:
 
 	_node_submodule="$$( \
           ls \
-	    "$(_PROJECT)/nodejs")";
+	    "$(_PROJECT)/nodejs")"; \
 	if [[ "$${_node_submodule}" == "" ]]; then \
 	  git \
 	    submodule \
@@ -198,7 +198,7 @@ install-node-scripts:
 	fi
 	if [[ "$(_NPM)" == "false" ]]; then
 	  $(_INSTALL_DIR) \
-	    "$(LIB_DIR)/nodejs"
+	    "$(LIB_DIR)/nodejs"; \
 	  cp \
 	    -r \
 	    $$(printf \
