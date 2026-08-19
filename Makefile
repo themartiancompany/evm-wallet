@@ -216,7 +216,7 @@ install-node-scripts:
 	    ln \
 	      -s \
 	      "$(PREFIX)/lib/$(_PROJECT)/nodejs/lib/$${_file}" \
-	      "$(LIB_DIR)/$${_file}" || \
+	      "$(LIB_DIR)/$${_name}" || \
 	      true; \
 	  done; \
 	  ln \
