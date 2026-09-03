@@ -883,10 +883,10 @@ _contacts_list() {
     _addresses
   declare \
     -A \
-    _wallets
+    _fingerprints
   declare \
     -A \
-    _fingerprints
+    _wallets
   if [[ "${_filter}" == "" ]]; then
     _filter="*"
   fi
@@ -906,19 +906,19 @@ _contacts_list() {
     elif [[ "${_file_name}" == *"-address.txt" ]]; then
       _wallet_name="${_file_name%-address.txt}"
       _addresses["${_wallet_name}"]="$(
-       cat \
-         "${_wallet}")" 
-       if [[ "${_output_type}" == "" || \
-             "${_output_type}" == "fingerprint" ]]; then
-         _msg=(
-           "Getting fingerprint for contact '${_wallet_name}'".
-         )
-         _msg_info \
-           "${_msg[*]}"
-         _fingerprint_get \
-           "${_wallet_name}"
-         _fingerprints["${_wallet_name}"]="${_fingerprint}"
-       fi
+        cat \
+          "${_wallet}")" 
+      if [[ "${_output_type}" == "" || \
+            "${_output_type}" == "fingerprint" ]]; then
+        _msg=(
+          "Getting fingerprint for contact '${_wallet_name}'".
+        )
+        _msg_info \
+          "${_msg[*]}"
+        _fingerprint_get \
+          "${_wallet_name}"
+        _fingerprints["${_wallet_name}"]="${_fingerprint}"
+      fi
     elif [[ "${_file_name}" == *"-fingerprint.txt" ]]; then
       true
     elif [[ "${_file_name}" == *"-password.txt" ]]; then
