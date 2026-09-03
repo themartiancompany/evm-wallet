@@ -713,10 +713,14 @@ _key_set() {
 
 _wallets_sort() {
   local \
+    _wallet_files=() \
     _wallets_names_unsorted=() \
     _wallet \
     _wallet_name \
     _msg=()
+  _wallet_files+=(
+    "$@"
+  )
   if (( 0 == "${#_wallets_files[@]}" )); then
     _msg=(
       "No wallets found."
@@ -872,6 +876,7 @@ _contacts_list() {
     _wallet_address \
     _wallet_seed \
     _file_name \
+    _file_type \
     _fingerprint
   declare \
     -A \
@@ -888,7 +893,8 @@ _contacts_list() {
   _wallets_files_get \
     "${_config_dir}" \
     "${_filter}"
-  _wallets_sort
+  _wallets_sort \
+    "${_wallet_files[@]}"
   for _wallet \
     in "${_wallets_files[@]}"; do
     _file_name="$(
@@ -913,6 +919,21 @@ _contacts_list() {
            "${_wallet_name}"
          _fingerprints["${_wallet_name}"]="${_fingerprint}"
        fi
+    elif [[ "${_file_name}" == *"-fingerprint.txt" ]]; then
+      true
+    elif [[ "${_file_name}" == *"-password.txt" ]]; then
+      true
+    else
+      _file_name="$(
+        basename \
+          "${_wallet}")"
+      _file_type="${_file_name#"${_file_name}"*}"
+      _file_type="${_file_type%*.txt}"
+      _msg=(
+       "Unknown file type"
+       "'${_file_type}' for file"
+       "'${_file_name}'."
+      )
     fi
   done
   for _wallet in \
