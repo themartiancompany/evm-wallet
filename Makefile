@@ -188,7 +188,7 @@ install-node-scripts:
 	  cp \
 	    -r \
 	    $$(printf \
-	         "${PWD}/$(_PROJECT)/nodejs/%s " \
+	         "$${PWD}/$(_PROJECT)/nodejs/%s " \
 	         $$(cat \
 	              "$(_PROJECT)/nodejs/package.json" | \
 	              jq \

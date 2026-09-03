@@ -749,8 +749,16 @@ _wallets_files_get() {
     _filter="${2}" \
     _find_opts=()
   _find_opts+=(
-    -wholename
-      "*${_filter}*-*.txt"
+    \( \
+      -iwholename \
+        "*${_filter}*-address.txt" \
+      -o \
+      -iwholename \
+        "*${_filter}*-fingerprint.txt" \
+      -o \
+      -iwholename \
+        "*${_filter}*-seed.txt" \
+    \) \
     -type \
       "f" \
     -print0
@@ -854,6 +862,7 @@ _contacts_list() {
   local \
     _filter="${1}" \
     _output_type="${2}" \
+    _config_dir="${3}" \
     _msg=() \
     _wallets_files=() \
     _wallets_names=() \
@@ -1022,7 +1031,8 @@ _evm_wallet_sync() {
     elif [[ "${_target_command}" == "list" ]]; then
       _contacts_list \
         "${_target_key}" \
-        "${_output_type}"
+        "${_output_type}" \
+        "${_config_dir}"
     elif [[ "${_target_command}" == "approve" ]]; then
       echo \
         "WIP"
