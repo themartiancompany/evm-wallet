@@ -442,8 +442,24 @@ _address_get() {
 _key_fingerprint_get() {
   local \
     _wallet_name="${1}" \
+    _evm_gpg_client \
+    _gpg_backend \
     _evm_gpg_opts=() \
     _msg=()
+  _evm_gpg_client="evm-gpg"
+  if (( 1 < "$#" )); then
+    _evm_gpg_client="${2}"
+  fi
+  _gpg_backend=""
+  if (( 2 < "$#" )); then
+    _gpg_backend="${3}"
+  else
+    if [[ "${_evm_gpg_client}" == "evm-gpg" ]]; then
+      _gpg_backend="gpg"
+    elif [[ "${_evm_gpg_client}" == "evm-gpg.js" ]]; then
+      _gpg_backend="openpgpjs"
+    fi
+  fi
   _msg=(
     "Returning OpenPGP"
     "on Ethereum fingerprint."
@@ -456,7 +472,13 @@ _key_fingerprint_get() {
     -o
       "fingerprint"
   )
-  evm-gpg \
+  if [[ "${_gpg_backend}" != "" ]]; then
+    _evm_gpg_opts+=(
+      -b
+        "${_gpg_backend}"
+    )
+  fi
+  "${_evm_gpg_client}" \
     "${_evm_gpg_opts[@]}" -- \
     "list" || \
     true
@@ -498,7 +520,7 @@ _fingerprint_get() {
     _msg_error \
       "${_msg[*]}" \
       "${_exit}"
-  elif [[ "${_fingerprint}" != "" ]]; then
+  else
     echo \
       "${_fingerprint}"
     _node_main="false"
