@@ -803,26 +803,34 @@ _wallets_files_get() {
 
 _contacts_display_full() {
   local \
-    _address \
+    _contact \
     _counter \
     _printf_args=() \
     _printf_template=() \
     _wallet_address \
     _fingerprint
   _counter="0"
-  for _address in \
+  for _contact in \
     "${!_addresses[@]}"; do
     _counter="$(( \
       "${_counter}" + \
       1 ))"
-    _printf_args=(
-                "        Name: ${_address}"
+    _printf_template=(
+      "%s" "\n"
+      "%s" "\n"
+      "%s" "\n"
     )
-    _wallet_address="${_addresses["${_address}"]}"
-    _fingerprint="${_fingerprints["${_address}"]}"
-    if [[ " ${!_wallets[@]} " == *" ${_address} "* ]]; then
+    _printf_args=(
+                "        Name: ${_contact}"
+    )
+    _wallet_address="${_addresses["${_contact}"]}"
+    _fingerprint="${_fingerprints["${_contact}"]}"
+    if [[ " ${!_wallets[@]} " == *" ${_contact} "* ]]; then
       _printf_args+=(
-        "           Private key: yes"
+      "           Private key: yes"
+      )
+      _printf_template+=(
+        "%s" "\n"
       )
     fi
     _printf_args+=(
@@ -830,12 +838,6 @@ _contacts_display_full() {
     )
     _printf_args+=(
       "   OpenPGP fingerprint: ${_fingerprint}" \
-    )
-    _printf_template=(
-      "%s" "\n"
-      "%s" "\n"
-      "%s" "\n"
-      "%s" "\n"
     )
     if [[ "${_counter}" != "${_addresses_amount}" ]]; then
       _printf_template+=(
@@ -855,12 +857,8 @@ _contacts_field_display() {
     _counter \
     _result \
     _results=()
-  _counter="0"
   for _name in \
     "${!_addresses[@]}"; do
-    _counter="$(( \
-      "${_counter}" + \
-      1 ))"
     if [[ "${_field}" == "name" ]]; then
       _result="${_address}"
     elif [[ "${_field}" == "address" ]]; then
@@ -878,12 +876,12 @@ _contacts_field_display() {
     _results+=(
       "${_result}"
     )
-    done
-    printf \
-      '%s\n' \
-      "${_results[@]}" |
-      sort \
-        -V
+  done
+  printf \
+    '%s\n' \
+    "${_results[@]}" |
+    sort \
+      -V
 }
 
 _contacts_list() {
@@ -959,6 +957,8 @@ _contacts_list() {
        "'${_file_type}' for file"
        "'${_file_name}'."
       )
+      _msg_warning \
+        "${_msg[*]}"
     fi
   done
   for _wallet in \
