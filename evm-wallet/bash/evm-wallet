@@ -450,6 +450,9 @@ _key_fingerprint_get() {
   if (( 1 < "$#" )); then
     _evm_gpg_client="${2}"
   fi
+  _check_cmd \
+    "${_evm_gpg_client}" \
+    "evm-gnupg"
   _gpg_backend=""
   if (( 2 < "$#" )); then
     _gpg_backend="${3}"
