@@ -174,9 +174,9 @@ install-scripts:
 
 	make \
 	  install-bash-scripts
-	if [[ "$(_NODE)" == "true" ]]; then
+	if [[ "$(_NODE)" == "true" ]]; then \
 	  make \
-	    install-node-scripts
+	    install-node-scripts; \
 	fi
 
 install-completion: $(_INSTALL_COMPLETION_TARGETS)
