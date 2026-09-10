@@ -21,6 +21,7 @@
 
 SHELL ?= bash
 NPM ?= false
+_NODE ?= true
 PREFIX ?= /usr/local
 _PROJECT=evm-wallet
 _PROJECT_NPM=$(_PROJECT).js
@@ -31,14 +32,20 @@ LIB_DIR=$(DESTDIR)$(PREFIX)/lib/$(_PROJECT)
 MAN_DIR?=$(DATA_DIR)/man
 
 DOC_FILES=\
-	  $(wildcard *.rst) \
-	  $(wildcard *.md)
+  $(wildcard *.rst) \
+  $(wildcard *.md)
 
 _BASH_FILES=\
-	    $(_PROJECT) \
-	    ether2wei \
-	    mkseed
+  $(_PROJECT) \
+  ether2wei \
+  mkseed
 
+_MAKE_EXE=\
+  chmod \
+    0755
+_MAKE_LINK=\
+  ln \
+    -sv
 _INSTALL_FILE=\
   install \
     -vDm644
@@ -163,7 +170,14 @@ shellcheck:
 
 install: $(_INSTALL_TARGETS)
 
-install-scripts: $(_INSTALL_SCRIPTS_TARGETS)
+install-scripts:
+
+	make \
+	  install-bash-scripts
+	if [[ "$(_NODE)" == "true" ]]; then
+	  make \
+	    install-node-scripts
+	fi
 
 install-completion: $(_INSTALL_COMPLETION_TARGETS)
 
@@ -284,7 +298,17 @@ install-man:
 
 uninstall-scripts:
 
-	true;
+	if [[ "$(_NODE)" == "true" ]]; then
+	  cd \
+	    "$(_PROJECT)/nodejs"; \
+	  make \
+	    "uninstall-scripts"; \
+	fi
+	for _file in $(_BASH_FILES); do \
+	  rm \
+	    -vrf \
+	    "$(BIN_DIR)/$${_file}"; \
+	done
 
 
 .PHONY: $(_PHONY_TARGETS)
