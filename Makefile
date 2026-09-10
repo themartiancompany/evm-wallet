@@ -298,7 +298,7 @@ install-man:
 
 uninstall-scripts:
 
-	if [[ "$(_NODE)" == "true" ]]; then
+	if [[ "$(_NODE)" == "true" ]]; then \
 	  cd \
 	    "$(_PROJECT)/nodejs"; \
 	  make \
