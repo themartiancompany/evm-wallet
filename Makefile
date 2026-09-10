@@ -19,6 +19,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+SHELL ?= bash
 NPM ?= false
 PREFIX ?= /usr/local
 _PROJECT=evm-wallet
@@ -67,6 +68,9 @@ _INSTALL_TARGETS=\
   install-scripts \
   install-completion \
   $(_INSTALL_DOC_TARGETS)
+_UNINSTALL_TARGETS_ALL=\
+  uninstall-man \
+  uninstall-scripts
 _INSTALL_TARGETS_ALL=\
   install \
   $(_INSTALL_TARGETS) \
@@ -75,7 +79,8 @@ _INSTALL_TARGETS_ALL=\
 
 _PHONY_TARGETS=\
   $(_CHECK_TARGETS_ALL) \
-  $(_INSTALL_TARGETS_ALL)
+  $(_INSTALL_TARGETS_ALL) \
+  $(_UNINSTALL_TARGETS_ALL)
 
 all:
 
@@ -276,6 +281,10 @@ install-man:
 	rst2man \
 	  "man/mkseed.1.rst" \
 	  "$(MAN_DIR)/man1/mkseed.1"
+
+uninstall-scripts:
+
+	true;
 
 
 .PHONY: $(_PHONY_TARGETS)
